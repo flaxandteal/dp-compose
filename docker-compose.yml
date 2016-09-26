@@ -1,0 +1,11 @@
+version: '2'
+services:
+  elasticsearch:
+    image: elasticsearch
+    ports:
+     - "9300:9300"
+     - "9200:9200"
+  highcharts:
+    image: onsdigital/highcharts-export-docker
+    ports:
+     - "9999:8080"
