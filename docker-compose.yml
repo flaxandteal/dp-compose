@@ -9,3 +9,10 @@ services:
     image: onsdigital/highcharts-export-docker
     ports:
      - "9999:8080"
+  postgres:
+    build: ./postgres
+    environment: 
+     - POSTGRES_USER=postgres
+     - POSTGRES_PASSWORD=mysecretpassword
+    ports:
+     - "5432:5432"
