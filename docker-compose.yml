@@ -53,13 +53,13 @@ services:
     ports:
       - '7687:7687'
 
-  vault:
-    image: 'vault:0.9.5'
-    ports:
-      - "127.0.0.1:8201:8200"
-    container_name: 'vault'
-    networks:
-      - dp-compose          
+  #vault:
+  #  image: 'vault:0.9.5'
+  #  ports:
+  #    - "127.0.0.1:8201:8200"
+  #  container_name: 'vault'
+  #  networks:
+  #    - dp-compose          
 
 networks:
 
