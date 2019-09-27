@@ -8,6 +8,15 @@ https://www.docker.com/products/docker#/mac
 Run ```docker-compose up``` to create docker containers for all required backing services. Using the ``` ./run.sh ``` script does the same thing.
 
 
+## CMD
+The ONS website and CMD both require Elastic search but (annoyingly) require different versions. The `docker-compose.yml` will start 2 instances. 
+
+**Note:** The default ports for Elastic search is usually `9200` & `9300` however in order to avoid a port conflict
+ when running 2 different versions on the same box at the same time the CMD instance is set to use ports `10200` & `10300`.
+
+:warning: **Gotcha Warning** :warning: You'll need to overwrite your ES config for the `dp-search-builder` and `dp
+-search-api` to use ports `10200` & `10300` to ensure sure its using the correct instance.
+
 ## Postgres
 
 **Important**: Zebedee requires _**Postgres 9.6**_. 
