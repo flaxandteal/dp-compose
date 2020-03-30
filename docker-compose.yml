@@ -5,7 +5,7 @@ services:
     ports:
      - "9300:9300"
      - "9200:9200"
-  cmdelasticsearch:
+  elasticsearch2:
     image: elasticsearch:5
     ports:
       # Set alternative ports to prevent port clash.
