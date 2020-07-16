@@ -7,6 +7,16 @@ https://www.docker.com/products/docker#/mac
 
 Run ```docker-compose up``` to create docker containers for all required backing services. Using the ``` ./run.sh ``` script does the same thing.
 
+## Docker resourses
+NEO4J is quite resourse hungry so before running this it's worth increasing the RAM and CPU allocated to the docker
+virtual machine. This can be done from the
+[Docker Desktop preferences](https://docs.docker.com/docker-for-mac/#resources). Choosing the best figures is more of an
+art than a science, too little and these services won't run effectively, too much and it'll slow all the other apps
+running locally on your laptop but a good starting point is…
+- CPUs: 4 (So the services are not restricted by CPU)
+- Memory: 6.00GB
+- Swap: 4GB
+- Disk image size: 60GB (This is not particularly relevant and the figure here is the Docker default)
 
 ## CMD
 The ONS website and CMD both require Elastic search but (annoyingly) require different versions. The `docker-compose.yml` will start 2 instances. 
