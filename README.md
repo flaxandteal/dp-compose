@@ -14,7 +14,7 @@ The ONS website and CMD both require Elastic search but (annoyingly) require dif
  when running 2 different versions on the same box at the same time the CMD instance is set to use ports `10200` & `10300`.
 
 :warning: **Gotcha Warning** :warning:
-You'll need to overwrite your ES config for the `dp-search-builder` and `dp-dimension-search-api` to use ports `10200` & `10300` to ensure they are using the correct instance.
+You'll need to overwrite your ES config for the `dp-dimension-search-builder` and `dp-dimension-search-api` to use ports `10200` & `10300` to ensure they are using the correct instance.
 
 ## Postgres
 
