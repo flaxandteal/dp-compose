@@ -1,0 +1,11 @@
+version: '3.3'
+services:
+    dp-cantabular-server:
+        build:
+            context: ../../dp-cantabular-server
+            dockerfile: Dockerfile
+        ports:
+            - 8491:8491
+        volumes:
+            - ../../dp-cantabular-server/cantabular/data:/app/data
+            - ../../dp-cantabular-server/cantabular/scripts:/app/scripts

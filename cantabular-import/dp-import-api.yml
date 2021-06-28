@@ -1,0 +1,26 @@
+version: '3.3'
+services:
+    dp-import-api:
+        build:
+            context: ../../dp-import-api
+            dockerfile: Dockerfile.local
+        command:
+            - reflex
+            - -d
+            - none
+            - -c
+            - ./reflex
+        volumes:
+            - ../../dp-import-api:/dp-import-api
+        depends_on:
+            - kafka
+        ports:
+            - 21800:21800
+        environment:
+            MONGODB_IMPORTS_ADDR:     "mongodb:27017"
+            KAFKA_ADDR:               "kafka:9092"
+            ENABLE_PRIVATE_ENDPOINTS: "true"
+            RECIPE_API_URL:           "http://dp-recipe-api:22300"
+            DATASET_API_URL:          "http://dp-dataset-api:22000"
+            ZEBEDEE_URL:              "http://zebedee:8082"
+            SERVICE_AUTH_TOKEN:       $SERVICE_AUTH_TOKEN
