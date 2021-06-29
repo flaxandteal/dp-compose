@@ -7,6 +7,9 @@ Expects you to have environment variables `zebedee_root` and
 
 Expects your services to be in the expected relative path
 
+dp-dataset-api expects a connection to Neptune via ssh. Won't break
+import but health checks will fail and produce annoying messages.
+
 # Bring Up Cantabular Import Services #
 
 `sudo docker-compose up`

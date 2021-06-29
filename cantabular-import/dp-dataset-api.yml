@@ -22,3 +22,7 @@ services:
             ENABLE_PRIVATE_ENDPOINTS:      "true"
             ZEBEDEE_URL:                   "http://zebedee:8082"
             SERVICE_AUTH_TOKEN:            $SERVICE_AUTH_TOKEN
+            GRAPH_DRIVER_TYPE:             "neptune"
+            GRAPH_ADDR: "wss://localhost.cluster-cpviojtnaxsj.eu-west-1.neptune.amazonaws.com:8182/gremlin"
+
+
