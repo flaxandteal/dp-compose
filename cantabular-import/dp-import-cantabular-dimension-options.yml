@@ -1,0 +1,23 @@
+version: '3.3'
+services:
+    dp-import-cantabular-dimension-options:
+        build:
+            context: ../../dp-import-cantabular-dimension-options
+            dockerfile: Dockerfile.local
+        command:
+            - reflex
+            - -d
+            - none
+            - -c
+            - ./reflex
+        volumes:
+            - ../../dp-import-cantabular-dimension-options:/dp-import-cantabular-dimension-options
+        depends_on:
+            - kafka
+        ports:
+            - 26200:26200
+        environment:
+            KAFKA_ADDR:         "kafka:9092"
+            DATASET_API_URL:    "http://dp-dataset-api:22000"
+            CANTABULAR_URL:     "http://dp-cantabular-server:8491"
+            SERVICE_AUTH_TOKEN: $SERVICE_AUTH_TOKEN
