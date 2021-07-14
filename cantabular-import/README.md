@@ -7,6 +7,9 @@ Expects you to have environment variables `zebedee_root` and
 
 Expects your services to be in the expected relative path
 
+You will need to run the `import-recipes` script in `dp-recipe-api` when
+first building the containers before running an import.
+
 # Bring Up Cantabular Import Services #
 
 `sudo -E docker-compose up` or `./run.sh`
