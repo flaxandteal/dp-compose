@@ -54,7 +54,3 @@ services:
     command: redis-server --requirepass default
     ports:
       - "6379:6379"
-
-
-
-
