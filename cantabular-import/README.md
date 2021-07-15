@@ -2,17 +2,30 @@
 
 ## Requirements ##
 
+Make sure you have the following repositories cloned to the same root directory
+as `dp-compose` (this repository):
+
+`dp-cantabular-server`
+`dp-dataset-api`
+`dp-import-api`
+`dp-import-cantabular-dataset`
+`dp-import-cantabular-dimension-options`
+`dp-recipe-api`
+`zebedee`
+
 Expects you to have environment variables `zebedee_root` and 
 `SERVICE_AUTH_TOKEN` set in your local environment
-
-Expects your services to be in the expected relative path
 
 You will need to run the `import-recipes` script in `dp-recipe-api` when
 first building the containers before running an import.
 
 # Bring Up Cantabular Import Services #
 
-`sudo -E docker-compose up` or `./run.sh`
+`sudo -E docker-compose up` (or `./run.sh` helper)
+
+(note: we use `sudo` to prevent docker having issues accessing the `GOCACHE`
+volume it creates. `sudo` requires the `-E` in order to preserve existing
+environment variables)
 
 # Bring Up Cantabular Import Services Detached (running in background) #
 
@@ -24,7 +37,7 @@ first building the containers before running an import.
 
 # Recall Logs For Specific Service #
 
-`docker-compose logs -f <service-name>` or `./logs <service-name>`
+`docker-compose logs -f <service-name>` (or `./logs <service-name>` helper)
 
 ## Notes ##
 
