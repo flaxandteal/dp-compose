@@ -14,6 +14,7 @@ services:
             - ../../dp-import-api:/dp-import-api
         depends_on:
             - kafka
+            - mongodb
         ports:
             - 21800:21800
         environment:

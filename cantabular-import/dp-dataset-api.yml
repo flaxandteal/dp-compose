@@ -14,6 +14,7 @@ services:
             - ../../dp-dataset-api:/dp-dataset-api
         depends_on:
             - kafka
+            - mongodb
         ports:
             - 22000:22000
         environment:
