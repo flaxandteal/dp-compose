@@ -21,7 +21,7 @@ first building the containers before running an import.
 
 # Bring Up Cantabular Import Services #
 
-`sudo -E docker-compose up` (or `./run.sh` helper)
+`make start`
 
 (note: we use `sudo` to prevent docker having issues accessing the `GOCACHE`
 volume it creates. `sudo` requires the `-E` in order to preserve existing
@@ -29,15 +29,31 @@ environment variables)
 
 # Bring Up Cantabular Import Services Detached (running in background) #
 
-`sudo -E docker-compose up -d`
+`make start-detached`
 
 # Stop Services #
 
-`docker-compose down`
+`make stop`
+
+# Stop Services And Remove Containers #
+
+`make down`
+
+# Stop Services And Remove All Containers, Volumes and Networks #
+
+`make clean`
+
+# Restart Services #
+
+`make restart`
+
+# Recall Logs #
+
+`make logs` or `./logs`
 
 # Recall Logs For Specific Service #
 
-`docker-compose logs -f <service-name>` (or `./logs <service-name>` helper)
+`make logs t=<service-name>` or `./logs <service-name>`
 
 ## Notes ##
 
@@ -46,11 +62,5 @@ environment variables)
 Go services will automatically rebuild upon detecting source file changes.
 
 If you need to make adjustments to compose files etc, you can just
-run `docker-compose up -d` and docker-compose will automatically detect 
+run `make start-detached` and docker-compose will automatically detect 
 which services need rebuilding (no need to bring everything down first).
-
-## Other Info ##
-
-dp-dataset-api requires a connection to a graph db in order to not complain
-at healthcheck time, but it isn't used at all during this journey.
-For this reason the neo4j image is included in the stack.

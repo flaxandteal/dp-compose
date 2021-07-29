@@ -20,7 +20,7 @@ Usage:
 
 * Edit the `./florence-token` script to use your florence username/password
 
-* Run `./start-import`
+* Run `./start-import.sh`
 
 Alternatively if you have your own script/other source to get a florence token
 you can pipe the output directly into `go run start-import/main.go`
