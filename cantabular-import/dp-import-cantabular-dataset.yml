@@ -22,4 +22,5 @@ services:
             DATASET_API_URL:    "http://dp-dataset-api:22000"
             RECIPE_API_URL:     "http://dp-recipe-api:22300"
             CANTABULAR_URL:     "http://dp-cantabular-server:8491"
+            IMPORT_API_URL:     "http://dp-import-api:21800"
             SERVICE_AUTH_TOKEN: $SERVICE_AUTH_TOKEN
