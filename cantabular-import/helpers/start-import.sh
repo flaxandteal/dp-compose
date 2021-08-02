@@ -1,2 +1,3 @@
-echo "retrieving florence token:" 
-./florence-token | go run start-import/main.go
+echo "retrieving florence token:"
+cd start-import
+../florence-token | go run main.go
