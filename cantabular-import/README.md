@@ -6,11 +6,17 @@ Make sure you have the following repositories cloned to the same root directory
 as `dp-compose` (this repository):
 
 `dp-cantabular-server`
+
 `dp-dataset-api`
+
 `dp-import-api`
+
 `dp-import-cantabular-dataset`
+
 `dp-import-cantabular-dimension-options`
+
 `dp-recipe-api`
+
 `zebedee`
 
 Expects you to have environment variables `zebedee_root` and 
@@ -64,3 +70,14 @@ Go services will automatically rebuild upon detecting source file changes.
 If you need to make adjustments to compose files etc, you can just
 run `make start-detached` and docker-compose will automatically detect 
 which services need rebuilding (no need to bring everything down first).
+
+------------------
+Files:
+
+    run-cantabular-without-sudo.sh
+
+    get-florence-token.sh
+
+are used by `cantabular-import/helpers/test-compose/test-compose.go` and are nedded at this level for it to bring up the cantabular containers.
+
+------------------
