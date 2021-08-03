@@ -27,3 +27,25 @@ you can pipe the output directly into `go run start-import/main.go`
 
 for example, if you had a FLORENCE_TOKEN environment variable saved you could run
 `echo $FLORENCE_TOKEN | go run start-import/main.go`
+
+-=-=-
+
+!!! sort the following:
+
+Using Docker 3.3.3 (the one before having docker-compose v2.0.0-beta.6 ... which does not work well)
+
+../run-cantabular-without-sudo.sh
+
+../get-florence-token.sh
+
+test-compose.sh
+
+    then run:
+
+    ../run-cantabular-without-sudo.sh
+
+    extract-docker-logs.sh
+
+count-log-events.sh
+
+extract-job-info.sh
