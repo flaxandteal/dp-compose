@@ -186,7 +186,7 @@ func main() {
 			maxEvents = eventsCountEnds
 		}
 
-		printAndSave(resultFile, fmt.Sprintf("Total events found: %d\n", maxEvents))
+		printAndSave(resultFile, fmt.Sprintf("Total events found (within first and last times): %d\n", maxEvents))
 	}
 }
 
