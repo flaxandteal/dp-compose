@@ -46,36 +46,50 @@ var (
 )
 
 const (
-	tmpFileName = "../tmp/id.txt"
-)
-
-const (
+	tmpFileName        = "../tmp/id.txt"
 	maxContainersInJob = 11 // adjust this to suite the number of continers docker-compose runs up
 	maxRuns            = 2  // number of times to run up containers, perform integration test and stop containers
 )
 
 func main() {
+	showedReminder := false
 
-	for testCount := 0; testCount < maxRuns; testCount++ {
+	for testCount := 1; testCount <= maxRuns; testCount++ {
 		fmt.Printf("Runnning test: %d\n\n", testCount)
 
 		startContainers()
 
-		for i := 0; i < 60; i++ {
-			count, err := getContainerCount()
+		lastCount := 0
+
+		// give enough time for containers to be built (if needed)...
+		// initial 180 seconds is from observing time taken to build all containers if they don't exist
+		for i := 0; i < 180; i++ {
+			count, err := getCantabularContainerCount()
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
 			}
-			fmt.Printf("Seconds: %03d   Container count: %d\n", i, count)
+			fmt.Printf("Seconds: %03d   Cantabular Containers Running count: %d\n", i, count)
 			time.Sleep(1 * time.Second)
 			if count == maxContainersInJob {
 				break
+			}
+			if count > lastCount {
+				// looks like containers exist and are starting up, so reduce remainng timeout
+				lastCount = count
+				i = 120
+			}
+			if count == 0 && i == 40 {
+				showImportReminder()
+				showedReminder = true
 			}
 		}
 
 		// we should now check health of apps, but it seemd OK to just do a delay for these tests
 		fmt.Println("Pasuing 15 seconds")
+		if showedReminder {
+			showImportReminder()
+		}
 		time.Sleep(15 * time.Second)
 
 		fmt.Printf("Doing Import ...\n")
@@ -85,17 +99,20 @@ func main() {
 				fmt.Println(err)
 				if attempts < 5 {
 					fmt.Println("Pasuing 5 seconds, and trying import again")
+					if showedReminder {
+						showImportReminder()
+					}
 					time.Sleep(5 * time.Second)
 				} else {
 					fmt.Printf("Import failing ...\n")
 					fmt.Println("Pasuing 5 seconds")
 					time.Sleep(5 * time.Second)
 
-					_ = stopAllDockerContainers()
+					_ = stopAllCantabularDockerContainers()
 					fmt.Println("Pasuing 5 seconds")
 					time.Sleep(5 * time.Second)
 					fmt.Println("Do you need to run './import-recipes.sh mongodb://localhost:27017' in dp-recipe-api/import-recipies ?")
-					fmt.Printf("Stopping early during test number: %d", testCount)
+					fmt.Printf("Stopping early during test number: %d\n", testCount)
 					os.Exit(2)
 				}
 			} else {
@@ -106,7 +123,7 @@ func main() {
 		fmt.Println("Pasuing 5 seconds")
 		time.Sleep(5 * time.Second)
 
-		err := stopAllDockerContainers()
+		err := stopAllCantabularDockerContainers()
 		if err != nil {
 			fmt.Printf("problem closing containers, stopping: %v\n", err)
 			break
@@ -117,15 +134,22 @@ func main() {
 	}
 }
 
+func showImportReminder() {
+	fmt.Println("\nprobably building containers and when you see: 'Running get-florence-token'")
+	fmt.Println("you will most likely need to, in another terminal:")
+	fmt.Println("in:")
+	fmt.Println("    dp-recipe-api/import-recipies")
+	fmt.Println("do:")
+	fmt.Printf("    ./import-recipes.sh mongodb://localhost:27017\n\n")
+}
+
 func startContainers() {
-	cmd := exec.Command("./run-cantabular-without-sudo.sh")
-	cmd.Dir = "../.."
+	cmd := exec.Command("./run-cantabular-without-sudo.sh") // where to get the command from
+	cmd.Dir = "../.."                                       // where to execute the command
 	err := cmd.Start()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	fmt.Printf("compose Process: %d\n", cmd.Process.Pid)
 }
 
 func doImport() error {
@@ -272,8 +296,10 @@ func prettyPrint(s interface{}) string {
 
 func getToken() (string, error) {
 	fmt.Printf("Running get-florence-token\n")
-	cmd := exec.Command("./get-florence-token.sh")
-	cmd.Dir = "../.."
+
+	cmd := exec.Command("./get-florence-token.sh") // where to get the command from
+	cmd.Dir = "../.."                              // where to execute the command*/
+
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	var stdErr bytes.Buffer
@@ -293,7 +319,7 @@ func getToken() (string, error) {
 	return s, nil
 }
 
-func stopAllDockerContainers() error {
+func stopAllCantabularDockerContainers() error {
 	fmt.Printf("Stopping all Containers\n")
 	ctx := context.Background()
 
@@ -312,7 +338,7 @@ func stopAllDockerContainers() error {
 	for _, container := range containers {
 
 		if strings.Contains(container.Names[0], "/cantabular-import-journey") {
-			fmt.Print("Stopping container ", container.ID[:10], " ", container.Names[0], " ... \n")
+			fmt.Print("Stopping cantabular container ", container.ID[:10], " ", container.Names[0], " ... \n")
 			if err := cli.ContainerStop(ctx, container.ID, nil); err != nil {
 				return err
 			}
@@ -328,7 +354,7 @@ func stopAllDockerContainers() error {
 	return nil
 }
 
-func getContainerCount() (int, error) {
+func getCantabularContainerCount() (int, error) {
 	ctx := context.Background()
 
 	cli, err := client.NewClientWithOpts(client.FromEnv)
@@ -341,5 +367,14 @@ func getContainerCount() (int, error) {
 		return 0, err
 	}
 
-	return len(containers), nil
+	cantabularContainersCount := 0
+
+	for _, container := range containers {
+
+		if strings.Contains(container.Names[0], "/cantabular-import-journey") {
+			cantabularContainersCount++
+		}
+	}
+
+	return cantabularContainersCount, nil
 }
