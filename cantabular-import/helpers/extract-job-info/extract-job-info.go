@@ -108,8 +108,39 @@ func main() {
 			return fieldsi[1] < fieldsj[1]
 		})
 
+		gotFirstTime := false
+		maxLastTime := ""
+		var maxDiff time.Duration
+		maxDiffTime := ""
+
 		for _, line := range linesFound {
 			fields := strings.Fields(line)
+
+			if gotFirstTime {
+				f, err := time.Parse(time.RFC3339, maxLastTime) // time format with nanoseconds
+				if err != nil {
+					fmt.Println(err)
+				}
+				fTime := f.Local()
+
+				l, err := time.Parse(time.RFC3339, fields[1])
+				if err != nil {
+					fmt.Println(err)
+				}
+				lTime := l.Local()
+
+				diffNanoseconds := lTime.Sub(fTime)
+				if diffNanoseconds > maxDiff {
+					maxDiff = diffNanoseconds
+					maxDiffTime = fields[1]
+				}
+				maxLastTime = fields[1]
+				printAndSave(idResultFile, fmt.Sprintf("time since last id: %d.%09d seconds", diffNanoseconds/1000000000, diffNanoseconds%1000000000))
+			} else {
+				gotFirstTime = true
+				maxLastTime = fields[1]
+			}
+
 			f1 := fields[0]
 			for len(f1) < maxFirstFieldLength {
 				// pad out the first field so that all timestamps are aligned
@@ -127,6 +158,9 @@ func main() {
 
 			printAndSave(idResultFile, fmt.Sprintf("   first event time: %s", firstTime))
 			printAndSave(idResultFile, fmt.Sprintf("    last event time: %s", lastTime))
+			if idsFound > 1 {
+				printAndSave(idResultFile, fmt.Sprintf("max id execution time is: %d.%09d seconds, finishing at: %s\n", maxDiff/1000000000, maxDiff%1000000000, maxDiffTime))
+			}
 
 			f, err := time.Parse(time.RFC3339, firstTime) // time format with nanoseconds
 			if err != nil {
@@ -142,7 +176,7 @@ func main() {
 
 			diffNanoseconds := lTime.Sub(fTime)
 
-			printAndSave(idResultFile, fmt.Sprintf("Job execution time is: %d.%d seconds\n", diffNanoseconds/1000000000, diffNanoseconds%1000000000))
+			printAndSave(idResultFile, fmt.Sprintf("Job execution time is: %d.%09d seconds\n", diffNanoseconds/1000000000, diffNanoseconds%1000000000))
 		}
 		cerr := logFile.Close()
 		if cerr != nil {
