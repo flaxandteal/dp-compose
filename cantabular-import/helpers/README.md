@@ -30,8 +30,6 @@ for example, if you had a FLORENCE_TOKEN environment variable saved you could ru
 
 -----
 
--=-=-
-
 ## Validating integration process utils ##
 
 In order to run the 'start-import.sh` script which kicks off one import job, you need to have the docker files for Cantabular running. 
@@ -54,7 +52,7 @@ Usage: (on mac books)
 
 * Edit the `../get-florence-token.sh` script to use your florence username/password
 
-* Adjust the constant `maxRuns` in test-compose.go for the number of times you want the process to run. Each loop of the process may take about 3 minutes.
+* Adjust the constant `maxRuns` in `test-compose.go` for the number of times you want the process to run. Each loop of the process may take about 3 minutes.
 
 * Run `./test-compose.sh`
 
