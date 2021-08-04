@@ -15,7 +15,7 @@ services:
       - 10200:9200
     environment:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-  elasticsearchseven:
+  sitewideelasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
     ports:
       # Set alternative ports to prevent port clash.
