@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"sort"
 	"strings"
@@ -69,11 +70,13 @@ func main() {
 		lastTime := "1111"  // a year way in the past
 		idsFound := 0
 
-		var linesFound []string
+		var linesFound []string        // to store lines that contain the 'id' being searched for
+		var diffsFound []time.Duration // to stroe time differences between id's being searched for
 
 		maxFirstFieldLength := 0
 
 		// search through all container logs
+		logFile.Seek(0, io.SeekStart)
 		scanner := bufio.NewScanner(logFile)
 		for scanner.Scan() {
 			strLine := string(scanner.Text())
@@ -108,8 +111,43 @@ func main() {
 			return fieldsi[1] < fieldsj[1]
 		})
 
+		gotFirstTime := false
+		maxLastTime := ""
+		var maxDiff time.Duration
+		maxDiffTime := ""
+
 		for _, line := range linesFound {
 			fields := strings.Fields(line)
+
+			if gotFirstTime {
+				f, ferr := time.Parse(time.RFC3339, maxLastTime) // time format with nanoseconds
+				if ferr != nil {
+					fmt.Printf("error in maxLastTime: %v\n", ferr)
+				}
+
+				l, lerr := time.Parse(time.RFC3339, fields[1])
+				if lerr != nil {
+					fmt.Printf("error in fields[1]: %v\n", lerr)
+				}
+
+				if ferr == nil && lerr == nil {
+					fTime := f.Local()
+					lTime := l.Local()
+
+					diffNanoseconds := lTime.Sub(fTime)
+					diffsFound = append(diffsFound, diffNanoseconds)
+					if diffNanoseconds > maxDiff {
+						maxDiff = diffNanoseconds
+						maxDiffTime = fields[1]
+					}
+					maxLastTime = fields[1]
+					printAndSave(idResultFile, fmt.Sprintf("time since last id: %.9f seconds", diffNanoseconds.Seconds()))
+				}
+			} else {
+				gotFirstTime = true
+				maxLastTime = fields[1]
+			}
+
 			f1 := fields[0]
 			for len(f1) < maxFirstFieldLength {
 				// pad out the first field so that all timestamps are aligned
@@ -127,29 +165,48 @@ func main() {
 
 			printAndSave(idResultFile, fmt.Sprintf("   first event time: %s", firstTime))
 			printAndSave(idResultFile, fmt.Sprintf("    last event time: %s", lastTime))
+			if idsFound > 1 {
+				printAndSave(idResultFile, fmt.Sprintf("max id execution time is: %.9f seconds, finishing at: %s\n", maxDiff.Seconds(), maxDiffTime))
+				sort.SliceStable(diffsFound, func(i, j int) bool {
+					// compare the durations
+					return diffsFound[i] < diffsFound[j]
+				})
+				printAndSave(idResultFile, fmt.Sprintf("diffs: %v\n", diffsFound))
+				printAndSave(idResultFile, fmt.Sprintf("len of diffs: %v\n", len(diffsFound)))
+				// deduce how much of the overall time is taken by the ~10% of the largest diffs
 
-			f, err := time.Parse(time.RFC3339, firstTime) // time format with nanoseconds
-			if err != nil {
-				fmt.Println(err)
+				topTenStart := len(diffsFound) - (len(diffsFound)/10 + 1)
+				var total time.Duration
+				var topTenTotal time.Duration
+				for i := 0; i < len(diffsFound); i++ {
+					total += diffsFound[i]
+					if i >= topTenStart {
+						topTenTotal += diffsFound[i]
+					}
+				}
+				printAndSave(idResultFile, fmt.Sprintf("Largest ~10%% of diffsFound adds up to: %v\n", topTenTotal))
+				printAndSave(idResultFile, fmt.Sprintf("Which is %v%% of the total\n", (100*topTenTotal.Nanoseconds())/total.Nanoseconds()))
 			}
-			fTime := f.Local()
 
-			l, err := time.Parse(time.RFC3339, lastTime)
-			if err != nil {
-				fmt.Println(err)
+			f, ferr := time.Parse(time.RFC3339, firstTime) // time format with nanoseconds
+			if ferr != nil {
+				fmt.Printf("error in firstTime: %v\n", ferr)
 			}
-			lTime := l.Local()
 
-			diffNanoseconds := lTime.Sub(fTime)
+			l, lerr := time.Parse(time.RFC3339, lastTime)
+			if lerr != nil {
+				fmt.Printf("error in lastTime: %v\n", lerr)
+			}
 
-			printAndSave(idResultFile, fmt.Sprintf("Job execution time is: %d.%d seconds\n", diffNanoseconds/1000000000, diffNanoseconds%1000000000))
+			if ferr == nil && lerr == nil {
+				fTime := f.Local()
+				lTime := l.Local()
+
+				diffNanoseconds := lTime.Sub(fTime)
+
+				printAndSave(idResultFile, fmt.Sprintf("Job execution time is: %.9f seconds\n", diffNanoseconds.Seconds()))
+			}
 		}
-		cerr := logFile.Close()
-		if cerr != nil {
-			fmt.Printf("problem closing: %s : %v\n", dockerLogName, cerr)
-		}
-		logFile, err = os.Open(dockerLogName)
-		check(err)
 	}
 
 	printAndSave(idResultFile, fmt.Sprintf("Total Jobs: %d", jobCount))
