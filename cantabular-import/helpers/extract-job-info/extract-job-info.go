@@ -141,7 +141,7 @@ func main() {
 						maxDiffTime = fields[1]
 					}
 					maxLastTime = fields[1]
-					printAndSave(idResultFile, fmt.Sprintf("time since last id: %d.%09d seconds", diffNanoseconds/1000000000, diffNanoseconds%1000000000))
+					printAndSave(idResultFile, fmt.Sprintf("time since last id: %.9f seconds", diffNanoseconds.Seconds()))
 				}
 			} else {
 				gotFirstTime = true
@@ -166,7 +166,7 @@ func main() {
 			printAndSave(idResultFile, fmt.Sprintf("   first event time: %s", firstTime))
 			printAndSave(idResultFile, fmt.Sprintf("    last event time: %s", lastTime))
 			if idsFound > 1 {
-				printAndSave(idResultFile, fmt.Sprintf("max id execution time is: %d.%09d seconds, finishing at: %s\n", maxDiff/1000000000, maxDiff%1000000000, maxDiffTime))
+				printAndSave(idResultFile, fmt.Sprintf("max id execution time is: %.9f seconds, finishing at: %s\n", maxDiff.Seconds(), maxDiffTime))
 				sort.SliceStable(diffsFound, func(i, j int) bool {
 					// compare the durations
 					return diffsFound[i] < diffsFound[j]
@@ -185,7 +185,7 @@ func main() {
 					}
 				}
 				printAndSave(idResultFile, fmt.Sprintf("Largest ~10%% of diffsFound adds up to: %v\n", topTenTotal))
-				printAndSave(idResultFile, fmt.Sprintf("Which is %%%v of the total\n", (100*topTenTotal.Nanoseconds())/total.Nanoseconds()))
+				printAndSave(idResultFile, fmt.Sprintf("Which is %v%% of the total\n", (100*topTenTotal.Nanoseconds())/total.Nanoseconds()))
 			}
 
 			f, ferr := time.Parse(time.RFC3339, firstTime) // time format with nanoseconds
@@ -204,7 +204,7 @@ func main() {
 
 				diffNanoseconds := lTime.Sub(fTime)
 
-				printAndSave(idResultFile, fmt.Sprintf("Job execution time is: %d.%09d seconds\n", diffNanoseconds/1000000000, diffNanoseconds%1000000000))
+				printAndSave(idResultFile, fmt.Sprintf("Job execution time is: %.9f seconds\n", diffNanoseconds.Seconds()))
 			}
 		}
 	}
