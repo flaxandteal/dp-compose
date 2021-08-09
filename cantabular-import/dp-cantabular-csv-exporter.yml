@@ -1,0 +1,25 @@
+version: '3.3'
+services:
+    dp-cantabular-csv-exporter:
+        build:
+            context: ../../dp-cantabular-csv-exporter
+            dockerfile: Dockerfile.local
+        command:
+            - reflex
+            - -d
+            - none
+            - -c
+            - ./reflex
+        volumes:
+            - ../../dp-cantabular-csv-exporter:/dp-cantabular-csv-exporter
+        depends_on:
+            - kafka
+        ports:
+            - 26300:26300
+        environment:
+            BIND_ADDR:          ":26300"
+            KAFKA_ADDR:         "kafka:9092"
+            DATASET_API_URL:    "http://dp-dataset-api:22000"
+            RECIPE_API_URL:     "http://dp-recipe-api:22300"
+            CANTABULAR_URL:     "http://dp-cantabular-server:8491"
+            SERVICE_AUTH_TOKEN: $SERVICE_AUTH_TOKEN
