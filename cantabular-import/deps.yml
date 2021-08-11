@@ -34,3 +34,11 @@ services:
      - POSTGRES_PASSWORD=mysecretpassword
     ports:
     - 5432:5432
+  minio:
+    image: 'bitnami/minio:latest'
+    ports:
+      - '9000:9000'
+    environment:
+      - MINIO_ACCESS_KEY=minio-access-key
+      - MINIO_SECRET_KEY=minio-secret-key
+      
