@@ -47,7 +47,7 @@ Its primary purpose is to determine that the version of Docker and Docker-compos
 
 Usage: (on mac books)
 * Have a version of Docker running that you wish to test.
-    
+
     Using Docker 3.3.3 works well (the one before having docker-compose v2.0.0-beta.6 ... which does not work well)
 
 * Edit the `../get-florence-token.sh` script to use your florence username/password

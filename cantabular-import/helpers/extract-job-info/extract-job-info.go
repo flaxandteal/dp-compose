@@ -71,7 +71,7 @@ func main() {
 		idsFound := 0
 
 		var linesFound []string        // to store lines that contain the 'id' being searched for
-		var diffsFound []time.Duration // to stroe time differences between id's being searched for
+		var diffsFound []time.Duration // to store time differences between id's being searched for
 
 		maxFirstFieldLength := 0
 
@@ -161,10 +161,10 @@ func main() {
 
 		printAndSave(idResultFile, fmt.Sprintf("Number of ID's found is: %d", idsFound))
 		if firstTime != "" && lastTime != "" && idsFound > 0 {
-			printAndSave(idResultFile, fmt.Sprintf("     Job start time: %s", jobStart))
+			printAndSave(idResultFile, fmt.Sprintf(" Job start time: %s", jobStart))
 
-			printAndSave(idResultFile, fmt.Sprintf("   first event time: %s", firstTime))
-			printAndSave(idResultFile, fmt.Sprintf("    last event time: %s", lastTime))
+			printAndSave(idResultFile, fmt.Sprintf(" first event time: %s", firstTime))
+			printAndSave(idResultFile, fmt.Sprintf("last event time: %s", lastTime))
 			if idsFound > 1 {
 				printAndSave(idResultFile, fmt.Sprintf("max id execution time is: %.9f seconds, finishing at: %s\n", maxDiff.Seconds(), maxDiffTime))
 				sort.SliceStable(diffsFound, func(i, j int) bool {
@@ -173,8 +173,8 @@ func main() {
 				})
 				printAndSave(idResultFile, fmt.Sprintf("diffs: %v\n", diffsFound))
 				printAndSave(idResultFile, fmt.Sprintf("len of diffs: %v\n", len(diffsFound)))
-				// deduce how much of the overall time is taken by the ~10% of the largest diffs
 
+				// deduce how much of the overall time is taken by the ~10% of the largest diffs
 				topTenStart := len(diffsFound) - (len(diffsFound)/10 + 1)
 				var total time.Duration
 				var topTenTotal time.Duration
