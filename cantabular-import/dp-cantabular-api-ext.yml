@@ -1,0 +1,13 @@
+version: '3.3'
+services:
+    dp-cantabular-api-ext:
+        build:
+            context: ../../dp-cantabular-api-ext
+            dockerfile: Dockerfile
+        ports:
+            - 8492:8492
+        volumes:
+            - ../../dp-cantabular-api-ext/cantabular/data:/app/data
+            - ../../dp-cantabular-api-ext/cantabular/scripts:/app/scripts
+        environment:
+            CANTABULAR_API_URL: "http://dp-cantabular-server:8491"
