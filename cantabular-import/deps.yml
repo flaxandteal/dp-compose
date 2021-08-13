@@ -41,4 +41,3 @@ services:
     environment:
       - MINIO_ACCESS_KEY=minio-access-key
       - MINIO_SECRET_KEY=minio-secret-key
-      
