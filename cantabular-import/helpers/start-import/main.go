@@ -40,10 +40,13 @@ var (
 )
 
 const (
+	idDir      = "../tmp"
 	idFileName = "../tmp/id.txt"
 )
 
 func main() {
+	ensureDirectoryExists(idDir)
+
 	token, err := readInput()
 	if err != nil {
 		fmt.Println("error reading input: ", err)
@@ -87,6 +90,12 @@ func main() {
 func check(err error) {
 	if err != nil {
 		panic(err)
+	}
+}
+
+func ensureDirectoryExists(dirName string) {
+	if _, err := os.Stat(dirName); os.IsNotExist(err) {
+		check(os.Mkdir(dirName, 0700))
 	}
 }
 
