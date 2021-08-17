@@ -1,6 +1,6 @@
 ## Validating docker working well ##
 
-In order to run the `start-import.sh` or `start-analysis` scripts which kick off one import job, you need to have the docker files for Cantabular running.
+In order to run the `start-import.sh` or `start-analysis.sh` scripts which kick off one import job, you need to have the docker files for Cantabular running.
 
 Sometimes a verion of docker / docker-compose may not prove reliable, so the `test-compose.sh` script can be used to gain confidence in docker and docker-compose.
 
