@@ -272,7 +272,7 @@ func main() {
 
 			diffNanoseconds := lTime.Sub(fTime)
 
-			printAndSave(resultFile, fmt.Sprintf("Job(s) execution time is: %d.%d seconds\n", diffNanoseconds/1000000000, diffNanoseconds%1000000000))
+			printAndSave(resultFile, fmt.Sprintf("Job(s) execution time is: %.9f seconds\n", diffNanoseconds.Seconds()))
 		}
 
 		printAndSave(resultFile, fmt.Sprintf("Total events found (within first and last times): %d\n", maxEvents))

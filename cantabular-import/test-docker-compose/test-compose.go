@@ -46,12 +46,15 @@ var (
 )
 
 const (
-	tmpFileName        = "../tmp/id.txt"
-	maxContainersInJob = 11 // adjust this to suite the number of continers docker-compose runs up
+	idDir              = "../analysis/tmp"
+	idFileName         = "../analysis/tmp/id.txt"
+	maxContainersInJob = 14 // adjust this to suite the number of continers docker-compose runs up
 	maxRuns            = 2  // number of times to run up containers, perform integration test and stop containers
 )
 
 func main() {
+	ensureDirectoryExists(idDir)
+
 	showedReminder := false
 
 	for testCount := 1; testCount <= maxRuns; testCount++ {
@@ -111,7 +114,7 @@ func main() {
 					_ = stopAllCantabularDockerContainers()
 					fmt.Println("Pasuing 5 seconds")
 					time.Sleep(5 * time.Second)
-					fmt.Println("Do you need to run './import-recipes.sh mongodb://localhost:27017' in dp-recipe-api/import-recipies ?")
+					fmt.Println("Do you need to run './import-recipes.sh mongodb://localhost:27017' in dp-recipe-api/import-recipies (when all containers are running) ?")
 					fmt.Printf("Stopping early during test number: %d\n", testCount)
 					os.Exit(2)
 				}
@@ -134,6 +137,12 @@ func main() {
 	}
 }
 
+func ensureDirectoryExists(dirName string) {
+	if _, err := os.Stat(dirName); os.IsNotExist(err) {
+		check(os.Mkdir(dirName, 0700))
+	}
+}
+
 func showImportReminder() {
 	fmt.Println("\nprobably building containers and when you see: 'Running get-florence-token'")
 	fmt.Println("you will most likely need to, in another terminal:")
@@ -145,7 +154,7 @@ func showImportReminder() {
 
 func startContainers() {
 	cmd := exec.Command("./run-cantabular-without-sudo.sh") // where to get the command from
-	cmd.Dir = "../.."                                       // where to execute the command
+	cmd.Dir = ".."                                          // where to execute the command
 	err := cmd.Start()
 	if err != nil {
 		log.Fatal(err)
@@ -171,12 +180,12 @@ func doImport() error {
 	}
 
 	fmt.Printf("\nTrace ID (?): %s\n\n", res.ID)
-	idTextFile, err := os.OpenFile(tmpFileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	idTextFile, err := os.OpenFile(idFileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	check(err)
 	defer func() {
 		cerr := idTextFile.Close()
 		if cerr != nil {
-			fmt.Printf("problem closing: %s : %v\n", tmpFileName, cerr)
+			fmt.Printf("problem closing: %s : %v\n", idFileName, cerr)
 		}
 	}()
 
@@ -298,7 +307,7 @@ func getToken() (string, error) {
 	fmt.Printf("Running get-florence-token\n")
 
 	cmd := exec.Command("./get-florence-token.sh") // where to get the command from
-	cmd.Dir = "../.."                              // where to execute the command*/
+	cmd.Dir = ".."                                 // where to execute the command*/
 
 	var out bytes.Buffer
 	cmd.Stdout = &out

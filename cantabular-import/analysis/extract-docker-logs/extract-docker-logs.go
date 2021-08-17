@@ -15,7 +15,7 @@ import (
 
 const (
 	dockerLogName      = "../tmp/all-container-logs.txt"
-	maxContainersInJob = 11 // adjust this to suite the number of continers docker-compose runs up
+	maxContainersInJob = 14 // adjust this to suite the number of continers docker-compose runs up
 )
 
 // It can take a while to read all container logs, so all logs are read into one file and then this file is

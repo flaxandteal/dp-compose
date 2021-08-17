@@ -1,3 +1,12 @@
 # Created by .ignore support plugin (hsz.mobi)
 
 .idea
+
+# Mac
+.DS_Store
+
+# files created / used in import process analysis
+id.txt
+all-container-logs.txt
+count-log-events-results.txt
+extract-job-info-results.txt
