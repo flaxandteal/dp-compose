@@ -1,6 +1,6 @@
 ### Helper scripts ###
 
-Find here a some scripts to help with working with the Cantabular import process
+Find here some scripts to help with working with the Cantabular import process
 
 ## florence-token ##
 
@@ -14,7 +14,7 @@ Usage: edit `florence-token` to have your username/password and run
 
 `start-import.sh` starts an import of the Example Cantabular Dataset.
 
-Usage: 
+Usage:
 * Make sure you have your Cantabular Import Journey set as per
 `cantabular-import/README.md`
 
@@ -22,67 +22,8 @@ Usage:
 
 * Run `./start-import.sh`
 
-This will save/append the job id in tmp/id.txt file for use by the apps for examining the Docker logs (see below).
-
 Alternatively if you have your own script/other source to get a florence token
 you can pipe the output directly into `go run start-import/main.go`
 
 for example, if you had a FLORENCE_TOKEN environment variable saved you could run
 `echo $FLORENCE_TOKEN | go run start-import/main.go`
-
------
-
-## Validating integration process utils ##
-
-In order to run the 'start-import.sh` script which kicks off one import job, you need to have the docker files for Cantabular running. 
-
-Sometimes a verion of docker / docker-compose may not prove reliable, so the `test-compose.sh` script can be used to gain confidence in docker and docker-compose.
-
-The script `test-compose.sh` runs multiple iterations of these steps:
-
-    start containers
-    get florence token
-    run import process
-    stop containers.
-
-Its primary purpose is to determine that the version of Docker and Docker-compose are working well (it also demonstrates that the whole import process is functioning, as are all the contaiers / services)
-
-Usage: (on mac books)
-* Have a version of Docker running that you wish to test.
-
-    Using Docker 3.3.3 works well (the one before having docker-compose v2.0.0-beta.6 ... which does not work well)
-
-* Edit the `../get-florence-token.sh` script to use your florence username/password
-
-* Adjust the constant `maxRuns` in `test-compose.go` for the number of times you want the process to run. Each loop of the process may take about 3 minutes. You may also need to adjust `maxContainersInJob` to match the number of containers that are run for the cantabular import process (which may change).
-
-* Run `./test-compose.sh`
-
-* follow any instructions the above produces.
-
-## Examining docker logs ##
-
-After running one or more import processes, you can extract the logs for the containers by doing:
-
-run:
-
-    ../run-cantabular-without-sudo.sh
-
-Then wait for all the containers to be running, pause for another 15 seconds to be sure, then run:
-
-    ./extract-docker-logs.sh
-
-You can then run two more utilities to get useful information about the import process(es) run by running the following:
-
-    ./count-log-events.sh
-
-    ./extract-job-info.sh
-
-The information that these utils produce as an output in the terminal (and saved within their directories) can help to determine if the whole import process is working as desired.
-
-### Further points when repeating tests and doing different sorts of tests as per your needs:
-
-1. When jobs are run, their id is placed in / appended to file tmp/id.txt that allows quick access if you have the whole of the dp-compose directory open in say vscode or goland ide's.
-2. If you wish to only examine one import process at a time then clear out the contents of the id.txt file before a run of the import process. You will also need to run `docker-compose down` to clear out Docker's logs before a new run.
-3. The script `./parallel-10.sh` is an example of kicking off 10 jobs to run in parallel, and when run (needs same pre-requsites as per start-import.sh) you will see 10 id's in the id.txt file. Then running the `extract-docker-logs.sh` followed by either or both of: `count-log-events.sh`, `extract-job-info.sh` you can check if you go the exepeted results for 10 jobs.
-4. The files provided for examining the logs perform the actions they do and may serve as a starting point for you to create new apps for different kinds of analysis or for you to adjust locally on your machines to suite the nature of a particular test you wish to run ...

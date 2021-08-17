@@ -1,14 +1,15 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"os/exec"
+	"strings"
+	"time"
 )
 
 type PutJobRequest struct {
@@ -38,11 +39,23 @@ var (
 	client = &http.Client{}
 )
 
+const (
+	idDir      = "../tmp"
+	idFileName = "../tmp/id.txt"
+)
+
 func main() {
-	token, err := readInput()
+	ensureDirectoryExists(idDir)
+
+	//	token, err := readInput()
+	token, err := getToken()
 	if err != nil {
 		fmt.Println("error reading input: ", err)
 	}
+
+	// grab time before postJob to ensure we have 'time' before anything relevant to this
+	// operation is put in log file for Docker container(s)
+	t := time.Now()
 
 	res, err := postJob(token)
 	if err != nil {
@@ -50,21 +63,75 @@ func main() {
 		os.Exit(1)
 	}
 
+	fmt.Printf("\nTrace ID (?): %s\n\n", res.ID)
+	idTextFile, err := os.OpenFile(idFileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	check(err)
+
 	if err := putJob(token, res); err != nil {
 		fmt.Println("error putting job to importAPI: ", err)
+		cerr := idTextFile.Close()
+		if cerr != nil {
+			fmt.Printf("problem closing: %s : %v\n", idFileName, cerr)
+		}
 		os.Exit(1)
 	}
 
+	// prefix time stamp of initiating the integration test
+	// (the specific format chosen is to be compatible with the ones in the docker logs, and thus makes
+	//  comparison of time's easily possible)
+	_, err = fmt.Fprintf(idTextFile, "%s %s\n", t.Format("2006-01-02T15:04:05.000000000Z"), res.ID)
+	check(err)
+	cerr := idTextFile.Close()
+	if cerr != nil {
+		fmt.Printf("problem closing: %s : %v\n", idFileName, cerr)
+	}
 	os.Exit(0)
 }
 
-func readInput() (string, error) {
+func check(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+func ensureDirectoryExists(dirName string) {
+	if _, err := os.Stat(dirName); os.IsNotExist(err) {
+		check(os.Mkdir(dirName, 0700))
+	}
+}
+
+/*func readInput() (string, error) {
 	rdr := bufio.NewReader(os.Stdin)
 
 	s, err := rdr.ReadString('\n')
 	if err != nil && err != io.EOF {
 		return "", fmt.Errorf("failed to read from stdin: %s", err)
 	}
+
+	fmt.Println("florence-token:", s)
+
+	return s, nil
+}*/
+
+func getToken() (string, error) {
+	fmt.Printf("Running get-florence-token\n")
+
+	cmd := exec.Command("./get-florence-token.sh") // where to get the command from
+	cmd.Dir = "../.."                              // where to execute the command*/
+
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	var stdErr bytes.Buffer
+	cmd.Stderr = &stdErr
+	err := cmd.Run()
+	if err != nil {
+		fmt.Printf("in all caps: %q\n", out.String())
+		fmt.Printf("stderr in all caps: %q\n", stdErr.String())
+		return "", err
+	}
+
+	s := out.String()
+	s = strings.ReplaceAll(s, "\"", "")
 
 	fmt.Println("florence-token:", s)
 
