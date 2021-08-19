@@ -10,6 +10,3 @@ id.txt
 all-container-logs.txt
 count-log-events-results.txt
 extract-job-info-results.txt
-
-# minio config
-cantabular-import/minio/data/*
