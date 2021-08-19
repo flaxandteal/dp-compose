@@ -12,6 +12,4 @@ count-log-events-results.txt
 extract-job-info-results.txt
 
 # minio config
-cantabular-import/minio/buckets/.access_key
-cantabular-import/minio/buckets/.secret_key
-cantabular-import/minio/buckets/.minio.sys
+cantabular-import/minio/data/*

@@ -37,11 +37,10 @@ services:
   minio:
     image: 'bitnami/minio:latest'
     volumes:
-      - ./minio/buckets:/data
+      - ./minio/data:/data
     ports:
       - '9001:9000'
     environment:
       - MINIO_ACCESS_KEY=minio-access-key
       - MINIO_SECRET_KEY=minio-secret-key
       - MINIO_DEFAULT_BUCKETS=dp-cantabular-csv-exporter
-      - BITNAMI_DEBUG=true
