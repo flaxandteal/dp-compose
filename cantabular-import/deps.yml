@@ -36,8 +36,11 @@ services:
     - 5432:5432
   minio:
     image: 'bitnami/minio:latest'
+    volumes:
+      - ./minio/buckets:/data
     ports:
       - '9001:9000'
     environment:
-      - MINIO_ACCESS_KEY=minio-access-key
-      - MINIO_SECRET_KEY=minio-secret-key
+      - MINIO_ROOT_USER=minio-access-key
+      - MINIO_ROOT_PASSWORD=minio-secret-key
+      - MINIO_DEFAULT_BUCKETS=dp-cantabular-csv-exporter
