@@ -29,6 +29,10 @@ Expects you to have environment variables `zebedee_root` and
 You will need to run the `import-recipes` script in `dp-recipe-api` when
 first building the containers before running an import.
 
+Also make sure you have setup the `dp-cantabular-server` and 
+`dp-cantabular-api-ext` services by running `make setup` in each of their
+root directories.
+
 # Bring Up Cantabular Import Services #
 
 `make start`
