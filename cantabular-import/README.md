@@ -7,6 +7,10 @@ as `dp-compose` (this repository):
 
 `dp-cantabular-server`
 
+`dp-cantabular-api-ext`
+
+`dp-cantabular-csv-exporter`
+
 `dp-dataset-api`
 
 `dp-import-api`
