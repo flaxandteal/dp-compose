@@ -134,7 +134,7 @@ func createLogFileForAllDockerContainers() error {
 	if containersReadCount > 0 {
 		fmt.Printf("Logs read OK\n")
 	} else {
-		return errors.New("no containers found to read ... have you started the containers ?")
+		return errors.New("no containers found to read ... have you started the containers")
 	}
 	return nil
 }

@@ -76,7 +76,9 @@ func main() {
 		maxFirstFieldLength := 0
 
 		// search through all container logs
-		logFile.Seek(0, io.SeekStart)
+		_, err := logFile.Seek(0, io.SeekStart)
+		check(err)
+
 		scanner := bufio.NewScanner(logFile)
 		for scanner.Scan() {
 			strLine := string(scanner.Text())

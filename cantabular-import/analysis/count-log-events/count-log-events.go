@@ -13,6 +13,7 @@ import (
 const (
 	dockerLogName        = "../tmp/all-container-logs.txt"
 	tmpFileName          = "../tmp/id.txt"
+	plotDataFileName     = "../tmp/plot.txt"
 	countResultsFileName = "count-log-events-results.txt"
 )
 
@@ -53,6 +54,15 @@ func main() {
 		}
 	}()
 
+	plotDataFile, err := os.OpenFile(plotDataFileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND|os.O_TRUNC, 0666)
+	check(err)
+	defer func() {
+		cerr := plotDataFile.Close()
+		if cerr != nil {
+			fmt.Printf("problem closing: %s : %v\n", plotDataFileName, cerr)
+		}
+	}()
+
 	jobCount := 0
 	idsFound := 0
 
@@ -87,7 +97,8 @@ func main() {
 		printAndSave(resultFile, fmt.Sprintf("Looking for id: %s\n", id))
 
 		// search through all container logs
-		logFile.Seek(0, io.SeekStart)
+		_, err = logFile.Seek(0, io.SeekStart)
+		check(err)
 		scanner := bufio.NewScanner(logFile)
 		for scanner.Scan() {
 			strLine := string(scanner.Text())
@@ -108,9 +119,32 @@ func main() {
 		err = scanner.Err()
 		check(err)
 	}
-
 	err = idScan.Err()
 	check(err)
+
+	// we now need to subtract a few milliseconds from the firsTime value found so that we grab the whole of the first event that contains the first id found.
+	// this means that we may grab a few extra events before the desired event.
+
+	f, ferr := time.Parse(time.RFC3339, firstTime) // time format with nanoseconds
+	if ferr != nil {
+		fmt.Printf("error in firstTime: %v\n", ferr)
+	} else {
+		f = f.Add(-(time.Second / 1000) * 2)
+		// (the specific format chosen is to be compatible with the ones in the docker logs, and thus makes
+		//  comparison of time's easily possible)
+		firstTime = f.Format("2006-01-02T15:04:05.000000000Z")
+	}
+
+	// and similarly for the lastTime
+	l, lerr := time.Parse(time.RFC3339, lastTime) // time format with nanoseconds
+	if lerr != nil {
+		fmt.Printf("error in firstTime: %v\n", lerr)
+	} else {
+		l = l.Add((time.Second / 1000) * 2)
+		// (the specific format chosen is to be compatible with the ones in the docker logs, and thus makes
+		//  comparison of time's easily possible)
+		lastTime = l.Format("2006-01-02T15:04:05.000000000Z")
+	}
 
 	var linesFound []string // to store start and end of events lines between the time range plus lines that contain id's
 
@@ -123,11 +157,18 @@ func main() {
 	if idsFound > 0 {
 		eventsCountStarts := 0
 		eventsCountEnds := 0
+		wrapperCounts := 0
+		eventsWithIds := 0
 
 		maxFirstFieldLength := 0
 
-		// search through all container logs
-		logFile.Seek(0, io.SeekStart)
+		var validLines []string
+		var validCount int
+
+		// search through all container logs to retrieve event lines within time range
+		_, err := logFile.Seek(0, io.SeekStart)
+		check(err)
+
 		scanner := bufio.NewScanner(logFile)
 		for scanner.Scan() {
 			strLine := string(scanner.Text())
@@ -137,33 +178,91 @@ func main() {
 				// we have three fields
 				if fields[1] >= firstTime && fields[1] <= lastTime {
 					// the fields are within the time range
-					found := false
-					if len(fields[0])+len(fields[1])+len(fields[2])+2 == len(strLine) {
-						// the line has no leading spaces in field[2], that got stripped out by strings.Fields()
-						if fields[2] == "{" {
-							// and its only the opening curly bracket that we are interested in
-							eventsCountStarts++
-							linesFound = append(linesFound, strLine)
-							found = true
-						}
-						if fields[2] == "}" {
-							// or the closing bracket
-							eventsCountEnds++
-							// linesFound = append(linesFound, strLine)
-							// found = true
-						}
-					}
-					for _, id := range idList {
-						if strings.Contains(strLine, id) {
-							linesFound = append(linesFound, strLine)
-							found = true
-							break
-						}
-					}
-					if found && len(fields[0]) > maxFirstFieldLength {
+					validLines = append(validLines, strLine)
+					validCount++
+				}
+			}
+		}
+		err = scanner.Err()
+		check(err)
+
+		for j := 0; j < validCount; j++ {
+			strLine := validLines[j]
+			fields := strings.Fields(strLine)
+
+			if len(fields[0])+len(fields[1])+len(fields[2])+2 == len(strLine) {
+				// the line has no leading spaces in field[2], that got stripped out by strings.Fields()
+				if fields[2] == "{" {
+					// and its only the opening curly bracket that we are interested in to indicate the start of a well formed event
+					eventsCountStarts++
+					if len(fields[0]) > maxFirstFieldLength {
 						// save field width for later
 						maxFirstFieldLength = len(fields[0])
 					}
+
+					var eventStr = "{"
+					var idLine string
+					// extract all lines of an event into one line
+					j++
+					for j < validCount {
+						eLine := validLines[j]
+						f := strings.Fields(eLine)
+						if len(f) > 2 {
+							// we have three fields
+							if len(f[0])+len(f[1])+len(f[2])+2 == len(eLine) {
+								// the line has no leading spaces in field[2], that got stripped out by strings.Fields()
+								if f[2] == "}" {
+									eventStr += "}"
+
+									offset := "0.0 " // an offset for Y axis that is prefixed to line indicating event is a wrapper and which it is
+									if strings.Contains(eventStr, "http request received") {
+										wrapperCounts++
+										offset = "0.3 "
+									}
+									if strings.Contains(eventStr, "http request completed") {
+										wrapperCounts++
+										offset = "-0.3 "
+									}
+
+									// examine event and do appropriate log: just line showing id or opening curly bracket
+									if idLine != "" {
+										linesFound = append(linesFound, offset+idLine)
+										// An id may appear in an event more than once, so this counter
+										// adds up just the events that have one or more id's in them
+										eventsWithIds++
+									} else {
+										linesFound = append(linesFound, offset+strLine)
+									}
+									break
+								}
+							} else {
+								for _, id := range idList {
+									if strings.Contains(eLine, id) {
+										idLine = eLine
+										break
+									}
+								}
+
+								eLine = strings.ReplaceAll(eLine, f[0], "")
+								eLine = strings.ReplaceAll(eLine, f[1], "")
+
+								for {
+									if string(eLine[0]) != " " {
+										break
+									}
+									eLine = strings.TrimPrefix(eLine, " ")
+								}
+
+								eventStr += eLine
+							}
+						}
+						j++
+					}
+					j--
+				}
+				if fields[2] == "}" {
+					// or the closing bracket
+					eventsCountEnds++
 				}
 			}
 		}
@@ -179,7 +278,7 @@ func main() {
 			// extract and sort by the timestamp for each line
 			fieldsi := strings.Fields(linesFound[i])
 			fieldsj := strings.Fields(linesFound[j])
-			return fieldsi[1] < fieldsj[1]
+			return fieldsi[2] < fieldsj[2]
 		})
 		gotFirstTime := false
 		maxLastTime := ""
@@ -187,6 +286,11 @@ func main() {
 		maxDiffTime := ""
 
 		var diffsFound []time.Duration // to store time differences between id's being searched for
+		var serviceNames []string
+		var eventHasId []bool
+		var wrappedOffset []string
+		var firstServiceName string
+		var total time.Duration
 
 		for _, line := range linesFound {
 			fields := strings.Fields(line)
@@ -197,9 +301,9 @@ func main() {
 					fmt.Printf("error in maxLastTime: %v\n", ferr)
 				}
 
-				l, lerr := time.Parse(time.RFC3339, fields[1])
+				l, lerr := time.Parse(time.RFC3339, fields[2])
 				if lerr != nil {
-					fmt.Printf("error in fields[1]: %v\n", lerr)
+					fmt.Printf("error in fields[2]: %v\n", lerr)
 				}
 
 				if ferr == nil && lerr == nil {
@@ -207,28 +311,51 @@ func main() {
 					lTime := l.Local()
 
 					diffNanoseconds := lTime.Sub(fTime)
+					total += diffNanoseconds
 					diffsFound = append(diffsFound, diffNanoseconds)
 					if diffNanoseconds > maxDiff {
 						maxDiff = diffNanoseconds
-						maxDiffTime = fields[1]
+						maxDiffTime = fields[2]
 					}
-					maxLastTime = fields[1]
+					maxLastTime = fields[2]
+					if fields[3] == "{" {
+						eventHasId = append(eventHasId, false)
+					} else {
+						eventHasId = append(eventHasId, true)
+					}
+					printAndSave(resultFile, fmt.Sprintf("current: %.9f seconds", total.Seconds()))
 					printAndSave(resultFile, fmt.Sprintf("diff: %.9f seconds", diffNanoseconds.Seconds()))
+
+					serviceNames = append(serviceNames, fields[1])
+					wrappedOffset = append(wrappedOffset, fields[0])
 				}
 			} else {
 				gotFirstTime = true
-				maxLastTime = fields[1]
+				maxLastTime = fields[2]
+				firstServiceName = fields[1]
 			}
 
-			f1 := fields[0]
+			f1 := fields[1]
 			for len(f1) < maxFirstFieldLength {
 				// pad out the first field so that all timestamps are aligned
-				f1 = f1 + " "
+				f1 += " "
 			}
 			f1 += " "
-			f1 += fields[1]
-			f1 += line[len(fields[0])+1+len(fields[1]):]
+			f1 += fields[2]
+			f1 += line[len(fields[0])+1+len(fields[1])+1+len(fields[2]):]
+			f1 = fields[0] + " " + f1 // prefix the wrapped offset value
 			printAndSave(resultFile, fmt.Sprintf("%s", f1))
+		}
+
+		if len(serviceNames) > 0 {
+			// save data for plotting
+			// The first service name is effectively time '0'
+			printAndSave(plotDataFile, fmt.Sprintf("0.0 %s 0.0000 true", firstServiceName))
+			var timeOffest time.Duration
+			for i := 0; i < len(diffsFound); i++ {
+				timeOffest += diffsFound[i]
+				printAndSave(plotDataFile, fmt.Sprintf("%s %s %.4f %v", wrappedOffset[i], serviceNames[i], timeOffest.Seconds(), eventHasId[i]))
+			}
 		}
 
 		printAndSave(resultFile, fmt.Sprintf("max id execution time is: %.9f seconds, finishing at: %s\n", maxDiff.Seconds(), maxDiffTime))
@@ -241,10 +368,8 @@ func main() {
 
 		// deduce how much of the overall time is taken by the ~10% of the largest diffs
 		topTenStart := len(diffsFound) - (len(diffsFound)/10 + 1)
-		var total time.Duration
 		var topTenTotal time.Duration
 		for i := 0; i < len(diffsFound); i++ {
-			total += diffsFound[i]
 			if i >= topTenStart {
 				topTenTotal += diffsFound[i]
 			}
@@ -253,6 +378,7 @@ func main() {
 		printAndSave(resultFile, fmt.Sprintf("Which is %v%% of the total\n", (100*topTenTotal.Nanoseconds())/total.Nanoseconds()))
 
 		printAndSave(resultFile, fmt.Sprintf("Number of ID's found is: %d", idsFound))
+		printAndSave(resultFile, fmt.Sprintf("Number of events with ID(s) is: %d", eventsWithIds))
 
 		if firstTime != "" && lastTime != "" {
 			printAndSave(resultFile, fmt.Sprintf(" first event time: %s", firstTime))
@@ -276,6 +402,8 @@ func main() {
 		}
 
 		printAndSave(resultFile, fmt.Sprintf("Total events found (within first and last times): %d\n", maxEvents))
+
+		printAndSave(resultFile, fmt.Sprintf("wrapperCounts: %d", wrapperCounts))
 
 		printAndSave(resultFile, fmt.Sprintf("Total Jobs: %d", jobCount))
 	}
