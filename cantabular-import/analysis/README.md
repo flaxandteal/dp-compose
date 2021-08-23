@@ -25,6 +25,14 @@ You can then run two more utilities to get useful information about the import p
 
 The information that these utils produce as an output in the terminal (and saved within their directories) can help to determine if the whole import process is working as desired.
 
+Also, after running ./count-log-events.sh you can run:
+
+    ./simple-plot.sh
+
+which will plot the plot.txt file saved by count-log-events into a file called diffsPlot.png
+
+The diffsPlot.png file shows the flow of events for the services. Events that are http request wrappers have their y axis position offset by +0.3 for a 'http request received' or offset by -0.3 for a 'http request completed' from the integer Y axis position to differentiate those events from others for a service.
+
 ### Further points when repeating tests and doing different sorts of tests as per your needs:
 
 1. When jobs are run, their id is placed in / appended to file tmp/id.txt that allows quick access if you have the whole of the dp-compose directory open in say vscode or goland ide's.
