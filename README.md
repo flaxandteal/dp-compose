@@ -54,3 +54,9 @@ To connect to the container and query via the postgres _cli_
 ```
 docker run -it --rm --link dp-compose_postgres_1:postgres --net dp-compose_default postgres:9.6 psql -h postgres -U postgres
 ```
+
+## Versioning
+
+Dependencies should be kept at specific versions and up-to-date with production.
+Previously we were just using 'latest' and out-of-date versions which both could lead to unexpected behaviour.
+This repository should be the source of truth for which versions to use for dependencies. 
