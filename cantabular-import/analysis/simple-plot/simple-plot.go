@@ -116,15 +116,31 @@ func main() {
 }
 
 func plotAll(plotData []plotXY) (*plot.Plot, error) {
+	var nofIds int
 	p := plot.New()
 
+	// create 1st plot of all events
 	points := make(plotter.XYs, len(plotData))
-
 	for i, val := range plotData {
 		points[i].X = val.x
 		points[i].Y = val.y
+		if val.isId {
+			nofIds++
+		}
 	}
-	if err := plotutil.AddLinePoints(p, "", points); err != nil {
+
+	// create 2nd plot line of just the events with the job ID to overlay on all events
+	idPoints := make(plotter.XYs, nofIds)
+	var index int
+	for _, val := range plotData {
+		if val.isId {
+			idPoints[index].X = val.x
+			idPoints[index].Y = val.y + 0.3 // offset the ID event in Y axis to separate overlaping lines for clarity
+			index++
+		}
+	}
+
+	if err := plotutil.AddLinePoints(p, "", points, idPoints); err != nil {
 		return nil, err
 	}
 	return p, nil
