@@ -94,10 +94,10 @@ func main() {
 	err = scanner.Err()
 	check(err)
 
-	diffsPlot, err := plotAll(plotData)
+	diffsPlot, totalEvents, nofIds, err := plotAll(plotData)
 	check(err)
 
-	diffsPlot.Title.Text = "Events for containers - timeline"
+	diffsPlot.Title.Text = "Events for containers - timeline, spanning: " + strconv.Itoa(totalEvents) + " events - of which: " + strconv.Itoa(nofIds) + " have import job Ids"
 	diffsPlot.X.Label.Text = "time in seconds"
 	diffsPlot.Y.Label.Text = "service / container name"
 
@@ -115,7 +115,7 @@ func main() {
 	check(err)
 }
 
-func plotAll(plotData []plotXY) (*plot.Plot, error) {
+func plotAll(plotData []plotXY) (*plot.Plot, int, int, error) {
 	var nofIds int
 	p := plot.New()
 
@@ -141,9 +141,9 @@ func plotAll(plotData []plotXY) (*plot.Plot, error) {
 	}
 
 	if err := plotutil.AddLinePoints(p, "", points, idPoints); err != nil {
-		return nil, err
+		return nil, 0, 0, err
 	}
-	return p, nil
+	return p, len(plotData), nofIds, nil
 }
 
 func check(err error) {
