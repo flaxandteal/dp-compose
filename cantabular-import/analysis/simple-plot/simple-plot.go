@@ -18,6 +18,7 @@ import (
 
 const (
 	plotDataFileName = "../tmp/plot.txt"
+	idOffsetY        = 0.3 // Y axis offset of the ID event to separate overlaping lines for clarity
 )
 
 type plotXY struct {
@@ -97,15 +98,15 @@ func main() {
 	diffsPlot, totalEvents, nofIds, err := plotAll(plotData)
 	check(err)
 
-	diffsPlot.Title.Text = "Events for containers - timeline, spanning: " + strconv.Itoa(totalEvents) + " events - of which: " + strconv.Itoa(nofIds) + " have import job Ids"
+	diffsPlot.Title.Text = fmt.Sprintf("Events for containers - timeline, spanning: %d events - of which: %d have import job Ids", totalEvents, nofIds)
 	diffsPlot.X.Label.Text = "time in seconds"
 	diffsPlot.Y.Label.Text = "service / container name"
 
 	cNames := make([]string, len(whatContainers)+1)
 
 	for k, v := range whatContainers {
-		k = strings.ReplaceAll(k, "/cantabular-import-journey_", "") //!!! this should be in code that creted files
-		k = strings.ReplaceAll(k, "_1", "")                          //!!! this should be in code that creted files
+		k = strings.ReplaceAll(k, "/cantabular-import-journey_", "") // this might best be in code that created files
+		k = strings.ReplaceAll(k, "_1", "")                          // this might best be in code that created files
 		cNames[v] = k
 	}
 
@@ -135,7 +136,7 @@ func plotAll(plotData []plotXY) (*plot.Plot, int, int, error) {
 	for _, val := range plotData {
 		if val.isId {
 			idPoints[index].X = val.x
-			idPoints[index].Y = val.y + 0.3 // offset the ID event in Y axis to separate overlaping lines for clarity
+			idPoints[index].Y = val.y + idOffsetY
 			index++
 		}
 	}
