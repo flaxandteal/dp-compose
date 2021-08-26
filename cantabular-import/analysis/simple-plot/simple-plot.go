@@ -9,11 +9,9 @@ import (
 	"strings"
 
 	"gonum.org/v1/plot"
-	_ "gonum.org/v1/plot/palette"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/plotutil"
 	"gonum.org/v1/plot/vg"
-	_ "gonum.org/v1/plot/vg/draw"
 )
 
 const (
@@ -112,7 +110,7 @@ func main() {
 
 	diffsPlot.NominalY(cNames...)
 
-	err = diffsPlot.Save(100*vg.Centimeter, 20*vg.Centimeter, "diffsPlot.png")
+	err = diffsPlot.Save(100*vg.Centimeter, 20*vg.Centimeter, "diffsPlot.svg")
 	check(err)
 }
 
