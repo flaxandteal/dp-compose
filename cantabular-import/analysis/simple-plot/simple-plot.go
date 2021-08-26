@@ -15,8 +15,9 @@ import (
 )
 
 const (
-	plotDataFileName = "../tmp/plot.txt"
-	idOffsetY        = 0.3 // Y axis offset of the ID event to separate overlaping lines for clarity
+	plotDataFileName   = "../tmp/plot.txt"
+	plotOutputFileName = "diffsPlot.svg"
+	idOffsetY          = 0.3 // Y axis offset of the ID event to separate overlaping lines for clarity
 )
 
 type plotXY struct {
@@ -110,7 +111,7 @@ func main() {
 
 	diffsPlot.NominalY(cNames...)
 
-	err = diffsPlot.Save(100*vg.Centimeter, 20*vg.Centimeter, "diffsPlot.svg")
+	err = diffsPlot.Save(100*vg.Centimeter, 20*vg.Centimeter, plotOutputFileName)
 	check(err)
 }
 
