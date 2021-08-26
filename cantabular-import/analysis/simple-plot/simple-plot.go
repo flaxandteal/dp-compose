@@ -140,7 +140,7 @@ func plotAll(plotData []plotXY) (*plot.Plot, int, int, error) {
 		}
 	}
 
-	if err := plotutil.AddLinePoints(p, "", points, idPoints); err != nil {
+	if err := plotutil.AddLinePoints(p, "All events:", points, "Events with Ids:", idPoints); err != nil {
 		return nil, 0, 0, err
 	}
 	return p, len(plotData), nofIds, nil
