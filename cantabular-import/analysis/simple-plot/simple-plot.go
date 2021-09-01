@@ -9,15 +9,15 @@ import (
 	"strings"
 
 	"gonum.org/v1/plot"
-	_ "gonum.org/v1/plot/palette"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/plotutil"
 	"gonum.org/v1/plot/vg"
-	_ "gonum.org/v1/plot/vg/draw"
 )
 
 const (
-	plotDataFileName = "../tmp/plot.txt"
+	plotDataFileName   = "../tmp/plot.txt"
+	plotOutputFileName = "diffsPlot.svg"
+	idOffsetY          = 0.3 // Y axis offset of the ID event to separate overlaping lines for clarity
 )
 
 type plotXY struct {
@@ -94,40 +94,56 @@ func main() {
 	err = scanner.Err()
 	check(err)
 
-	diffsPlot, err := plotAll(plotData)
+	diffsPlot, totalEvents, nofIds, err := plotAll(plotData)
 	check(err)
 
-	diffsPlot.Title.Text = "Events for containers - timeline"
+	diffsPlot.Title.Text = fmt.Sprintf("Events for containers - timeline, spanning: %d events - of which: %d have import job Ids", totalEvents, nofIds)
 	diffsPlot.X.Label.Text = "time in seconds"
 	diffsPlot.Y.Label.Text = "service / container name"
 
 	cNames := make([]string, len(whatContainers)+1)
 
 	for k, v := range whatContainers {
-		k = strings.ReplaceAll(k, "/cantabular-import-journey_", "") //!!! this should be in code that creted files
-		k = strings.ReplaceAll(k, "_1", "")                          //!!! this should be in code that creted files
+		k = strings.ReplaceAll(k, "/cantabular-import-journey_", "") // this might best be in code that created files
+		k = strings.ReplaceAll(k, "_1", "")                          // this might best be in code that created files
 		cNames[v] = k
 	}
 
 	diffsPlot.NominalY(cNames...)
 
-	err = diffsPlot.Save(100*vg.Centimeter, 20*vg.Centimeter, "diffsPlot.png")
+	err = diffsPlot.Save(100*vg.Centimeter, 20*vg.Centimeter, plotOutputFileName)
 	check(err)
 }
 
-func plotAll(plotData []plotXY) (*plot.Plot, error) {
+func plotAll(plotData []plotXY) (*plot.Plot, int, int, error) {
+	var nofIds int
 	p := plot.New()
 
+	// create 1st plot of all events
 	points := make(plotter.XYs, len(plotData))
-
 	for i, val := range plotData {
 		points[i].X = val.x
 		points[i].Y = val.y
+		if val.isId {
+			nofIds++
+		}
 	}
-	if err := plotutil.AddLinePoints(p, "", points); err != nil {
-		return nil, err
+
+	// create 2nd plot line of just the events with the job ID to overlay on all events
+	idPoints := make(plotter.XYs, nofIds)
+	var index int
+	for _, val := range plotData {
+		if val.isId {
+			idPoints[index].X = val.x
+			idPoints[index].Y = val.y + idOffsetY
+			index++
+		}
 	}
-	return p, nil
+
+	if err := plotutil.AddLinePoints(p, "All events:", points, "Events with Ids:", idPoints); err != nil {
+		return nil, 0, 0, err
+	}
+	return p, len(plotData), nofIds, nil
 }
 
 func check(err error) {
