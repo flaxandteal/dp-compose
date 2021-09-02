@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -21,7 +22,8 @@ const (
 )
 
 type plotXY struct {
-	x    float64
+	x float64
+
 	y    float64
 	isId bool
 }
@@ -43,7 +45,7 @@ func main() {
 
 	whatContainers := make(map[string]int)
 
-	var containerIndex = 1 // start at 1 above Y axis
+	var index int // just to have different value
 
 	// for each event line extract container name and buld up a map of individual container names
 	for plotDataScan.Scan() {
@@ -56,13 +58,48 @@ func main() {
 		containerName := fields[1]
 
 		if _, ok := whatContainers[containerName]; !ok {
-			fmt.Printf("Name: %s, index: %d\n", containerName, containerIndex)
-			whatContainers[containerName] = containerIndex
-			containerIndex++
+			fmt.Printf("Name: %s, index: %d\n", containerName, index)
+			whatContainers[containerName] = index
+			index++
 		}
 	}
 	err = plotDataScan.Err()
 	check(err)
+
+	// alphabetically sort container names
+	cNames := make([]string, len(whatContainers))
+
+	for k, value_index := range whatContainers {
+		cNames[value_index] = k
+	}
+
+	sort.Strings(cNames)
+
+	whatContainersSorted := make(map[string]int)
+
+	yOffset := 1 // start at 1 above Y axis (to help with better display of any minor applied offsets for wrapping http request midleware events)
+	// extract names in descending order
+	for i := len(cNames) - 1; i >= 0; i-- {
+		fmt.Printf("Name: %s, Y axis offset: %d\n", cNames[i], yOffset)
+		// and assign Y axis to try to maintain consistency between different plots
+		whatContainersSorted[cNames[i]] = yOffset
+		yOffset++
+	}
+
+	type request struct {
+		x        float64
+		y        float64
+		gotFirst bool
+	}
+	requestMarkers := make([]request, len(cNames)+yOffset)
+
+	type segment struct {
+		startX float64
+		startY float64
+		endX   float64
+		endY   float64
+	}
+	var segmentList []segment
 
 	var plotData []plotXY
 
@@ -85,9 +122,26 @@ func main() {
 		check(err)
 		yOffseFloat, err := strconv.ParseFloat(yOffset, 64)
 		check(err)
-		pData.y = float64(whatContainers[containerName]) + yOffseFloat
+		pData.y = float64(whatContainersSorted[containerName]) + yOffseFloat
 		pData.isId, err = strconv.ParseBool(hasId)
 		check(err)
+
+		if yOffseFloat < -0.01 || yOffseFloat > 0.01 {
+			if requestMarkers[whatContainersSorted[containerName]].gotFirst == false && yOffseFloat > 0.01 {
+				requestMarkers[whatContainersSorted[containerName]].x = pData.x
+				requestMarkers[whatContainersSorted[containerName]].y = pData.y
+				requestMarkers[whatContainersSorted[containerName]].gotFirst = true
+			} else if requestMarkers[whatContainersSorted[containerName]].gotFirst == true && yOffseFloat < -0.01 {
+				requestMarkers[whatContainersSorted[containerName]].gotFirst = false
+				// build segment info and add to list
+				var seg segment
+				seg.startX = requestMarkers[whatContainersSorted[containerName]].x
+				seg.startY = requestMarkers[whatContainersSorted[containerName]].y + (yOffseFloat / 2)
+				seg.endX = pData.x
+				seg.endY = pData.y - (yOffseFloat / 2)
+				segmentList = append(segmentList, seg)
+			}
+		}
 
 		plotData = append(plotData, pData)
 	}
@@ -97,19 +151,46 @@ func main() {
 	diffsPlot, totalEvents, nofIds, err := plotAll(plotData)
 	check(err)
 
-	diffsPlot.Title.Text = fmt.Sprintf("Events for containers - timeline, spanning: %d events - of which: %d have import job Ids", totalEvents, nofIds)
+	for _, seg := range segmentList {
+		points := make(plotter.XYs, 5)
+
+		// build segment shape ... !!! change to a bounding box with y's 0.1 higher and lower
+		points[0].X = seg.startX
+		points[0].Y = seg.startY
+
+		points[1].X = seg.startX // draw down left side of box
+		points[1].Y = seg.endY
+
+		points[2].X = seg.endX // draw bottom of box
+		points[2].Y = seg.endY
+
+		points[3].X = seg.endX // draw right side of box
+		points[3].Y = seg.startY
+
+		points[4].X = seg.startX // close top side of box
+		points[4].Y = seg.startY
+
+		// add shape in 'blue' colour
+		l, err := plotter.NewLine(points)
+		check(err)
+		l.Color = plotutil.Color(2)
+		l.Dashes = plotutil.Dashes(0)
+		diffsPlot.Add(l)
+	}
+
+	diffsPlot.Title.Text = fmt.Sprintf("Events for containers - timeline, spanning: %d events - of which: %d have import job Ids\nBlue boxes show events wrapped by middle ware http request (received & completed)", totalEvents, nofIds)
 	diffsPlot.X.Label.Text = "time in seconds"
 	diffsPlot.Y.Label.Text = "service / container name"
 
-	cNames := make([]string, len(whatContainers)+1)
+	cNamesYaxis := make([]string, len(whatContainersSorted)+1)
 
-	for k, v := range whatContainers {
+	for k, value_index := range whatContainersSorted {
 		k = strings.ReplaceAll(k, "/cantabular-import-journey_", "") // this might best be in code that created files
 		k = strings.ReplaceAll(k, "_1", "")                          // this might best be in code that created files
-		cNames[v] = k
+		cNamesYaxis[value_index] = k
 	}
 
-	diffsPlot.NominalY(cNames...)
+	diffsPlot.NominalY(cNamesYaxis...)
 
 	err = diffsPlot.Save(100*vg.Centimeter, 20*vg.Centimeter, plotOutputFileName)
 	check(err)
