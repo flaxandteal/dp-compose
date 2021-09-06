@@ -1,8 +1,8 @@
 version: '3.3'
 services:
-    dp-cantabular-csv-exporter:
+    dp-download-service:
         build:
-            context: ../../dp-cantabular-csv-exporter
+            context: ../../dp-download-service
             dockerfile: Dockerfile.local
         command:
             - reflex
@@ -11,22 +11,20 @@ services:
             - -c
             - ./reflex
         volumes:
-            - ../../dp-cantabular-csv-exporter:/dp-cantabular-csv-exporter
+            - ../../dp-download-service:/dp-download-service
         depends_on:
             - kafka
             - minio
         ports:
-            - 26300:26300
+            - 23600:23600
         environment:
-            BIND_ADDR:              ":26300"
+            BIND_ADDR:              ":23600"
             KAFKA_ADDR:             "kafka:9092"
             DATASET_API_URL:        "http://dp-dataset-api:22000"
-            RECIPE_API_URL:         "http://dp-recipe-api:22300"
-            CANTABULAR_URL:         "http://dp-cantabular-server:8491"
-            CANTABULAR_EXT_API_URL: "http://dp-cantabular-api-ext:8492"
             LOCAL_OBJECT_STORE:     "http://minio:9000"
+            ZEBEDEE_URL:            "http://zebedee:8082"
             MINIO_ACCESS_KEY:       "minio-access-key"
             MINIO_SECRET_KEY:       "minio-secret-key"
             SERVICE_AUTH_TOKEN:     $SERVICE_AUTH_TOKEN
             ENCRYPTION_DISABLED:    "true"
-            UPLOAD_BUCKET_NAME:     "dp-cantabular-csv-exporter"
+            BUCKET_NAME:            "dp-cantabular-csv-exporter"
