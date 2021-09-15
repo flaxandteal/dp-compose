@@ -15,6 +15,7 @@ services:
         depends_on:
             - kafka
             - minio
+            - mongodb
         ports:
             - 23600:23600
         environment:
