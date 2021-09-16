@@ -111,6 +111,10 @@ the service will need. These include those used when you would usually run the s
 `ENABLE_PRIVATE_ENDPOINTS=true`) and others that would usually use the service's default.
 Most commonly these include URLs to other services which will need to be set to the
 `http://service-name:port` from `http://localhost:port`.
+- Add service yml file to relavent `.env` files in `dp-compose/cantabular-import`. The default
+`.env` is for the full journey including front-end services, `env.backend` for back-end only
+services and new `.env` files can be created for different journeys with different collections
+of services as needed.
 - If there are any external services (e.g. MongoDB, Kafka) the service depends on that are
 not already included in the compose cluster add them to `deps.yml`. Be cognizant of which
 services the new service is dependant on and add under the `depends_on` clause.

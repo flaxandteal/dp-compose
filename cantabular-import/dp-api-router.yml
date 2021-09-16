@@ -1,0 +1,25 @@
+version: '3.3'
+services:
+    dp-api-router:
+        build:
+            context: ../../dp-api-router
+            dockerfile: Dockerfile.local
+        command:
+            - reflex
+            - -d
+            - none
+            - -c
+            - ./reflex
+        volumes:
+            - ../../dp-api-router:/dp-api-router
+        depends_on:
+            - kafka
+            - mongodb
+        ports:
+            - 23200:23200
+        environment:
+            MONGODB_BIND_ADDR:        "mongodb:27017"
+            KAFKA_ADDR:               "kafka:9092"
+            ENABLE_PRIVATE_ENDPOINTS: "true"
+            ZEBEDEE_URL:              "http://zebedee:8082"
+            SERVICE_AUTH_TOKEN:       $SERVICE_AUTH_TOKEN
