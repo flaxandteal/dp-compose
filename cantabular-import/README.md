@@ -91,3 +91,28 @@ Files:
 are used by `cantabular-import/helpers/test-compose/test-compose.go` and are nedded at this level for it to bring up the cantabular containers.
 
 ------------------
+
+# Adding New Services To Journey #
+
+If you need to add a new service to the journey you need to take the following steps.
+
+For a Golang service:
+
+- Add `Dockerfile.local` and `reflex` file to service root directory. Copy from existing
+examples and change instances of the service name in Dockerfile.local and the command
+to be executed. This usually either `make debug` or `make debug-run`. Check the Makefile
+and use the make target that runs the service using `go run` (as opposed to building an
+executable and then running it). If there isn't such a target you will need to add it.
+Again, use existing examples as a guide.
+- Add `/go` to .`dockerignore` for service.
+- Add `dp-my-service-name.yml` to `dp-compose/cantabular-import` directory. Follow existing
+examples as a guide. Be sure to use the correct service name, port and environment variables
+the service will need. These include those used when you would usually run the service (e.g.
+`ENABLE_PRIVATE_ENDPOINTS=true`) and others that would usually use the service's default.
+Most commonly these include URLs to other services which will need to be set to the
+`http://service-name:port` from `http://localhost:port`.
+- If there are any external services (e.g. MongoDB, Kafka) the service depends on that are
+not already included in the compose cluster add them to `deps.yml`. Be cognizant of which
+services the new service is dependant on and add under the `depends_on` clause.
+- Test the new service runs as expected and can be reached by other services and you're
+good to go!
