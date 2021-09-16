@@ -1,0 +1,15 @@
+version: '3.3'
+services:
+    sixteens:
+        build:
+            context: ../../sixteens
+            dockerfile: Dockerfile.local
+        command:
+            - ./run.sh
+        volumes:
+            - ../../sixteens:/sixteens
+        depends_on:
+            - kafka
+            - mongodb
+        ports:
+            - 9000:9000

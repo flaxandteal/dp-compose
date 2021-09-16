@@ -1,0 +1,25 @@
+version: '3.3'
+services:
+    florence:
+        build:
+            context: ../../florence
+            dockerfile: Dockerfile.local
+        command:
+            - reflex
+            - -d
+            - none
+            - -c
+            - ./reflex
+        volumes:
+            - ../../florence:/florence
+        depends_on:
+            - kafka
+            - mongodb
+        ports:
+            - 8081:8081
+        environment:
+            ENCRYPTION_DISABLED:    "true"
+            ENABLE_DATASET_IMPORT:  "true"
+            API_ROUTER_URL:         "http://dp-api-router:23200"
+            ROUTER_URL:             "http://dp-frontend-router:20000"
+            DATASET_CONTROLLER_URL: "http://dp-dataset-api:24000"

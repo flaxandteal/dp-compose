@@ -1,0 +1,24 @@
+version: '3.3'
+services:
+    dp-frontend-dataset-controller:
+        build:
+            context: ../../dp-frontend-dataset-controller
+            dockerfile: Dockerfile.local
+        command:
+            - reflex
+            - -d
+            - none
+            - -c
+            - ./reflex
+        volumes:
+            - ../../dp-frontend-dataset-controller:/dp-frontend-dataset-controller
+        depends_on:
+            - kafka
+            - mongodb
+        ports:
+            - 20200:20200
+        environment:
+            BIND_ADDR:                ":20200"
+            DOWNLOAD_SERVICE_URL:     "http://dp-download-service:23600"
+            API_ROUTER_URL:           "http://dp-api-router:23200"
+            ENABLE_CENSUS_PAGES:      "true"

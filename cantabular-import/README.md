@@ -21,6 +21,8 @@ as `dp-compose` (this repository):
 
 `dp-recipe-api`
 
+`florence`
+
 `zebedee`
 
 Expects you to have environment variables `zebedee_root` and 
