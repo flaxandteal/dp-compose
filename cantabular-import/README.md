@@ -21,6 +21,14 @@ as `dp-compose` (this repository):
 
 `dp-recipe-api`
 
+`dp-api-router`
+
+`dp-frontend-router`
+
+`dp-publishing-dataset-controller`
+
+`dp-frontend-dataset-controller`
+
 `florence`
 
 `zebedee`
@@ -35,13 +43,19 @@ Also make sure you have setup the `dp-cantabular-server` and
 `dp-cantabular-api-ext` services by running `make setup` in each of their
 root directories.
 
-For the full-stack journey you will need to run `make assets` in dp-frontend-router.
+For the full-stack journey:
+
+ You will need to run `make assets` in dp-frontend-router.
 Assets generated using the  `-debug` flag won't work.
 
-Also for the full stack-journey you will also need to make sure you have some
-databases into your Mongo collections. The easiest way to do this is to use the
+You will also need to make sure you have some
+datasets into your Mongo collections. The easiest way to do this is to use the
 import script in `dp-dataset-api`. Currently it can be found on it's own branch
 `feature/import-script`.
+
+For Florence to work you will need to have built npm modules and production assets.
+You can do this by running `make node-modules` followed by `make generate-go-prod`.
+This only needs to be done once (or until you generate debug assets). 
 
 # Bring Up Cantabular Import Services #
 
