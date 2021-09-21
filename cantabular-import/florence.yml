@@ -12,9 +12,6 @@ services:
             - ./reflex
         volumes:
             - ../../florence:/florence
-        depends_on:
-            - kafka
-            - mongodb
         ports:
             - 8081:8081
         environment:
@@ -22,4 +19,4 @@ services:
             ENABLE_DATASET_IMPORT:  "true"
             API_ROUTER_URL:         "http://dp-api-router:23200"
             ROUTER_URL:             "http://dp-frontend-router:20000"
-            DATASET_CONTROLLER_URL: "http://dp-dataset-api:24000"
+            DATASET_CONTROLLER_URL: "http://dp-publishing-dataset-controller:24000"

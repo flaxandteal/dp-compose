@@ -22,4 +22,7 @@ services:
             KAFKA_ADDR:               "kafka:9092"
             ENABLE_PRIVATE_ENDPOINTS: "true"
             ZEBEDEE_URL:              "http://zebedee:8082"
+            RECIPE_API_URL:           "http://dp-recipe-api:22300"
+            IMPORT_API_URL:           "http://dp-import-api:21800"
+            DATASET_API_URL:          "http://dp-dataset-api:22000"
             SERVICE_AUTH_TOKEN:       $SERVICE_AUTH_TOKEN

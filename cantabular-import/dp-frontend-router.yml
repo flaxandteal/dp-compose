@@ -1,0 +1,22 @@
+version: '3.3'
+services:
+    dp-frontend-router:
+        build:
+            context: ../../dp-frontend-router
+            dockerfile: Dockerfile.local
+        command:
+            - reflex
+            - -d
+            - none
+            - -c
+            - ./reflex
+        volumes:
+            - ../../dp-frontend-router:/dp-frontend-router
+        ports:
+            - 20000:20000
+        privileged: true
+        environment:
+            DATASET_CONTROLLER_URL: "http://dp-frontend-dataset-controller:20200"
+            API_ROUTER_URL:         "http://dp-api-router:23200/v1"
+            DATASET_ROUTES_ENABLED: "true"
+            ASSETS_DIRECTORY: "../../dp-frontend-router/assets"

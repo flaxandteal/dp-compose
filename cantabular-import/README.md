@@ -35,6 +35,14 @@ Also make sure you have setup the `dp-cantabular-server` and
 `dp-cantabular-api-ext` services by running `make setup` in each of their
 root directories.
 
+For the full-stack journey you will need to run `make assets` in dp-frontend-router.
+Assets generated using the  `-debug` flag won't work.
+
+Also for the full stack-journey you will also need to make sure you have some
+databases into your Mongo collections. The easiest way to do this is to use the
+import script in `dp-dataset-api`. Currently it can be found on it's own branch
+`feature/import-script`.
+
 # Bring Up Cantabular Import Services #
 
 `make start`
@@ -110,7 +118,8 @@ examples as a guide. Be sure to use the correct service name, port and environme
 the service will need. These include those used when you would usually run the service (e.g.
 `ENABLE_PRIVATE_ENDPOINTS=true`) and others that would usually use the service's default.
 Most commonly these include URLs to other services which will need to be set to the
-`http://service-name:port` from `http://localhost:port`.
+`http://service-name:port` from `http://localhost:port`. Also sometimes the `BIND_ADDR` will
+default to `http://localhost:port` which will need to be set to simply `:port`.
 - Add service yml file to relavent `.env` files in `dp-compose/cantabular-import`. The default
 `.env` is for the full journey including front-end services, `env.backend` for back-end only
 services and new `.env` files can be created for different journeys with different collections
