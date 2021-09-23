@@ -51,11 +51,11 @@ func main() {
 	for plotDataScan.Scan() {
 		fields := strings.Fields(plotDataScan.Text())
 
-		if len(fields) != 4 {
-			fmt.Printf("error in plot.txt file. expected 'Y offset', 'service name', 'relative time' and 'is ID flag' in line, but got %v\n", fields)
+		if len(fields) != 5 {
+			fmt.Printf("error in plot.txt file. expected 'kafka indication', 'Y offset', 'service name', 'relative time' and 'is ID flag' in line, but got %v\n", fields)
 			os.Exit(1)
 		}
-		containerName := fields[1]
+		containerName := fields[2]
 
 		if _, ok := whatContainers[containerName]; !ok {
 			fmt.Printf("Name: %s, index: %d\n", containerName, index)
@@ -93,13 +93,22 @@ func main() {
 	}
 	requestMarkers := make([]request, len(cNames)+yOffset)
 
-	type segment struct {
+	type apiWrapper struct {
 		startX float64
 		startY float64
 		endX   float64
 		endY   float64
 	}
-	var segmentList []segment
+	var apiList []apiWrapper
+
+	type kafkaCoords struct {
+		x float64
+		y float64
+	}
+
+	var kafkaConsumeList []kafkaCoords
+	var kafkaProduceList []kafkaCoords
+	var kafkaMultipleProduceList []kafkaCoords
 
 	var plotData []plotXY
 
@@ -111,10 +120,11 @@ func main() {
 	for scanner.Scan() {
 		fields := strings.Fields(scanner.Text())
 
-		yOffset := fields[0]
-		containerName := fields[1]
-		offset := fields[2]
-		hasId := fields[3]
+		kafkaIndicator := fields[0]
+		yOffset := fields[1]
+		containerName := fields[2]
+		offset := fields[3]
+		hasId := fields[4]
 
 		var pData plotXY
 
@@ -133,14 +143,35 @@ func main() {
 				requestMarkers[whatContainersSorted[containerName]].gotFirst = true
 			} else if requestMarkers[whatContainersSorted[containerName]].gotFirst == true && yOffseFloat < -0.01 {
 				requestMarkers[whatContainersSorted[containerName]].gotFirst = false
-				// build segment info and add to list
-				var seg segment
-				seg.startX = requestMarkers[whatContainersSorted[containerName]].x
-				seg.startY = requestMarkers[whatContainersSorted[containerName]].y + (yOffseFloat / 2)
-				seg.endX = pData.x
-				seg.endY = pData.y - (yOffseFloat / 2)
-				segmentList = append(segmentList, seg)
+				// build apiWrapper info and add to list
+				var wrap apiWrapper
+				wrap.startX = requestMarkers[whatContainersSorted[containerName]].x
+				wrap.startY = requestMarkers[whatContainersSorted[containerName]].y + (yOffseFloat / 2)
+				wrap.endX = pData.x
+				wrap.endY = pData.y - (yOffseFloat / 2)
+				apiList = append(apiList, wrap)
 			}
+		}
+
+		if kafkaIndicator == "k=c" {
+			var kc kafkaCoords
+			kc.x = pData.x
+			kc.y = pData.y
+			kafkaConsumeList = append(kafkaConsumeList, kc)
+		}
+
+		if kafkaIndicator == "k=p" {
+			var kc kafkaCoords
+			kc.x = pData.x
+			kc.y = pData.y
+			kafkaProduceList = append(kafkaProduceList, kc)
+		}
+
+		if kafkaIndicator == "k=mp" {
+			var kc kafkaCoords
+			kc.x = pData.x
+			kc.y = pData.y
+			kafkaMultipleProduceList = append(kafkaMultipleProduceList, kc)
 		}
 
 		plotData = append(plotData, pData)
@@ -151,24 +182,24 @@ func main() {
 	diffsPlot, totalEvents, nofIds, err := plotAll(plotData)
 	check(err)
 
-	for _, seg := range segmentList {
+	for _, wrap := range apiList {
 		points := make(plotter.XYs, 5)
 
-		// build segment shape ... !!! change to a bounding box with y's 0.1 higher and lower
-		points[0].X = seg.startX
-		points[0].Y = seg.startY
+		// build api bounding box
+		points[0].X = wrap.startX
+		points[0].Y = wrap.startY
 
-		points[1].X = seg.startX // draw down left side of box
-		points[1].Y = seg.endY
+		points[1].X = wrap.startX // draw down left side of box
+		points[1].Y = wrap.endY
 
-		points[2].X = seg.endX // draw bottom of box
-		points[2].Y = seg.endY
+		points[2].X = wrap.endX // draw bottom of box
+		points[2].Y = wrap.endY
 
-		points[3].X = seg.endX // draw right side of box
-		points[3].Y = seg.startY
+		points[3].X = wrap.endX // draw right side of box
+		points[3].Y = wrap.startY
 
-		points[4].X = seg.startX // close top side of box
-		points[4].Y = seg.startY
+		points[4].X = wrap.startX // close top side of box
+		points[4].Y = wrap.startY
 
 		// add shape in 'blue' colour
 		l, err := plotter.NewLine(points)
@@ -178,7 +209,85 @@ func main() {
 		diffsPlot.Add(l)
 	}
 
-	diffsPlot.Title.Text = fmt.Sprintf("Events for containers - timeline, spanning: %d events - of which: %d have import job Ids\nBlue boxes show events wrapped by middle ware http request (received & completed)", totalEvents, nofIds)
+	for _, kc := range kafkaConsumeList {
+		points := make(plotter.XYs, 4)
+
+		// build kafka consume point down triangle
+		points[0].X = kc.x
+		points[0].Y = kc.y
+
+		points[1].X = kc.x - 0.003
+		points[1].Y = kc.y + 0.25
+
+		points[2].X = kc.x + 0.003
+		points[2].Y = kc.y + 0.25
+
+		points[3].X = kc.x
+		points[3].Y = kc.y
+
+		// add shape in 'purple' colour
+		l, err := plotter.NewLine(points)
+		check(err)
+		l.Color = plotutil.Color(4)
+		l.Dashes = plotutil.Dashes(0)
+		diffsPlot.Add(l)
+	}
+
+	for _, kc := range kafkaProduceList {
+		points := make(plotter.XYs, 4)
+
+		// build kafka produce point up triangle
+		points[0].X = kc.x - 0.003
+		points[0].Y = kc.y
+
+		points[1].X = kc.x + 0.003
+		points[1].Y = kc.y
+
+		points[2].X = kc.x
+		points[2].Y = kc.y + 0.5
+
+		points[3].X = kc.x - 0.003
+		points[3].Y = kc.y
+
+		// add shape in 'orange' colour
+		l, err := plotter.NewLine(points)
+		check(err)
+		l.Color = plotutil.Color(3)
+		l.Dashes = plotutil.Dashes(0)
+		diffsPlot.Add(l)
+	}
+
+	for _, kc := range kafkaMultipleProduceList {
+		points := make(plotter.XYs, 6)
+
+		// build kafka multiple produce point up triangle within triangle
+		points[0].X = kc.x - 0.003
+		points[0].Y = kc.y - 0.6
+
+		points[1].X = kc.x + 0.003
+		points[1].Y = kc.y - 0.6
+
+		points[2].X = kc.x
+		points[2].Y = kc.y
+
+		points[3].X = kc.x - 0.003
+		points[3].Y = kc.y - 0.6
+
+		points[4].X = kc.x
+		points[4].Y = kc.y - 0.35
+
+		points[5].X = kc.x + 0.003
+		points[5].Y = kc.y - 0.6
+
+		// add shape in 'orange' colour
+		l, err := plotter.NewLine(points)
+		check(err)
+		l.Color = plotutil.Color(3)
+		l.Dashes = plotutil.Dashes(0)
+		diffsPlot.Add(l)
+	}
+
+	diffsPlot.Title.Text = fmt.Sprintf("Events for containers - timeline, spanning: %d events - of which: %d have import job Ids\nBlue boxes show events wrapped by middle ware http request (received & completed)\nPurple down triangle: kafka consume event, Orange up triangle: kafka produce event, Orange up triangle within orange up triangle: kafka produce multiple events.", totalEvents, nofIds)
 	diffsPlot.X.Label.Text = "time in seconds"
 	diffsPlot.Y.Label.Text = "service / container name"
 

@@ -214,6 +214,7 @@ func main() {
 								if f[2] == "}" {
 									eventStr += "}"
 
+									// a space on the end of the strings is the field delimeter
 									offset := "0.0 " // an offset for Y axis that is prefixed to line indicating event is a wrapper and which it is
 									if strings.Contains(eventStr, "http request received") {
 										wrapperCounts++
@@ -224,14 +225,28 @@ func main() {
 										offset = "-0.3 "
 									}
 
+									kafkaType := "k=n "
+									if strings.Contains(eventStr, "event received") {
+										// got a consume message
+										kafkaType = "k=c "
+									}
+									if strings.Contains(eventStr, "producing new cantabular dataset instance started event") {
+										// got a produce message
+										kafkaType = "k=p "
+									}
+									if strings.Contains(eventStr, "Triggering dimension options import") {
+										// got a produce message that is about to produce 'multiple' messages
+										kafkaType = "k=mp "
+									}
+
 									// examine event and do appropriate log: just line showing id or opening curly bracket
 									if idLine != "" {
-										linesFound = append(linesFound, offset+idLine)
+										linesFound = append(linesFound, kafkaType+offset+idLine)
 										// An id may appear in an event more than once, so this counter
 										// adds up just the events that have one or more id's in them
 										eventsWithIds++
 									} else {
-										linesFound = append(linesFound, offset+strLine)
+										linesFound = append(linesFound, kafkaType+offset+strLine)
 									}
 									break
 								}
@@ -278,7 +293,7 @@ func main() {
 			// extract and sort by the timestamp for each line
 			fieldsi := strings.Fields(linesFound[i])
 			fieldsj := strings.Fields(linesFound[j])
-			return fieldsi[2] < fieldsj[2]
+			return fieldsi[3] < fieldsj[3]
 		})
 		gotFirstTime := false
 		maxLastTime := ""
@@ -289,6 +304,7 @@ func main() {
 		var serviceNames []string
 		var eventHasId []bool
 		var wrappedOffset []string
+		var kafkaIndication []string
 		var firstServiceName string
 		var total time.Duration
 
@@ -301,9 +317,9 @@ func main() {
 					fmt.Printf("error in maxLastTime: %v\n", ferr)
 				}
 
-				l, lerr := time.Parse(time.RFC3339, fields[2])
+				l, lerr := time.Parse(time.RFC3339, fields[3])
 				if lerr != nil {
-					fmt.Printf("error in fields[2]: %v\n", lerr)
+					fmt.Printf("error in fields[3]: %v\n", lerr)
 				}
 
 				if ferr == nil && lerr == nil {
@@ -315,10 +331,10 @@ func main() {
 					diffsFound = append(diffsFound, diffNanoseconds)
 					if diffNanoseconds > maxDiff {
 						maxDiff = diffNanoseconds
-						maxDiffTime = fields[2]
+						maxDiffTime = fields[3]
 					}
-					maxLastTime = fields[2]
-					if fields[3] == "{" {
+					maxLastTime = fields[3]
+					if fields[4] == "{" {
 						eventHasId = append(eventHasId, false)
 					} else {
 						eventHasId = append(eventHasId, true)
@@ -326,35 +342,37 @@ func main() {
 					printAndSave(resultFile, fmt.Sprintf("current: %.9f seconds", total.Seconds()))
 					printAndSave(resultFile, fmt.Sprintf("diff: %.9f seconds", diffNanoseconds.Seconds()))
 
-					serviceNames = append(serviceNames, fields[1])
-					wrappedOffset = append(wrappedOffset, fields[0])
+					serviceNames = append(serviceNames, fields[2])
+					wrappedOffset = append(wrappedOffset, fields[1])
+					kafkaIndication = append(kafkaIndication, fields[0])
 				}
 			} else {
 				gotFirstTime = true
-				maxLastTime = fields[2]
-				firstServiceName = fields[1]
+				maxLastTime = fields[3]
+				firstServiceName = fields[2]
 			}
 
-			f1 := fields[1]
+			f1 := fields[2]
 			for len(f1) < maxFirstFieldLength {
 				// pad out the first field so that all timestamps are aligned
 				f1 += " "
 			}
 			f1 += " "
-			f1 += fields[2]
-			f1 += line[len(fields[0])+1+len(fields[1])+1+len(fields[2]):]
-			f1 = fields[0] + " " + f1 // prefix the wrapped offset value
+			f1 += fields[3]
+			f1 += line[len(fields[1])+1+len(fields[2])+1+len(fields[3]):]
+			f1 = fields[1] + " " + f1 // prefix the wrapped offset value
+			f1 = fields[0] + " " + f1 // prefix the kafka consume indication
 			printAndSave(resultFile, fmt.Sprintf("%s", f1))
 		}
 
 		if len(serviceNames) > 0 {
 			// save data for plotting
 			// The first service name is effectively time '0'
-			printAndSave(plotDataFile, fmt.Sprintf("0.0 %s 0.0000 true", firstServiceName))
+			printAndSave(plotDataFile, fmt.Sprintf("k=n 0.0 %s 0.0000 true", firstServiceName))
 			var timeOffest time.Duration
 			for i := 0; i < len(diffsFound); i++ {
 				timeOffest += diffsFound[i]
-				printAndSave(plotDataFile, fmt.Sprintf("%s %s %.4f %v", wrappedOffset[i], serviceNames[i], timeOffest.Seconds(), eventHasId[i]))
+				printAndSave(plotDataFile, fmt.Sprintf("%s %s %s %.4f %v", kafkaIndication[i], wrappedOffset[i], serviceNames[i], timeOffest.Seconds(), eventHasId[i]))
 			}
 		}
 
