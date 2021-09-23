@@ -37,7 +37,9 @@ Expects you to have environment variables `zebedee_root` and
 `SERVICE_AUTH_TOKEN` set in your local environment
 
 You will need to run the `import-recipes` script in `dp-recipe-api` when
-first building the containers before running an import.
+first building the containers before running an import. Alternatively there 
+is an `init-db.sh` script in this repositories `helpers` directory that runs 
+both the recipes and datasets import scripts.
 
 Also make sure you have setup the `dp-cantabular-server` and 
 `dp-cantabular-api-ext` services by running `make setup` in each of their
@@ -51,7 +53,9 @@ Assets generated using the  `-debug` flag won't work.
 You will also need to make sure you have some
 datasets into your Mongo collections. The easiest way to do this is to use the
 import script in `dp-dataset-api`. Currently it can be found on it's own branch
-`feature/import-script`.
+`feature/import-script`. Alternatively there is an `init-db.sh` script in this
+repositories `helpers` directory that runs both the recipes and datasets import
+scripts.
 
 For Florence to work you will need to have built npm modules and production assets.
 You can do this by running `make node-modules` followed by `make generate-go-prod`.
