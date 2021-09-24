@@ -231,7 +231,8 @@ func main() {
 										kafkaType = "k=c "
 									}
 									if strings.Contains(eventStr, "producing new cantabular dataset instance started event") ||
-										strings.Contains(eventStr, "all dimensions in instance have been completely processed and kafka message has been sent") {
+										strings.Contains(eventStr, "all dimensions in instance have been completely processed and kafka message has been sent") ||
+										strings.Contains(eventStr, "producing common output created event") {
 										// this is a produce message
 										kafkaType = "k=p "
 									}
