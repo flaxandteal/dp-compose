@@ -28,10 +28,21 @@ down:
 clean:
 	@echo "stopping and removing containers, associated volumes and networks"
 	docker-compose down -v
+
+.PHONY: full-clean
+full-clean: clean
+	@echo recreating zebedee content
+	cd helpers && ./clean-zebedee.sh
+
 .PHONY: restart
 restart:
 	@echo "restarting containers"
 	docker-compose restart
+
+.PHONY: init-db
+init-db:
+	@echo "initialising Mongo with recipes and CPIH dataset"
+	cd helpers && ./init-db.sh
 
 # print logs for given service
 .PHONY: logs
