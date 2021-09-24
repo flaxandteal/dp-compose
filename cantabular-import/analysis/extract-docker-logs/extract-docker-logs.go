@@ -15,7 +15,7 @@ import (
 
 const (
 	dockerLogName      = "../tmp/all-container-logs.txt"
-	maxContainersInJob = 15 // adjust this to suite the number of continers docker-compose runs up for cantabular
+	maxContainersInJob = 20 // adjust this to suite the number of continers docker-compose runs up for cantabular
 )
 
 // It can take a while to read all container logs, so all logs are read into one file and then this file is

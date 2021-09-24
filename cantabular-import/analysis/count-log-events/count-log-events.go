@@ -225,17 +225,18 @@ func main() {
 										offset = "-0.3 "
 									}
 
-									kafkaType := "k=n "
+									kafkaType := "k=n " // initialise to indicate 'not' a kafka log event
 									if strings.Contains(eventStr, "event received") {
-										// got a consume message
+										// this is a consume message
 										kafkaType = "k=c "
 									}
-									if strings.Contains(eventStr, "producing new cantabular dataset instance started event") {
-										// got a produce message
+									if strings.Contains(eventStr, "producing new cantabular dataset instance started event") ||
+										strings.Contains(eventStr, "all dimensions in instance have been completely processed and kafka message has been sent") {
+										// this is a produce message
 										kafkaType = "k=p "
 									}
 									if strings.Contains(eventStr, "Triggering dimension options import") {
-										// got a produce message that is about to produce 'multiple' messages
+										// this is a produce message that is about to produce 'multiple' messages
 										kafkaType = "k=mp "
 									}
 
