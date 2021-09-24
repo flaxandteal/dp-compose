@@ -51,6 +51,7 @@ func main() {
 	token, err := getToken()
 	if err != nil {
 		fmt.Println("error reading input: ", err)
+		os.Exit(1)
 	}
 
 	// grab time before postJob to ensure we have 'time' before anything relevant to this
@@ -132,6 +133,10 @@ func getToken() (string, error) {
 
 	s := out.String()
 	s = strings.ReplaceAll(s, "\"", "")
+
+	if s == "Authentication failed." {
+		return s, fmt.Errorf("Failed getting token: Authentication failed")
+	}
 
 	fmt.Println("florence-token:", s)
 
