@@ -16,6 +16,7 @@ services:
             - kafka
         ports:
             - 26100:26100
+        restart: unless-stopped
         environment:
             BIND_ADDR:          ":26100"
             KAFKA_ADDR:         "kafka:9092"

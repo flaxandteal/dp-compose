@@ -9,5 +9,6 @@ services:
         volumes:
             - ../../dp-cantabular-api-ext/cantabular/data:/app/data
             - ../../dp-cantabular-api-ext/cantabular/scripts:/app/scripts
+        restart: unless-stopped
         environment:
             CANTABULAR_API_URL: "http://dp-cantabular-server:8491"

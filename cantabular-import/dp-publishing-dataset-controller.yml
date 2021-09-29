@@ -14,6 +14,7 @@ services:
             - ../../dp-publishing-dataset-controller:/dp-publishing-dataset-controller
         ports:
             - 24000:24000
+        restart: unless-stopped
         environment:
             BIND_ADDR:          ":24000"
             API_ROUTER_URL:     "http://dp-api-router:23200/v1"

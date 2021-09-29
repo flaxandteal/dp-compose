@@ -14,7 +14,7 @@ services:
             - ../../dp-frontend-router:/dp-frontend-router
         ports:
             - 20000:20000
-        privileged: true
+        restart: unless-stopped
         environment:
             DATASET_CONTROLLER_URL: "http://dp-frontend-dataset-controller:20200"
             API_ROUTER_URL:         "http://dp-api-router:23200/v1"

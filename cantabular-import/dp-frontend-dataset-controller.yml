@@ -14,6 +14,7 @@ services:
             - ../../dp-frontend-dataset-controller:/dp-frontend-dataset-controller
         ports:
             - 20200:20200
+        restart: unless-stopped
         environment:
             BIND_ADDR:                ":20200"
             DOWNLOAD_SERVICE_URL:     "http://dp-download-service:23600"

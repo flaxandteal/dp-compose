@@ -18,6 +18,7 @@ services:
             - zebedee
             - dp-frontend-router
             - dp-frontend-dataset-controller
+        restart: unless-stopped
         environment:
             ENCRYPTION_DISABLED:    "true"
             ENABLE_DATASET_IMPORT:  "true"
