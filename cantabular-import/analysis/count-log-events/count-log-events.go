@@ -129,18 +129,18 @@ func main() {
 	if ferr != nil {
 		fmt.Printf("error in firstTime: %v\n", ferr)
 	} else {
-		f = f.Add(-(time.Second / 1000) * 2)
+		f = f.Add(-(time.Second / 1000) * 100)
 		// (the specific format chosen is to be compatible with the ones in the docker logs, and thus makes
 		//  comparison of time's easily possible)
 		firstTime = f.Format("2006-01-02T15:04:05.000000000Z")
 	}
 
-	// and similarly for the lastTime
+	// and similarly for the lastTime, we add a bit
 	l, lerr := time.Parse(time.RFC3339, lastTime) // time format with nanoseconds
 	if lerr != nil {
 		fmt.Printf("error in firstTime: %v\n", lerr)
 	} else {
-		l = l.Add((time.Second / 1000) * 2)
+		l = l.Add((time.Second / 1000) * 200)
 		// (the specific format chosen is to be compatible with the ones in the docker logs, and thus makes
 		//  comparison of time's easily possible)
 		lastTime = l.Format("2006-01-02T15:04:05.000000000Z")
@@ -280,6 +280,13 @@ func main() {
 				if fields[2] == "}" {
 					// or the closing bracket
 					eventsCountEnds++
+				}
+			} else {
+				// handle non standard Sensible code log lines
+				if len(fields) > 4 {
+					strLine = fields[0] + " " + fields[1]
+					strLine += " {" // ditch the rest of sensible code / cantabular log line and replace with '{' to indicate no job id in line
+					linesFound = append(linesFound, "k-n 0.0 "+strLine)
 				}
 			}
 		}
