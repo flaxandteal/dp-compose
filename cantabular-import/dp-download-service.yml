@@ -18,6 +18,7 @@ services:
             - mongodb
         ports:
             - 23600:23600
+        restart: unless-stopped
         environment:
             BIND_ADDR:              ":23600"
             KAFKA_ADDR:             "kafka:9092"

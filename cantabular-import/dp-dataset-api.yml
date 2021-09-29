@@ -17,10 +17,12 @@ services:
             - mongodb
         ports:
             - 22000:22000
+        restart: unless-stopped
         environment:
             MONGODB_BIND_ADDR:             "mongodb:27017"
             KAFKA_ADDR:                    "kafka:9092"
             ENABLE_PRIVATE_ENDPOINTS:      "true"
+            ENABLE_DETACH_DATASET:         "true"
             ZEBEDEE_URL:                   "http://zebedee:8082"
             SERVICE_AUTH_TOKEN:            $SERVICE_AUTH_TOKEN
             DISABLE_GRAPH_DB_DEPENDENCY:   "true"

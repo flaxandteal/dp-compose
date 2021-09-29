@@ -17,6 +17,7 @@ services:
             - minio
         ports:
             - 26300:26300
+        restart: unless-stopped
         environment:
             BIND_ADDR:              ":26300"
             KAFKA_ADDR:             "kafka:9092"

@@ -1,8 +1,8 @@
 version: '3.3'
 services:
-    dp-recipe-api:
+    dp-api-router:
         build:
-            context: ../../dp-recipe-api
+            context: ../../dp-api-router
             dockerfile: Dockerfile.local
         command:
             - reflex
@@ -11,16 +11,19 @@ services:
             - -c
             - ./reflex
         volumes:
-            - ../../dp-recipe-api:/dp-recipe-api
+            - ../../dp-api-router:/dp-api-router
         depends_on:
             - kafka
             - mongodb
         ports:
-            - 22300:22300
+            - 23200:23200
         restart: unless-stopped
         environment:
             MONGODB_BIND_ADDR:        "mongodb:27017"
             KAFKA_ADDR:               "kafka:9092"
             ENABLE_PRIVATE_ENDPOINTS: "true"
             ZEBEDEE_URL:              "http://zebedee:8082"
+            RECIPE_API_URL:           "http://dp-recipe-api:22300"
+            IMPORT_API_URL:           "http://dp-import-api:21800"
+            DATASET_API_URL:          "http://dp-dataset-api:22000"
             SERVICE_AUTH_TOKEN:       $SERVICE_AUTH_TOKEN
