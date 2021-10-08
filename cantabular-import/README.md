@@ -58,6 +58,9 @@ Assets generated using the  `-debug` flag won't work.
 
 You will also need to run `make generate-prod` in the dp-frontend-dataset-controller to generate the asset files.
 
+For dp-frontend-dataset-controller you will need to generate assets using
+`make generate-prod`
+
 You will also need to make sure you have some
 datasets into your Mongo collections. The easiest way to do this is to use the
 import script in `dp-dataset-api`. Currently it can be found on it's own branch
