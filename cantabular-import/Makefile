@@ -1,7 +1,14 @@
+UID := $(shell id -u)
+GID := $(shell id -g)
+
+export UID
+export GID
+
 # start full journey
 .PHONY: start
 start:
-	UID=$(id -u) GID=$(id -g) docker-compose up
+	@echo "starting containers"
+	docker-compose up
 
 # Start full journey with super user privileges
 .PHONY: start-privileged
@@ -12,13 +19,13 @@ start-privileged:
 .PHONY: start-detached
 start-detached:
 	@echo "starting containers in background"
-	UID=$(id -u) GID=$(id -g)  docker-compose up -d
+	docker-compose up -d
 
 # start only backend services
 .PHONY: start-backend
 start-backend:
 	@echo "starting back-end containers"
-	UID=$(id -u) GID=$(id -g)  docker-compose --env-file .env.backend up
+	docker-compose --env-file .env.backend up
 
 .PHONY: stop
 stop:

@@ -36,4 +36,3 @@ services:
             ENABLE_CENTRALISED_KEYRING: "false"
             KEYRING_SECRET_KEY:         "38c03PzhNuSrYV8J0537XQ=="
             KEYRING_INIT_VECTOR:        "RkL9MmjfRcPB86alO82gHQ=="
-

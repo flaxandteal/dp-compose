@@ -38,7 +38,7 @@ Expects you to have environment variables `zebedee_root` and
 
 To use the `start-import` helpers scripts or analysis tools you will need
 to set an environment variable called `FLORENCE_PASSWORD` to your local
-florence login password for `florence@magicroundabout.gov.uk`. Alternatively
+florence login password for `florence@magicroundabout.ons.gov.uk`. Alternatively
 you can directly edit `helpers/florence-token` to hard code your username
 and password.
 
