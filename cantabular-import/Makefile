@@ -1,24 +1,24 @@
 # start full journey
 .PHONY: start
 start:
-	docker-compose up
+	UID=$(id -u) GID=$(id -g) docker-compose up
 
 # Start full journey with super user privileges
 .PHONY: start-privileged
 start-privileged:
-	sudo -E docker-compose up
+	sudo docker-compose up
 
 # start full journey (containers in background)
 .PHONY: start-detached
 start-detached:
 	@echo "starting containers in background"
-	docker-compose up -d
+	UID=$(id -u) GID=$(id -g)  docker-compose up -d
 
 # start only backend services
 .PHONY: start-backend
 start-backend:
 	@echo "starting back-end containers"
-	docker-compose --env-file .env.backend up
+	UID=$(id -u) GID=$(id -g)  docker-compose --env-file .env.backend up
 
 .PHONY: stop
 stop:
