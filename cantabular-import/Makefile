@@ -1,18 +1,24 @@
 # start full journey
 start:
-	sudo -E docker-compose up
+	@echo "starting containers"
+	docker-compose up
+
+# Start full journey with super user privileges
+.PHONY: start-privileged
+start-privileged:
+	sudo docker-compose up
 
 # start full journey (containers in background)
 .PHONY: start-detached
 start-detached:
 	@echo "starting containers in background"
-	sudo -E docker-compose up -d
+	docker-compose up -d
 
 # start only backend services
 .PHONY: start-backend
 start-backend:
-	@echo "starting containers"
-	sudo -E docker-compose --env-file .env.backend up
+	@echo "starting back-end containers"
+	docker-compose --env-file .env.backend up
 
 .PHONY: stop
 stop:

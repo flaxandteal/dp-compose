@@ -37,3 +37,4 @@ services:
             db_audit_url:            "jdbc:postgresql://localhost:5432/audit"
             db_audit_username:       "postgres"
             db_audit_password:       "mysecretpassword"
+            publish_url:             "http://the-train:8084"
