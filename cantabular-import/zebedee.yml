@@ -14,8 +14,8 @@ services:
             - $zebedee_root:/zebedee_root
         restart: unless-stopped
         environment:
-            DATASET_API_URL:           "http://dp-dataset-api:22000"
-            DATASET_API_AUTH_TOKEN:    "FD0108EA-825D-411C-9B1D-41EF7727F465"
+            DATASET_API_URL:            "http://dp-dataset-api:22000"
+            DATASET_API_AUTH_TOKEN:     "FD0108EA-825D-411C-9B1D-41EF7727F465"
             ENABLE_PERMISSIONS_AUTH:    "true"
             ENABLE_DATASET_IMPORT:      "true"
             FORMAT_LOGGING:             "true"
@@ -31,6 +31,7 @@ services:
             db_audit_url:               "jdbc:postgresql://localhost:5432/audit"
             db_audit_username:          "postgres"
             db_audit_password:          "mysecretpassword"
+            publish_url:                "http://the-train:8084"
             ENABLE_CENTRALISED_KEYRING: "false"
             KEYRING_SECRET_KEY:         "38c03PzhNuSrYV8J0537XQ=="
             KEYRING_INIT_VECTOR:        "RkL9MmjfRcPB86alO82gHQ=="
