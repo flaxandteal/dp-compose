@@ -48,7 +48,9 @@ root directories.
 For the full-stack journey:
 
  You will need to run `make assets` in dp-frontend-router.
-Assets generated using the  `-debug` flag won't work.
+Assets generated using the  `-debug` flag won't work. 
+
+You will also need to run `make generate-prod` in the dp-frontend-dataset-controller to generate the asset files.
 
 You will also need to make sure you have some
 datasets into your Mongo collections. The easiest way to do this is to use the

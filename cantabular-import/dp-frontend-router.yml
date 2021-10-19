@@ -16,7 +16,8 @@ services:
             - 20000:20000
         restart: unless-stopped
         environment:
+            BABBAGE_URL:            "http://babbage:8080"
             DATASET_CONTROLLER_URL: "http://dp-frontend-dataset-controller:20200"
             API_ROUTER_URL:         "http://dp-api-router:23200/v1"
             DATASET_ROUTES_ENABLED: "true"
-            ASSETS_DIRECTORY: "../../dp-frontend-router/assets"
+            ASSETS_DIRECTORY:       "../../dp-frontend-router/assets"

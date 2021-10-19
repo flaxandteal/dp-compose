@@ -13,7 +13,7 @@ services:
         volumes:
             - ../../dp-frontend-dataset-controller:/dp-frontend-dataset-controller
         ports:
-            - 20200:20200
+            - 20200
         restart: unless-stopped
         environment:
             BIND_ADDR:                ":20200"
