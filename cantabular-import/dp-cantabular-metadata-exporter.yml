@@ -1,0 +1,30 @@
+version: '3.3'
+services:
+    dp-cantabular-metadata-exporter:
+        build:
+            context: ../../dp-cantabular-metadata-exporter
+            dockerfile: Dockerfile.local
+        command:
+            - reflex
+            - -d
+            - none
+            - -c
+            - ./reflex
+        volumes:
+            - ../../dp-cantabular-metadata-exporter:/dp-cantabular-metadata-exporter
+        depends_on:
+            - kafka
+            - minio
+        ports:
+            - 26700:26700
+        restart: unless-stopped
+        environment:
+            BIND_ADDR:              ":26700"
+            KAFKA_ADDR:             "kafka:9092"
+            DATASET_API_URL:        "http://dp-dataset-api:22000"
+            LOCAL_OBJECT_STORE:     "http://minio:9000"
+            MINIO_ACCESS_KEY:       "minio-access-key"
+            MINIO_SECRET_KEY:       "minio-secret-key"
+            SERVICE_AUTH_TOKEN:     $SERVICE_AUTH_TOKEN
+            ENCRYPTION_DISABLED:    "true"
+            UPLOAD_BUCKET_NAME:     "dp-cantabular-metadata-exporter"
