@@ -6,7 +6,7 @@ start:
 # Start full journey with super user privileges
 .PHONY: start-privileged
 start-privileged:
-	sudo docker-compose up
+	sudo -E docker-compose up
 
 # start full journey (containers in background)
 .PHONY: start-detached
