@@ -43,7 +43,7 @@ services:
     environment:
       - MINIO_ACCESS_KEY=minio-access-key
       - MINIO_SECRET_KEY=minio-secret-key
-      - MINIO_DEFAULT_BUCKETS=dp-cantabular-csv-exporter,dp-cantabular-metadata-exporter
+      - MINIO_DEFAULT_BUCKETS=dp-cantabular-csv-private,dp-cantabular-csv-public,dp-cantabular-metadata-exporter
   vault:
     image: 'hashicorp/vault:latest'
     ports:
