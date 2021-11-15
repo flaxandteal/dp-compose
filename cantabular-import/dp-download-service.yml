@@ -29,4 +29,4 @@ services:
             MINIO_SECRET_KEY:       "minio-secret-key"
             SERVICE_AUTH_TOKEN:     $SERVICE_AUTH_TOKEN
             ENCRYPTION_DISABLED:    "true"
-            BUCKET_NAME:            "dp-cantabular-csv-exporter"
+            BUCKET_NAME:            "private-bucket"
