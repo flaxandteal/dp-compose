@@ -28,5 +28,5 @@ services:
             MINIO_SECRET_KEY:       "minio-secret-key"
             SERVICE_AUTH_TOKEN:     $SERVICE_AUTH_TOKEN
             VAULT_TOKEN:            "0000-0000-0000-0000"
-            PUBLIC_BUCKET:          "dp-cantabular-metadata-exporter"
-            PRIVATE_BUCKET:         "dp-cantabular-metadata-exporter"
+            PUBLIC_BUCKET:          "public-bucket"
+            PRIVATE_BUCKET:         "private-bucket"

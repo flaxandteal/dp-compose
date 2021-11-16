@@ -30,5 +30,5 @@ services:
             MINIO_SECRET_KEY:           "minio-secret-key"
             SERVICE_AUTH_TOKEN:         $SERVICE_AUTH_TOKEN
             ENCRYPTION_DISABLED:        "true"
-            UPLOAD_BUCKET_NAME:         "dp-cantabular-csv-public"
-            PRIVATE_UPLOAD_BUCKET_NAME: "dp-cantabular-csv-private"
+            UPLOAD_BUCKET_NAME:         "public-bucket"
+            PRIVATE_UPLOAD_BUCKET_NAME: "private-bucket"
