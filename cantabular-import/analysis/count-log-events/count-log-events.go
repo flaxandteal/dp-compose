@@ -129,18 +129,18 @@ func main() {
 	if ferr != nil {
 		fmt.Printf("error in firstTime: %v\n", ferr)
 	} else {
-		f = f.Add(-(time.Second / 1000) * 100)
+		f = f.Add(-(time.Second / 1000) * 2)
 		// (the specific format chosen is to be compatible with the ones in the docker logs, and thus makes
 		//  comparison of time's easily possible)
 		firstTime = f.Format("2006-01-02T15:04:05.000000000Z")
 	}
 
-	// and similarly for the lastTime, we add a bit
+	// and similarly for the lastTime
 	l, lerr := time.Parse(time.RFC3339, lastTime) // time format with nanoseconds
 	if lerr != nil {
-		fmt.Printf("error in firstTime: %v\n", lerr)
+		fmt.Printf("error in lastTime: %v\n", lerr)
 	} else {
-		l = l.Add((time.Second / 1000) * 200)
+		l = l.Add((time.Second / 1000) * 1500)
 		// (the specific format chosen is to be compatible with the ones in the docker logs, and thus makes
 		//  comparison of time's easily possible)
 		lastTime = l.Format("2006-01-02T15:04:05.000000000Z")
@@ -226,7 +226,8 @@ func main() {
 									}
 
 									kafkaType := "k=n " // initialise to indicate 'not' a kafka log event
-									if strings.Contains(eventStr, "event received") {
+									if strings.Contains(eventStr, "event received") ||
+										strings.Contains(eventStr, "handling pre-publish") { // dp-dataset-exporter-xlsx : handleFullDownloadMessage()
 										// this is a consume message
 										kafkaType = "k=c "
 									}
