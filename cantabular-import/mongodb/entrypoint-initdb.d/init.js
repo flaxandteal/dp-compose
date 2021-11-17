@@ -18,6 +18,10 @@ var databases = [
 	{
 		name: "search",
 		collections: ["jobs", "jobs_locks"]
+	},
+	{
+		name: "images",
+		collections: ["images_locks"]
 	}
 ];
 

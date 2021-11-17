@@ -80,7 +80,8 @@ func main() {
 	// prefix time stamp of initiating the integration test
 	// (the specific format chosen is to be compatible with the ones in the docker logs, and thus makes
 	//  comparison of time's easily possible)
-	_, err = fmt.Fprintf(idTextFile, "%s %s\n", t.Format("2006-01-02T15:04:05.000000000Z"), res.ID)
+	//	_, err = fmt.Fprintf(idTextFile, "%s %s\n", t.Format("2006-01-02T15:04:05.000000000Z"), res.ID) // the JobID
+	_, err = fmt.Fprintf(idTextFile, "%s %s\n", t.Format("2006-01-02T15:04:05.000000000Z"), res.Links.Instances[0].ID) // instance ID
 	check(err)
 	cerr := idTextFile.Close()
 	if cerr != nil {
@@ -169,6 +170,8 @@ func postJob(token string) (*PostJobResponse, error) {
 	}()
 
 	var resp PostJobResponse
+
+	fmt.Printf("\nHeader: %v\n\n", res.Header.Get("Content-Type"))
 
 	b, err = ioutil.ReadAll(res.Body)
 	if err != nil {

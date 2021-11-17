@@ -30,10 +30,10 @@ services:
   postgres:
     build: ../postgres
     environment: 
-     - POSTGRES_USER=postgres
-     - POSTGRES_PASSWORD=mysecretpassword
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=mysecretpassword
     ports:
-    - 5432:5432
+      - 5432:5432
   minio:
     image: 'bitnami/minio:latest'
     volumes:
