@@ -82,6 +82,8 @@ func main() {
 		logFatal(ctx, "config failed", err, nil)
 	}
 
+	// !!! maybe this code should somehow use the kavka v3 lib ?
+
 	// Create Kafka Producer
 	pConfig := &kafka.ProducerConfig{
 		BrokerAddrs:     cfg.KafkaConfig.Addr,
@@ -233,6 +235,9 @@ func main() {
 	// kick off the export that produces the public files
 
 	// then read the instance document again, looking for desired change in the state variable and the downloads has the desired links
+
+	// wait a little while to see if we get any Kafka erros
+	time.Sleep(500 * time.Millisecond)
 
 	os.Exit(0)
 }

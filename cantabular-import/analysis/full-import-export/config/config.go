@@ -37,9 +37,7 @@ type KafkaConfig struct {
 	SecClientKey     string   `envconfig:"KAFKA_SEC_CLIENT_KEY"                  json:"-"`
 	SecClientCert    string   `envconfig:"KAFKA_SEC_CLIENT_CERT"`
 	SecSkipVerify    bool     `envconfig:"KAFKA_SEC_SKIP_VERIFY"`
-	ExportStartGroup string   `envconfig:"KAFKA_GROUP_CANTABULAR_EXPORT_START"`
 	ExportStartTopic string   `envconfig:"KAFKA_TOPIC_CANTABULAR_EXPORT_START"`
-	CsvCreatedTopic  string   `envconfig:"KAFKA_TOPIC_CSV_CREATED"`
 }
 
 // NewConfig creates the config object
@@ -65,9 +63,7 @@ func NewConfig() (*Config, error) {
 			SecClientKey:     "",
 			SecClientCert:    "",
 			SecSkipVerify:    false,
-			ExportStartGroup: "dp-cantabular-csv-exporter",
 			ExportStartTopic: "cantabular-export-start",
-			CsvCreatedTopic:  "cantabular-csv-created",
 		},
 	}
 	if err := envconfig.Process("", &cfg); err != nil {
