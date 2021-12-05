@@ -3,6 +3,8 @@ package main
 import (
 	"ONSdigital/full-import-export/api"
 	"ONSdigital/full-import-export/config"
+	"ONSdigital/full-import-export/event"
+	"ONSdigital/full-import-export/schema"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -15,7 +17,9 @@ import (
 	"time"
 
 	"github.com/ONSdigital/dp-api-clients-go/dataset"
+	kafka "github.com/ONSdigital/dp-kafka/v3"
 	"github.com/ONSdigital/log.go/log"
+	"github.com/davecgh/go-spew/spew"
 )
 
 type PutJobRequest struct {
@@ -39,8 +43,9 @@ type Link struct {
 }
 
 var (
-	importAPIHost = "http://localhost:21800"
-	recipeID      = "38542eb6-d3a6-4cc4-ba3f-32b25f23223a"
+	importAPIHost  = "http://localhost:21800"
+	datasetAPIHost = "http://localhost:22000"
+	recipeID       = "38542eb6-d3a6-4cc4-ba3f-32b25f23223a"
 
 	client = &http.Client{}
 )
@@ -70,6 +75,38 @@ func logFatal(ctx context.Context, contextMessage string, err error, data log.Da
 func main() {
 	fmt.Printf("Full import and export with database monitoring\n")
 	ensureDirectoryExists(idDir)
+
+	ctx := context.Background()
+	cfg, err := config.NewConfig()
+	if err != nil {
+		logFatal(ctx, "config failed", err, nil)
+	}
+
+	// Create Kafka Producer
+	pConfig := &kafka.ProducerConfig{
+		BrokerAddrs:     cfg.KafkaConfig.Addr,
+		Topic:           cfg.KafkaConfig.ExportStartTopic,
+		KafkaVersion:    &cfg.KafkaConfig.Version,
+		MaxMessageBytes: &cfg.KafkaConfig.MaxBytes,
+	}
+	if cfg.KafkaConfig.SecProtocol == config.KafkaTLSProtocolFlag {
+		pConfig.SecurityConfig = kafka.GetSecurityConfig(
+			cfg.KafkaConfig.SecCACerts,
+			cfg.KafkaConfig.SecClientCert,
+			cfg.KafkaConfig.SecClientKey,
+			cfg.KafkaConfig.SecSkipVerify,
+		)
+	}
+	kafkaProducer, err := kafka.NewProducer(ctx, pConfig)
+	if err != nil {
+		logFatal(ctx, "fatal error trying to create kafka producer", err, log.Data{"topic": cfg.KafkaConfig.ExportStartTopic})
+		os.Exit(1)
+	}
+
+	// kafka error logging go-routines
+	kafkaProducer.LogErrors(ctx)
+
+	//time.Sleep(500 * time.Millisecond)
 
 	//	token, err := readInput()
 	token, err := getToken()
@@ -118,12 +155,6 @@ func main() {
 
 	// then check that state is : 'edition-confirmed' ... under some sort of repeat timeout
 
-	ctx := context.Background()
-	cfg, err := config.NewConfig()
-	if err != nil {
-		logFatal(ctx, "config failed", err, nil)
-	}
-
 	// Create wrapped datasetAPI client
 	datasetAPI := &api.DatasetAPI{
 		Client:           dataset.NewAPIClient(cfg.DatasetAPIAddr),
@@ -143,20 +174,57 @@ func main() {
 
 	fmt.Printf("\nState: %v\n", instanceFromAPI.Version.State)
 
-	time.Sleep(4 * time.Second)
+	attempts := 50
 
-	instanceFromAPI, isFatal, err = datasetAPI.GetInstance(ctx, instanceID)
-	if err != nil {
-		fmt.Printf("isFatal: %v\n", isFatal)
-		logFatal(ctx, "config failed", err, nil) // !!! this needs to be different if waiting for desired instance state
-		//return isFatal, err
+	for attempts > 0 {
+		time.Sleep(100 * time.Millisecond)
+
+		instanceFromAPI, isFatal, err = datasetAPI.GetInstance(ctx, instanceID)
+		if err != nil {
+			fmt.Printf("isFatal: %v\n", isFatal)
+			logFatal(ctx, "config failed", err, nil) // !!! this needs to be different if waiting for desired instance state
+			//return isFatal, err
+		}
+		if instanceFromAPI.Version.State == "edition-confirmed" {
+			fmt.Printf("\ninstanceFromAPI: %v\n", instanceFromAPI)
+			spew.Dump(instanceFromAPI)
+			fmt.Printf("Got 'edition-confirmed' after: %d milliseconds\n", 100*(51-attempts))
+			break
+		}
+		attempts--
+	}
+	if attempts == 0 {
+		fmt.Printf("failed to see 'edition-confirmed' after 5 seconds\n")
+		os.Exit(1)
 	}
 
-	fmt.Printf("\nState (after 4 seconds): %v\n", instanceFromAPI.Version.State)
-
+	fmt.Printf("\ninstance_id: %s\n", instanceFromAPI.Version.ID)
+	fmt.Printf("dataset_id: %s\n", instanceFromAPI.Version.Links.Dataset.ID)
+	fmt.Printf("edition: %s\n", instanceFromAPI.Version.Links.Edition.ID)
+	fmt.Printf("version: %s\n", instanceFromAPI.Version.Links.Version.ID)
 	// and once we have the instance and the state is as required ...
 
 	// kick off the export that produces the encrypted files
+	e := &event.ExportStart{
+		InstanceID: instanceFromAPI.Version.ID,
+		DatasetID:  instanceFromAPI.Version.Links.Dataset.ID,
+		Edition:    instanceFromAPI.Version.Links.Edition.ID,
+		Version:    instanceFromAPI.Version.Links.Version.ID,
+	}
+
+	avroBytes, err := schema.ExportStart.Marshal(e)
+	if err != nil {
+		logFatal(ctx, "hello-called event error", err, nil)
+		os.Exit(1)
+	}
+
+	// Send bytes to Output channel, after calling Initialise just in case it is not initialised.
+	// Wait for producer to be initialised
+	<-kafkaProducer.Channels().Initialised
+	time.Sleep(500 * time.Millisecond)
+
+	fmt.Printf("\nSending kafka message to kick off export to: %s\n", cfg.KafkaConfig.ExportStartTopic)
+	kafkaProducer.Channels().Output <- avroBytes
 
 	// then read the instance document again, looking for desired change in the state variable and the downloads has the desired links
 
@@ -319,4 +387,47 @@ func prettyPrint(s interface{}) string {
 	}
 }
 
-// code copied from dataset-api:
+//!!! for possible use ... in kicking off export
+func putDatasetEditionVersion(token string, resp *PostJobResponse) error {
+	fmt.Println("Making request to PUT dataset-api/put:")
+
+	req := PutJobRequest{
+		State: "submitted",
+		Links: resp.Links,
+	}
+
+	b, err := json.Marshal(req)
+	if err != nil {
+		return fmt.Errorf("error marshalling request: %s request:\n%+v", err, req)
+	}
+
+	fmt.Println(prettyPrint(req))
+
+	r, err := http.NewRequest("PUT", importAPIHost+"/jobs/"+resp.ID, bytes.NewReader(b))
+	if err != nil {
+		return fmt.Errorf("error creating request: %s", err)
+	}
+
+	r.Header.Set("X-Florence-Token", token)
+
+	res, err := client.Do(r)
+	if err != nil {
+		return fmt.Errorf("error making request: %s", err)
+	}
+	defer func() {
+		cerr := res.Body.Close()
+		if cerr != nil {
+			fmt.Printf("problem closing: response body : %v\n", cerr)
+		}
+	}()
+
+	b, err = ioutil.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("error reading response body: %s", err)
+	}
+
+	fmt.Printf("Got response from PUT dataset-api/put/%s: %d\n", resp.ID, res.StatusCode)
+	fmt.Println(prettyPrint(string(b)))
+
+	return nil
+}

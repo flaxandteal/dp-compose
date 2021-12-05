@@ -5,16 +5,19 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
 )
 
 const (
-	dockerLogName        = "../tmp/all-container-logs.txt"
-	tmpFileName          = "../tmp/id.txt"
-	plotDataFileName     = "../tmp/plot.txt"
-	countResultsFileName = "count-log-events-results.txt"
+	dockerLogName             = "../tmp/all-container-logs.txt"
+	tmpFileName               = "../tmp/id.txt"
+	plotDataFileName          = "../tmp/plot.txt"
+	countResultsFileName      = "count-log-events-results.txt"
+	instanceEventsFileName    = "instance-events.txt"
+	filterHealthEtcFromEvents = true
 )
 
 // Using pre-read docker logs file, for all job id's deduce the combined first and last times in the log files.
@@ -60,6 +63,15 @@ func main() {
 		cerr := plotDataFile.Close()
 		if cerr != nil {
 			fmt.Printf("problem closing: %s : %v\n", plotDataFileName, cerr)
+		}
+	}()
+
+	instanceEventsFile, err := os.OpenFile(instanceEventsFileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND|os.O_TRUNC, 0666)
+	check(err)
+	defer func() {
+		cerr := instanceEventsFile.Close()
+		if cerr != nil {
+			fmt.Printf("problem closing: %s : %v\n", instanceEventsFileName, cerr)
 		}
 	}()
 
@@ -140,13 +152,14 @@ func main() {
 	if lerr != nil {
 		fmt.Printf("error in lastTime: %v\n", lerr)
 	} else {
-		l = l.Add((time.Second / 1000) * 1500)
+		l = l.Add((time.Second / 1000) * 500)
 		// (the specific format chosen is to be compatible with the ones in the docker logs, and thus makes
 		//  comparison of time's easily possible)
 		lastTime = l.Format("2006-01-02T15:04:05.000000000Z")
 	}
 
-	var linesFound []string // to store start and end of events lines between the time range plus lines that contain id's
+	var linesFound []string        // to store start and end of events lines between the time range plus lines that contain id's
+	var allInstanceEvents []string // to save off a chronological list of all event information pertaining to the instance
 
 	// Now look for events between firstTime and lastTime in all log files.
 	// This is done in a simple mined manned taking into account that the format of the log lines
@@ -277,6 +290,11 @@ func main() {
 						j++
 					}
 					j--
+
+					serviceName := strings.ReplaceAll(fields[0], "/cantabular-import-journey_", "") // this might best be in code that created files
+					serviceName = strings.ReplaceAll(serviceName, "_1", "")                         // this might best be in code that created files
+					eventLine := fmt.Sprintf("%40s: %s\n", serviceName, eventStr)
+					allInstanceEvents = append(allInstanceEvents, eventLine)
 				}
 				if fields[2] == "}" {
 					// or the closing bracket
@@ -290,6 +308,77 @@ func main() {
 					linesFound = append(linesFound, "k-n 0.0 "+strLine)
 				}
 			}
+		}
+
+		sort.SliceStable(allInstanceEvents, func(i, j int) bool {
+			// extract and sort by the timestamp for each line
+			fieldsi := strings.Fields(allInstanceEvents[i])
+			fieldsj := strings.Fields(allInstanceEvents[j])
+			var fi, fj []string
+			// zebedee logs split differently to all other services, so require a different check:
+			if strings.Contains(allInstanceEvents[i], "zebedee: {") {
+				fi = strings.Split(fieldsi[3], ",")
+			} else {
+				fi = strings.Split(fieldsi[2], ",")
+
+			}
+			if strings.Contains(allInstanceEvents[j], "zebedee: {") {
+				fj = strings.Split(fieldsj[3], ",")
+			} else {
+				fj = strings.Split(fieldsj[2], ",")
+			}
+			return fi[0] < fj[0]
+		})
+
+		// create regex to remove timestamp string: "created_at": "2021-12-01T09:33:58.1004706Z",
+		reg := regexp.MustCompile(`"created_at": "[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])T(2[0-3]|[01][0-9]):[0-5][0-9].*Z",`)
+
+		// save event lines
+		for _, s := range allInstanceEvents {
+			// for zebedee log lines, remove space before colon so that all the created at timestamps line up vertically in file
+			e := strings.ReplaceAll(s, "zebedee: {\"created_at\" :", "zebedee: {\"created_at\":")
+			if filterHealthEtcFromEvents {
+				// filter out events that don't have any useful info to following the import/export process
+				if strings.Contains(e, `","instanceID": "","location": "","payload": null,"type": ""}},"event": "client log","namespace": "florence","severity": 3}`) ||
+					strings.Contains(e, `","event": "executing identity check middleware","namespace":`) ||
+					strings.Contains(e, `","data": {"auth_token": {},"florence_token": {},"is_service_request": true,"is_user_request": true,"url": "http://zebedee:8082/identity"},"event": "calling AuthAPI to authenticate caller identity","namespace":`) ||
+					strings.Contains(e, `","http" : {"method" : "GET","path" : "/identity","scheme" : "http","host" : "zebedee","port" : 8082}}`) ||
+					strings.Contains(e, `","http" : {"method" : "GET","path" : "/health","scheme" : "http","host" : "zebedee","port" : 8082}}`) ||
+					//strings.Contains(e, `","namespace" : "zebedee-reader","severity" : 3,"event" : "request received","trace_id" `) ||
+					strings.Contains(e, `","event": "identity client check request completed successfully invoking downstream http handler","namespace":`) ||
+					strings.Contains(e, `","data": {"action": "retrieving service health","method": "GET","uri": "http://zebedee:8082"},"event": "Making request to service: Zebedee","namespace":`) ||
+					strings.Contains(e, `"data": {"action": "retrieving service health","method": "GET","uri": "http:`) ||
+					strings.Contains(e, `","event": "http request received","http": {"method": "GET","path": "/health","started_at": "`) ||
+					strings.Contains(e, `","method": "GET","path": "/health","response_content_length":`) ||
+					strings.Contains(e, `","event": "florence access token header not found attempting to find access token cookie","namespace": "`) ||
+					strings.Contains(e, `","event": "florence access token cookie not found in request","namespace": "`) ||
+					strings.Contains(e, `","data": {"auth_token": {},"is_service_request": true,"is_user_request": false,"url": "http://zebedee:8082/identity"},"event": "calling AuthAPI to authenticate caller identity","namespace":`) ||
+					strings.Contains(e, `","data": {"auth_token": {},"caller_identity": "","is_service_request": true,"is_user_request": false,"url": "http://zebedee:8082/identity","user_identity": ""},"event": "caller identity retrieved setting context values","namespace":`) ||
+					strings.Contains(e, `","data": {"service": "image-api"},"errors": [{"message": "Get \"http://localhost:24700/health\": dial tcp 127.0.0.1:24700: connect: connection refused","stack_trace":`) ||
+					strings.Contains(e, `","event": "http request received","http": {"method": "GET","path": "/v1/health","started_at":`) ||
+					strings.Contains(e, `","data": {"florence_token": {},"is_service_request": false,"is_user_request": true,"url": "http://zebedee:8082/identity"},"event": "calling AuthAPI to authenticate caller identity","namespace": "dp-dataset-api","severity": 3}`) ||
+					strings.Contains(e, `","method": "GET","path": "/v1/health","response_content_length":`) ||
+					strings.Contains(e, `,"event": "getDataset endpoint: caller not authorised returning dataset","namespace":`) ||
+					strings.Contains(e, `","data": {"service": "filter-api"},"errors": [{"message": "Get \"http:`) ||
+					strings.Contains(e, `"event": "service auth token request header is not found","namespace":`) ||
+					// the following don't aid studying successful event sequences, so they are also filtered out
+					strings.Contains(e, `"status_code": 0},"namespace": "dp-api-router","severity": 3,"trace_id":`) ||
+					strings.Contains(e, `"status_code": 0},"namespace": "dp-dataset-api","severity": 3`) ||
+					strings.Contains(e, `"status_code": 0},"namespace": "florence"`) ||
+					strings.Contains(e, `"status_code": 0},"namespace": "dp-import-api","severity": 3`) ||
+					strings.Contains(e, `"status_code": 0},"namespace": "recipe-api","severity": 3`) ||
+					strings.Contains(e, `"status_code": 0},"namespace": "dp-publishing-dataset-controller","severity": 3`) ||
+					strings.Contains(e, `"status_code": 200},"namespace": "`) {
+					continue
+				}
+			}
+
+			// As the list is in correct timestamp order, by removing the timestamp ... the application 'meld' is able to matchup and
+			// nicely visually compare the resulting file with previously saved/renamed files (without removing the timestamp there are too may
+			// differences for meld to funciton as desired)
+			res := reg.ReplaceAllString(e, "")
+			_, err := fmt.Fprintf(instanceEventsFile, res)
+			check(err)
 		}
 
 		// we now take the max of the two counts, just in case the time range that we checked between

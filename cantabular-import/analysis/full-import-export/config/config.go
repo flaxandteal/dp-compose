@@ -8,61 +8,67 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
+// KafkaTLSProtocolFlag informs service to use TLS protocol for kafka
+const KafkaTLSProtocolFlag = "TLS"
+
 // Config represents the app configuration
 type Config struct {
-	NewInstanceTopic                  string        `envconfig:"INPUT_FILE_AVAILABLE_TOPIC"`
-	NewInstanceConsumerGroup          string        `envconfig:"INPUT_FILE_AVAILABLE_CONSUMER_GROUP"`
-	ObservationsInsertedTopic         string        `envconfig:"IMPORT_OBSERVATIONS_INSERTED_TOPIC"`
-	ObservationsInsertedConsumerGroup string        `envconfig:"IMPORT_OBSERVATIONS_INSERTED_CONSUMER_GROUP"`
-	HierarchyBuiltTopic               string        `envconfig:"HIERARCHY_BUILT_TOPIC"`
-	HierarchyBuiltConsumerGroup       string        `envconfig:"HIERARCHY_BUILT_CONSUMER_GROUP"`
-	SearchBuiltTopic                  string        `envconfig:"SEARCH_BUILT_TOPIC"`
-	SearchBuiltConsumerGroup          string        `envconfig:"SEARCH_BUILT_CONSUMER_GROUP"`
-	DataImportCompleteTopic           string        `envconfig:"DATA_IMPORT_COMPLETE_TOPIC"`
-	Brokers                           []string      `envconfig:"KAFKA_ADDR"`
-	ImportAPIAddr                     string        `envconfig:"IMPORT_API_ADDR"`
-	DatasetAPIAddr                    string        `envconfig:"DATASET_API_ADDR"`
-	DatasetAPIMaxWorkers              int           `envconfig:"DATASET_API_MAX_WORKERS"` // maximum number of concurrent go-routines requesting items to datast api at the same time
-	DatasetAPIBatchSize               int           `envconfig:"DATASET_API_BATCH_SIZE"`  // maximum size of a response by dataset api when requesting items in batches
-	ShutdownTimeout                   time.Duration `envconfig:"GRACEFUL_SHUTDOWN_TIMEOUT"`
-	BindAddr                          string        `envconfig:"BIND_ADDR"`
-	ServiceAuthToken                  string        `envconfig:"SERVICE_AUTH_TOKEN"                   json:"-"`
-	CheckCompleteInterval             time.Duration `envconfig:"CHECK_COMPLETE_INTERVAL"`
-	InitialiseListInterval            time.Duration `envconfig:"INITIALISE_LIST_INTERVAL"`
-	InitialiseListAttempts            int           `envconfig:"INITIALISE_LIST_ATTEMPTS"`
-	HealthCheckInterval               time.Duration `envconfig:"HEALTHCHECK_INTERVAL"`
-	HealthCheckCriticalTimeout        time.Duration `envconfig:"HEALTHCHECK_CRITICAL_TIMEOUT"`
-	KafkaVersion                      string        `envconfig:"KAFKA_VERSION"`
-	KafkaOffsetOldest                 bool          `envconfig:"KAFKA_OFFSET_OLDEST"`
+	ImportAPIAddr              string        `envconfig:"IMPORT_API_ADDR"`
+	DatasetAPIAddr             string        `envconfig:"DATASET_API_ADDR"`
+	DatasetAPIMaxWorkers       int           `envconfig:"DATASET_API_MAX_WORKERS"` // maximum number of concurrent go-routines requesting items to datast api at the same time
+	DatasetAPIBatchSize        int           `envconfig:"DATASET_API_BATCH_SIZE"`  // maximum size of a response by dataset api when requesting items in batches
+	ShutdownTimeout            time.Duration `envconfig:"GRACEFUL_SHUTDOWN_TIMEOUT"`
+	BindAddr                   string        `envconfig:"BIND_ADDR"`
+	ServiceAuthToken           string        `envconfig:"SERVICE_AUTH_TOKEN"                   json:"-"`
+	HealthCheckInterval        time.Duration `envconfig:"HEALTHCHECK_INTERVAL"`
+	HealthCheckCriticalTimeout time.Duration `envconfig:"HEALTHCHECK_CRITICAL_TIMEOUT"`
+	KafkaConfig                KafkaConfig
+}
+
+// KafkaConfig contains the config required to connect to Kafka
+type KafkaConfig struct {
+	Addr             []string `envconfig:"KAFKA_ADDR"                            json:"-"`
+	Version          string   `envconfig:"KAFKA_VERSION"`
+	OffsetOldest     bool     `envconfig:"KAFKA_OFFSET_OLDEST"`
+	NumWorkers       int      `envconfig:"KAFKA_NUM_WORKERS"`
+	MaxBytes         int      `envconfig:"KAFKA_MAX_BYTES"`
+	SecProtocol      string   `envconfig:"KAFKA_SEC_PROTO"`
+	SecCACerts       string   `envconfig:"KAFKA_SEC_CA_CERTS"`
+	SecClientKey     string   `envconfig:"KAFKA_SEC_CLIENT_KEY"                  json:"-"`
+	SecClientCert    string   `envconfig:"KAFKA_SEC_CLIENT_CERT"`
+	SecSkipVerify    bool     `envconfig:"KAFKA_SEC_SKIP_VERIFY"`
+	ExportStartGroup string   `envconfig:"KAFKA_GROUP_CANTABULAR_EXPORT_START"`
+	ExportStartTopic string   `envconfig:"KAFKA_TOPIC_CANTABULAR_EXPORT_START"`
+	CsvCreatedTopic  string   `envconfig:"KAFKA_TOPIC_CSV_CREATED"`
 }
 
 // NewConfig creates the config object
 func NewConfig() (*Config, error) {
 	cfg := Config{
-		BindAddr:                          ":21300",
-		ServiceAuthToken:                  "AB0A5CFA-3C55-4FA8-AACC-F98039BED0AC",
-		NewInstanceTopic:                  "input-file-available",
-		NewInstanceConsumerGroup:          "dp-import-tracker",
-		ObservationsInsertedTopic:         "import-observations-inserted",
-		ObservationsInsertedConsumerGroup: "dp-import-tracker",
-		HierarchyBuiltTopic:               "hierarchy-built",
-		HierarchyBuiltConsumerGroup:       "dp-import-tracker",
-		SearchBuiltTopic:                  "dimension-search-built",
-		SearchBuiltConsumerGroup:          "dp-import-tracker",
-		DataImportCompleteTopic:           "data-import-complete",
-		Brokers:                           []string{"localhost:9092"},
-		ImportAPIAddr:                     "http://localhost:21800",
-		DatasetAPIAddr:                    "http://localhost:22000",
-		DatasetAPIMaxWorkers:              100,
-		DatasetAPIBatchSize:               1000,
-		ShutdownTimeout:                   5 * time.Second,
-		CheckCompleteInterval:             2000 * time.Millisecond,
-		InitialiseListInterval:            4 * time.Second,
-		InitialiseListAttempts:            20,
-		HealthCheckInterval:               30 * time.Second,
-		HealthCheckCriticalTimeout:        90 * time.Second,
-		KafkaVersion:                      "1.0.2",
-		KafkaOffsetOldest:                 true,
+		BindAddr:                   ":21300",
+		ServiceAuthToken:           "AB0A5CFA-3C55-4FA8-AACC-F98039BED0AC",
+		ImportAPIAddr:              "http://localhost:21800",
+		DatasetAPIAddr:             "http://localhost:22000",
+		DatasetAPIMaxWorkers:       100,
+		DatasetAPIBatchSize:        1000,
+		ShutdownTimeout:            5 * time.Second,
+		HealthCheckInterval:        30 * time.Second,
+		HealthCheckCriticalTimeout: 90 * time.Second,
+		KafkaConfig: KafkaConfig{
+			Addr:             []string{"localhost:9092"},
+			Version:          "1.0.2",
+			OffsetOldest:     true,
+			NumWorkers:       1,
+			MaxBytes:         2000000,
+			SecProtocol:      "",
+			SecCACerts:       "",
+			SecClientKey:     "",
+			SecClientCert:    "",
+			SecSkipVerify:    false,
+			ExportStartGroup: "dp-cantabular-csv-exporter",
+			ExportStartTopic: "cantabular-export-start",
+			CsvCreatedTopic:  "cantabular-csv-created",
+		},
 	}
 	if err := envconfig.Process("", &cfg); err != nil {
 		return nil, err
