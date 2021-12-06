@@ -18,7 +18,6 @@ type Config struct {
 	DatasetAPIMaxWorkers       int           `envconfig:"DATASET_API_MAX_WORKERS"` // maximum number of concurrent go-routines requesting items to datast api at the same time
 	DatasetAPIBatchSize        int           `envconfig:"DATASET_API_BATCH_SIZE"`  // maximum size of a response by dataset api when requesting items in batches
 	ShutdownTimeout            time.Duration `envconfig:"GRACEFUL_SHUTDOWN_TIMEOUT"`
-	BindAddr                   string        `envconfig:"BIND_ADDR"`
 	ServiceAuthToken           string        `envconfig:"SERVICE_AUTH_TOKEN"                   json:"-"`
 	HealthCheckInterval        time.Duration `envconfig:"HEALTHCHECK_INTERVAL"`
 	HealthCheckCriticalTimeout time.Duration `envconfig:"HEALTHCHECK_CRITICAL_TIMEOUT"`
@@ -43,7 +42,6 @@ type KafkaConfig struct {
 // NewConfig creates the config object
 func NewConfig() (*Config, error) {
 	cfg := Config{
-		BindAddr:                   ":21300",
 		ServiceAuthToken:           "AB0A5CFA-3C55-4FA8-AACC-F98039BED0AC",
 		ImportAPIAddr:              "http://localhost:21800",
 		DatasetAPIAddr:             "http://localhost:22000",

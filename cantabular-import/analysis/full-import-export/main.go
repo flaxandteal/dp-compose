@@ -239,6 +239,17 @@ func main() {
 	// wait a little while to see if we get any Kafka erros
 	time.Sleep(500 * time.Millisecond)
 
+	err = putDatasetEditionVersion(token,
+		instanceFromAPI.Version.ID,
+		instanceFromAPI.Version.Links.Dataset.ID,
+		instanceFromAPI.Version.Links.Edition.ID,
+		instanceFromAPI.Version.Links.Version.ID)
+
+	if err != nil {
+		fmt.Println("error initiating csv exporter: ", err)
+		os.Exit(1)
+	}
+
 	os.Exit(0)
 }
 
@@ -393,22 +404,14 @@ func prettyPrint(s interface{}) string {
 }
 
 //!!! for possible use ... in kicking off export
-func putDatasetEditionVersion(token string, resp *PostJobResponse) error {
+func putDatasetEditionVersion(token, instanceID, datasetID, edition, version string) error {
 	fmt.Println("Making request to PUT dataset-api/put:")
 
-	req := PutJobRequest{
-		State: "submitted",
-		Links: resp.Links,
-	}
+	//	someBody := `{"dataset":{"id":"test-dataset"},"version":{"id":"1"},"instance":{},"collection_id":"testcollection","collection_state":"InProgress"}`
+	someBody := fmt.Sprintf(`{"dataset":{"id":"%s"},"instance":{}}`, datasetID)
+	//someBody := `{}`
 
-	b, err := json.Marshal(req)
-	if err != nil {
-		return fmt.Errorf("error marshalling request: %s request:\n%+v", err, req)
-	}
-
-	fmt.Println(prettyPrint(req))
-
-	r, err := http.NewRequest("PUT", importAPIHost+"/jobs/"+resp.ID, bytes.NewReader(b))
+	r, err := http.NewRequest("PUT", datasetAPIHost+"/datasets/"+datasetID+"/editions/"+edition+"/versions/"+version, bytes.NewBufferString(someBody))
 	if err != nil {
 		return fmt.Errorf("error creating request: %s", err)
 	}
@@ -426,12 +429,12 @@ func putDatasetEditionVersion(token string, resp *PostJobResponse) error {
 		}
 	}()
 
-	b, err = ioutil.ReadAll(res.Body)
+	b, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return fmt.Errorf("error reading response body: %s", err)
 	}
 
-	fmt.Printf("Got response from PUT dataset-api/put/%s: %d\n", resp.ID, res.StatusCode)
+	fmt.Printf("Got response from PUT dataset-api/put/...: %d\n", res.StatusCode)
 	fmt.Println(prettyPrint(string(b)))
 
 	return nil
