@@ -7,9 +7,19 @@ Note that if you run Docker using the mac VM, you will need to increase its reso
 
 https://www.docker.com/products/docker#/mac
 
-Run ```docker-compose up``` to create docker containers for all required backing services. Using the ``` ./run.sh ``` script does the same thing.
+More information about the kafka cluster [here](./kafka-cluster.md)
+
+### Run
+
+You may run containers for all required backing services by doing one of the following:
+- Run ```docker-compose up```
+- Using the ``` ./run.sh ``` script does the same thing.
+- Run `make start` to start the kafka cluster containers
+
+You can run `make stop` to stop the containers, or `make clean` to stop and remove them as well.
 
 ## CMD
+
 The ONS website and CMD both require Elastic search but (annoyingly) require different versions. The `docker-compose.yml` will start 2 instances. 
 
 **Note:** The default ports for Elastic search is usually `9200` & `9300` however in order to avoid a port conflict
