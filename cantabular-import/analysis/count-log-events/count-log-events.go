@@ -363,7 +363,7 @@ func main() {
 					strings.Contains(e, `"event": "service auth token request header is not found","namespace":`) ||
 					// the following don't aid studying successful event sequences, so they are also filtered out
 					strings.Contains(e, `"status_code": 0},"namespace": "dp-api-router","severity": 3,"trace_id":`) ||
-					strings.Contains(e, `"status_code": 0},"namespace": "dp-dataset-api","severity": 3`) ||
+					//strings.Contains(e, `"status_code": 0},"namespace": "dp-dataset-api","severity": 3`) ||
 					strings.Contains(e, `"status_code": 0},"namespace": "florence"`) ||
 					strings.Contains(e, `"status_code": 0},"namespace": "dp-import-api","severity": 3`) ||
 					strings.Contains(e, `"status_code": 0},"namespace": "recipe-api","severity": 3`) ||

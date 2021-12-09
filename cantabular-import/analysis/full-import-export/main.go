@@ -3,8 +3,6 @@ package main
 import (
 	"ONSdigital/full-import-export/api"
 	"ONSdigital/full-import-export/config"
-	"ONSdigital/full-import-export/event"
-	"ONSdigital/full-import-export/schema"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -43,9 +41,12 @@ type Link struct {
 }
 
 var (
-	importAPIHost  = "http://localhost:21800"
-	datasetAPIHost = "http://localhost:22000"
-	recipeID       = "38542eb6-d3a6-4cc4-ba3f-32b25f23223a"
+	importAPIHost          = "http://localhost:21800"
+	datasetAPIHost         = "http://localhost:22000"
+	recipeID               = "38542eb6-d3a6-4cc4-ba3f-32b25f23223a"
+	datasetType            = "cantabular_table"
+	collectionName         = "a1"
+	collectionUniqueNumber = "17073b56a18b3af2f3c8220be6df9fcdaac9b5394925a9980c98bfd84ad3a003"
 
 	client = &http.Client{}
 )
@@ -184,8 +185,7 @@ func main() {
 		instanceFromAPI, isFatal, err = datasetAPI.GetInstance(ctx, instanceID)
 		if err != nil {
 			fmt.Printf("isFatal: %v\n", isFatal)
-			logFatal(ctx, "config failed", err, nil) // !!! this needs to be different if waiting for desired instance state
-			//return isFatal, err
+			logFatal(ctx, "GetInstance 1 failed", err, nil)
 		}
 		if instanceFromAPI.Version.State == "edition-confirmed" {
 			fmt.Printf("\ninstanceFromAPI: %v\n", instanceFromAPI)
@@ -200,6 +200,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	fmt.Printf("\nImport complete\n")
+
 	fmt.Printf("\ninstance_id: %s\n", instanceFromAPI.Version.ID)
 	fmt.Printf("dataset_id: %s\n", instanceFromAPI.Version.Links.Dataset.ID)
 	fmt.Printf("edition: %s\n", instanceFromAPI.Version.Links.Edition.ID)
@@ -207,48 +209,140 @@ func main() {
 	// and once we have the instance and the state is as required ...
 
 	// kick off the export that produces the encrypted files
-	e := &event.ExportStart{
-		InstanceID: instanceFromAPI.Version.ID,
-		DatasetID:  instanceFromAPI.Version.Links.Dataset.ID,
-		Edition:    instanceFromAPI.Version.Links.Edition.ID,
-		Version:    instanceFromAPI.Version.Links.Version.ID,
-	}
+	/*	e := &event.ExportStart{
+			InstanceID: instanceFromAPI.Version.ID,
+			DatasetID:  instanceFromAPI.Version.Links.Dataset.ID,
+			Edition:    instanceFromAPI.Version.Links.Edition.ID,
+			Version:    instanceFromAPI.Version.Links.Version.ID,
+		}
 
-	avroBytes, err := schema.ExportStart.Marshal(e)
-	if err != nil {
-		logFatal(ctx, "hello-called event error", err, nil)
-		os.Exit(1)
-	}
+		avroBytes, err := schema.ExportStart.Marshal(e)
+		if err != nil {
+			logFatal(ctx, "hello-called event error", err, nil)
+			os.Exit(1)
+		}
 
-	// Send bytes to Output channel, after calling Initialise just in case it is not initialised.
-	// Wait for producer to be initialised
-	<-kafkaProducer.Channels().Initialised
-	time.Sleep(500 * time.Millisecond)
+		// Send bytes to Output channel, after calling Initialise just in case it is not initialised.
+		// Wait for producer to be initialised
+		<-kafkaProducer.Channels().Initialised
+		time.Sleep(500 * time.Millisecond)
 
-	fmt.Printf("\nSending kafka message to kick off export to: %s\n", cfg.KafkaConfig.ExportStartTopic)
-	kafkaProducer.Channels().Output <- avroBytes
+		fmt.Printf("\nSending kafka message to kick off export to: %s\n", cfg.KafkaConfig.ExportStartTopic)
+		kafkaProducer.Channels().Output <- avroBytes*/
 
 	// then read the instance document again, looking for desired change in the state variable and the downloads has the desired links
 
 	// then
 
-	// kick off the export that produces the public files
+	fmt.Printf("Private Export Step 1:\n")
+	err = addDataset(token, instanceFromAPI.Version.Links.Dataset.ID, datasetType)
 
-	// then read the instance document again, looking for desired change in the state variable and the downloads has the desired links
+	if err != nil {
+		fmt.Println("error doing addDataset: ", err)
+		os.Exit(1)
+	}
 
-	// wait a little while to see if we get any Kafka erros
-	time.Sleep(500 * time.Millisecond)
+	fmt.Printf("Private Export Step 2:\n")
+	err = putMetadata(token, instanceFromAPI.Version.Links.Dataset.ID)
 
-	err = putDatasetEditionVersion(token,
-		instanceFromAPI.Version.ID,
+	if err != nil {
+		fmt.Println("error doing putMetadata: ", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Private Export Step 3:\n")
+	err = putVersion(token,
 		instanceFromAPI.Version.Links.Dataset.ID,
 		instanceFromAPI.Version.Links.Edition.ID,
 		instanceFromAPI.Version.Links.Version.ID)
 
 	if err != nil {
-		fmt.Println("error initiating csv exporter: ", err)
+		fmt.Println("error doing putVersion: ", err)
 		os.Exit(1)
 	}
+
+	fmt.Printf("Private Export Step 4:\n")
+	err = updateInstance(token, instanceFromAPI.Version.ID) // the instance_id
+
+	if err != nil {
+		fmt.Println("error doing updateInstance: ", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Private Export Step 5:\n")
+	err = putCollection(token, instanceFromAPI.Version.Links.Dataset.ID, collectionName, collectionUniqueNumber)
+
+	if err != nil {
+		fmt.Println("error doing putCollection: ", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Private Export Step 6:\n")
+	err = putVersionCollection(token,
+		instanceFromAPI.Version.Links.Dataset.ID,
+		instanceFromAPI.Version.Links.Edition.ID,
+		instanceFromAPI.Version.Links.Version.ID,
+		collectionName,
+		collectionUniqueNumber,
+		instanceFromAPI.Version.ID) // the instance_id
+
+	if err != nil {
+		fmt.Println("error doing putVersionCollection: ", err)
+		os.Exit(1)
+	}
+
+	// then read the instance document again, looking for desired file creation
+
+	fmt.Printf("\nWaiting for 4 Private files to be created (for upt to 5 seconds):\n")
+	attempts = 50
+
+	for attempts > 0 {
+		time.Sleep(100 * time.Millisecond)
+
+		instanceFromAPI, isFatal, err = datasetAPI.GetInstance(ctx, instanceID)
+		if err != nil {
+			fmt.Printf("isFatal: %v\n", isFatal)
+			logFatal(ctx, "GetInstance 2 failed", err, nil)
+		}
+		if instanceFromAPI.Version.Downloads["csv"].Private != "" &&
+			instanceFromAPI.Version.Downloads["csvw"].Private != "" &&
+			instanceFromAPI.Version.Downloads["txt"].Private != "" &&
+			instanceFromAPI.Version.Downloads["xls"].Private != "" {
+
+			fmt.Printf("Got all 4 private files after: %d milliseconds\n", 100*(51-attempts))
+			break
+		}
+		attempts--
+	}
+	if attempts == 0 {
+		fmt.Printf("failed to see get all 4 private files after 5 seconds\nOnly got:")
+		spew.Dump(instanceFromAPI.Version.Downloads["csv"].Private)
+		spew.Dump(instanceFromAPI.Version.Downloads["csvw"].Private)
+		spew.Dump(instanceFromAPI.Version.Downloads["txt"].Private)
+		spew.Dump(instanceFromAPI.Version.Downloads["xls"].Private)
+		os.Exit(1)
+	}
+	spew.Dump(instanceFromAPI.Version.Downloads["csv"].Private)
+	spew.Dump(instanceFromAPI.Version.Downloads["csvw"].Private)
+	spew.Dump(instanceFromAPI.Version.Downloads["txt"].Private)
+	spew.Dump(instanceFromAPI.Version.Downloads["xls"].Private)
+
+	// now delete the dataset, so this can run again with the same recipe ...
+
+	fmt.Printf("Finished, now deleting dataset:\n")
+	err = deleteDataset(token, instanceFromAPI.Version.Links.Dataset.ID)
+
+	if err != nil {
+		fmt.Println("error doing deleteDataset: ", err)
+		os.Exit(1)
+	}
+
+	/*
+		spew.Dump(instanceFromAPI.Version.Downloads["csv"].Public)
+		spew.Dump(instanceFromAPI.Version.Downloads["csvw"].Public)
+		spew.Dump(instanceFromAPI.Version.Downloads["txt"].Public)
+		spew.Dump(instanceFromAPI.Version.Downloads["xls"].Public)
+	*/
 
 	os.Exit(0)
 }
@@ -358,6 +452,8 @@ func putJob(token string, resp *PostJobResponse) error {
 		Links: resp.Links,
 	}
 
+	spew.Dump(resp) //trash!!!
+
 	b, err := json.Marshal(req)
 	if err != nil {
 		return fmt.Errorf("error marshalling request: %s request:\n%+v", err, req)
@@ -403,13 +499,80 @@ func prettyPrint(s interface{}) string {
 	}
 }
 
-//!!! for possible use ... in kicking off export
-func putDatasetEditionVersion(token, instanceID, datasetID, edition, version string) error {
-	fmt.Println("Making request to PUT dataset-api/put:")
+func addDataset(token, datasetID, datasetType string) error {
+	fmt.Println("addDataset: POST /datasets/{dataset_id}:")
 
-	//	someBody := `{"dataset":{"id":"test-dataset"},"version":{"id":"1"},"instance":{},"collection_id":"testcollection","collection_state":"InProgress"}`
-	someBody := fmt.Sprintf(`{"dataset":{"id":"%s"},"instance":{}}`, datasetID)
-	//someBody := `{}`
+	someBody := fmt.Sprintf(`{"type":"%s"}`, datasetType)
+
+	r, err := http.NewRequest("POST", datasetAPIHost+"/datasets/"+datasetID, bytes.NewBufferString(someBody))
+	if err != nil {
+		return fmt.Errorf("error creating request: %s", err)
+	}
+
+	r.Header.Set("X-Florence-Token", token)
+
+	res, err := client.Do(r)
+	if err != nil {
+		return fmt.Errorf("error making request: %s", err)
+	}
+	defer func() {
+		cerr := res.Body.Close()
+		if cerr != nil {
+			fmt.Printf("problem closing: response body : %v\n", cerr)
+		}
+	}()
+
+	b, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("error reading response body: %s", err)
+	}
+
+	fmt.Printf("Got response from POST: %d\n", res.StatusCode)
+	fmt.Println(prettyPrint(string(b)))
+
+	return nil
+}
+
+func putMetadata(token, datasetID string) error {
+	fmt.Println("putMetadata: PUT /datasets/{dataset_id}:")
+
+	// !!! might want to add something extra in for the qmi/url so as to see something in the metadata
+	// !!! also, the following may be missing the insertion of the 'release_date' that is needed in net step, but i did not see it in any of the logs
+	someBody := fmt.Sprintf(`{"contacts": [{}],"id": "%s","links": {"access_rights": {},"editions": {},"latest_version": {},"self": {},"taxonomy": {}},"qmi": {},"title": "a2 test"}`, datasetID) //!!! ??
+
+	r, err := http.NewRequest("PUT", datasetAPIHost+"/datasets/"+datasetID, bytes.NewBufferString(someBody))
+	if err != nil {
+		return fmt.Errorf("error creating request: %s", err)
+	}
+
+	r.Header.Set("X-Florence-Token", token)
+
+	res, err := client.Do(r)
+	if err != nil {
+		return fmt.Errorf("error making request: %s", err)
+	}
+	defer func() {
+		cerr := res.Body.Close()
+		if cerr != nil {
+			fmt.Printf("problem closing: response body : %v\n", cerr)
+		}
+	}()
+
+	b, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("error reading response body: %s", err)
+	}
+
+	fmt.Printf("Got response from PUT: %d\n", res.StatusCode)
+	fmt.Println(prettyPrint(string(b)))
+
+	return nil
+}
+
+func putVersion(token, datasetID, edition, version string) error {
+	fmt.Println("putVersion: PUT /datasets/{dataset_id}/editions/{edition}/versions/{version}:")
+
+	someBody := fmt.Sprintf(`{"release_date": "2021-12-01T00:00:00.000Z"}`) // seems to need this, but did not see it in any of the logs for this action, maybe its done in a previous step that i missed ?
 
 	r, err := http.NewRequest("PUT", datasetAPIHost+"/datasets/"+datasetID+"/editions/"+edition+"/versions/"+version, bytes.NewBufferString(someBody))
 	if err != nil {
@@ -434,7 +597,143 @@ func putDatasetEditionVersion(token, instanceID, datasetID, edition, version str
 		return fmt.Errorf("error reading response body: %s", err)
 	}
 
-	fmt.Printf("Got response from PUT dataset-api/put/...: %d\n", res.StatusCode)
+	fmt.Printf("Got response from PUT: %d\n", res.StatusCode)
+	fmt.Println(prettyPrint(string(b)))
+
+	return nil
+}
+
+func updateInstance(token, instanceID string) error {
+	fmt.Println("updateInstance: PUT /instances/{instance_id}:")
+
+	someBody := fmt.Sprintf(`{"dimensions": [{"id": "city","label": "City","links": {"code_list": {},"options": {},"version": {}},"name": "City"},{"id": "siblings_3","label": "Number of siblings (3 mappings)","links": {"code_list": {},"options": {},"version": {}},"name": "Number of siblings (3 mappings)"},{"id": "sex","label": "Sex","links": {"code_list": {},"options": {},"version": {}},"name": "Sex"}],"import_tasks": null,"last_updated": "0001-01-01T00:00:00Z"}`)
+
+	r, err := http.NewRequest("PUT", datasetAPIHost+"/instances/"+instanceID, bytes.NewBufferString(someBody))
+	if err != nil {
+		return fmt.Errorf("error creating request: %s", err)
+	}
+
+	r.Header.Set("X-Florence-Token", token)
+
+	res, err := client.Do(r)
+	if err != nil {
+		return fmt.Errorf("error making request: %s", err)
+	}
+	defer func() {
+		cerr := res.Body.Close()
+		if cerr != nil {
+			fmt.Printf("problem closing: response body : %v\n", cerr)
+		}
+	}()
+
+	b, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("error reading response body: %s", err)
+	}
+
+	fmt.Printf("Got response from PUT: %d\n", res.StatusCode)
+	fmt.Println(prettyPrint(string(b)))
+
+	return nil
+}
+
+func putCollection(token, datasetID, collectionName, collectionUniqueNumber string) error {
+	fmt.Println("putCollection: PUT /datasets/{dataset_id}:")
+
+	someBody := fmt.Sprintf(`{"collection_id": "%s-%s","state": "associated"}`, collectionName, collectionUniqueNumber)
+
+	r, err := http.NewRequest("PUT", datasetAPIHost+"/datasets/"+datasetID, bytes.NewBufferString(someBody))
+	if err != nil {
+		return fmt.Errorf("error creating request: %s", err)
+	}
+
+	r.Header.Set("X-Florence-Token", token)
+
+	res, err := client.Do(r)
+	if err != nil {
+		return fmt.Errorf("error making request: %s", err)
+	}
+	defer func() {
+		cerr := res.Body.Close()
+		if cerr != nil {
+			fmt.Printf("problem closing: response body : %v\n", cerr)
+		}
+	}()
+
+	b, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("error reading response body: %s", err)
+	}
+
+	fmt.Printf("Got response from PUT: %d\n", res.StatusCode)
+	fmt.Println(prettyPrint(string(b)))
+
+	return nil
+}
+
+func putVersionCollection(token, datasetID, edition, version, collectionName, collectionUniqueNumber, instance_id string) error {
+	fmt.Println("putVersionCollection: PUT /datasets/{dataset_id}/editions/{edition}/versions/{version}:")
+
+	someBody := fmt.Sprintf(`{"collection_id": "%s-%s","dataset_id": "%s","id": "%s","state": "associated"}`, collectionName, collectionUniqueNumber, datasetID, instance_id)
+
+	r, err := http.NewRequest("PUT", datasetAPIHost+"/datasets/"+datasetID+"/editions/"+edition+"/versions/"+version, bytes.NewBufferString(someBody))
+	if err != nil {
+		return fmt.Errorf("error creating request: %s", err)
+	}
+
+	r.Header.Set("X-Florence-Token", token)
+
+	res, err := client.Do(r)
+	if err != nil {
+		return fmt.Errorf("error making request: %s", err)
+	}
+	defer func() {
+		cerr := res.Body.Close()
+		if cerr != nil {
+			fmt.Printf("problem closing: response body : %v\n", cerr)
+		}
+	}()
+
+	b, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("error reading response body: %s", err)
+	}
+
+	fmt.Printf("Got response from PUT: %d\n", res.StatusCode)
+	fmt.Println(prettyPrint(string(b)))
+
+	return nil
+}
+
+func deleteDataset(token, datasetID string) error {
+	fmt.Println("deleteDataset: DELETE /datasets/{dataset_id}:")
+
+	someBody := fmt.Sprintf(`{}`)
+
+	r, err := http.NewRequest("DELETE", datasetAPIHost+"/datasets/"+datasetID, bytes.NewBufferString(someBody))
+	if err != nil {
+		return fmt.Errorf("error creating request: %s", err)
+	}
+
+	r.Header.Set("X-Florence-Token", token)
+
+	res, err := client.Do(r)
+	if err != nil {
+		return fmt.Errorf("error making request: %s", err)
+	}
+	defer func() {
+		cerr := res.Body.Close()
+		if cerr != nil {
+			fmt.Printf("problem closing: response body : %v\n", cerr)
+		}
+	}()
+
+	b, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("error reading response body: %s", err)
+	}
+
+	fmt.Printf("Got response from DELETE: %d\n", res.StatusCode)
 	fmt.Println(prettyPrint(string(b)))
 
 	return nil

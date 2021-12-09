@@ -51,7 +51,7 @@ func NewConfig() (*Config, error) {
 		HealthCheckInterval:        30 * time.Second,
 		HealthCheckCriticalTimeout: 90 * time.Second,
 		KafkaConfig: KafkaConfig{
-			Addr:             []string{"localhost:9092"},
+			Addr:             []string{"localhost:19092"},
 			Version:          "1.0.2",
 			OffsetOldest:     true,
 			NumWorkers:       1,
