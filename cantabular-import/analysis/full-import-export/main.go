@@ -188,8 +188,8 @@ func main() {
 			logFatal(ctx, "GetInstance 1 failed", err, nil)
 		}
 		if instanceFromAPI.Version.State == "edition-confirmed" {
-			fmt.Printf("\ninstanceFromAPI: %v\n", instanceFromAPI)
-			spew.Dump(instanceFromAPI)
+			//fmt.Printf("\ninstanceFromAPI: %v\n", instanceFromAPI)
+			//spew.Dump(instanceFromAPI)
 			fmt.Printf("Got 'edition-confirmed' after: %d milliseconds\n", 100*(51-attempts))
 			break
 		}
@@ -208,33 +208,9 @@ func main() {
 	fmt.Printf("version: %s\n", instanceFromAPI.Version.Links.Version.ID)
 	// and once we have the instance and the state is as required ...
 
-	// kick off the export that produces the encrypted files
-	/*	e := &event.ExportStart{
-			InstanceID: instanceFromAPI.Version.ID,
-			DatasetID:  instanceFromAPI.Version.Links.Dataset.ID,
-			Edition:    instanceFromAPI.Version.Links.Edition.ID,
-			Version:    instanceFromAPI.Version.Links.Version.ID,
-		}
+	// do the steps that produces the encrypted files ...
 
-		avroBytes, err := schema.ExportStart.Marshal(e)
-		if err != nil {
-			logFatal(ctx, "hello-called event error", err, nil)
-			os.Exit(1)
-		}
-
-		// Send bytes to Output channel, after calling Initialise just in case it is not initialised.
-		// Wait for producer to be initialised
-		<-kafkaProducer.Channels().Initialised
-		time.Sleep(500 * time.Millisecond)
-
-		fmt.Printf("\nSending kafka message to kick off export to: %s\n", cfg.KafkaConfig.ExportStartTopic)
-		kafkaProducer.Channels().Output <- avroBytes*/
-
-	// then read the instance document again, looking for desired change in the state variable and the downloads has the desired links
-
-	// then
-
-	fmt.Printf("Private Export Step 1:\n")
+	fmt.Printf("\nPrivate Export Step 1:\n")
 	err = addDataset(token, instanceFromAPI.Version.Links.Dataset.ID, datasetType)
 
 	if err != nil {
@@ -242,7 +218,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Private Export Step 2:\n")
+	fmt.Printf("\nPrivate Export Step 2:\n")
 	err = putMetadata(token, instanceFromAPI.Version.Links.Dataset.ID)
 
 	if err != nil {
@@ -250,7 +226,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Private Export Step 3:\n")
+	fmt.Printf("\nPrivate Export Step 3:\n")
 	err = putVersion(token,
 		instanceFromAPI.Version.Links.Dataset.ID,
 		instanceFromAPI.Version.Links.Edition.ID,
@@ -261,7 +237,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Private Export Step 4:\n")
+	fmt.Printf("\nPrivate Export Step 4:\n")
 	err = updateInstance(token, instanceFromAPI.Version.ID) // the instance_id
 
 	if err != nil {
@@ -269,7 +245,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Private Export Step 5:\n")
+	fmt.Printf("\nPrivate Export Step 5:\n")
 	err = putCollection(token, instanceFromAPI.Version.Links.Dataset.ID, collectionName, collectionUniqueNumber)
 
 	if err != nil {
@@ -277,7 +253,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Private Export Step 6:\n")
+	fmt.Printf("\nPrivate Export Step 6:\n")
 	err = putVersionCollection(token,
 		instanceFromAPI.Version.Links.Dataset.ID,
 		instanceFromAPI.Version.Links.Edition.ID,
@@ -309,7 +285,7 @@ func main() {
 			instanceFromAPI.Version.Downloads["txt"].Private != "" &&
 			instanceFromAPI.Version.Downloads["xls"].Private != "" {
 
-			fmt.Printf("Got all 4 private files after: %d milliseconds\n", 100*(51-attempts))
+			fmt.Printf("\nGot all 4 private files after: %d milliseconds:\n", 100*(51-attempts))
 			break
 		}
 		attempts--
@@ -329,7 +305,7 @@ func main() {
 
 	// now delete the dataset, so this can run again with the same recipe ...
 
-	fmt.Printf("Finished, now deleting dataset:\n")
+	fmt.Printf("\nFinished, now deleting dataset:\n")
 	err = deleteDataset(token, instanceFromAPI.Version.Links.Dataset.ID)
 
 	if err != nil {
@@ -452,7 +428,7 @@ func putJob(token string, resp *PostJobResponse) error {
 		Links: resp.Links,
 	}
 
-	spew.Dump(resp) //trash!!!
+	//spew.Dump(resp)
 
 	b, err := json.Marshal(req)
 	if err != nil {
