@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"github.com/ONSdigital/dp-api-clients-go/dataset"
-	kafka "github.com/ONSdigital/dp-kafka/v3"
 	"github.com/ONSdigital/log.go/log"
 	"github.com/davecgh/go-spew/spew"
 )
@@ -83,35 +82,6 @@ func main() {
 		logFatal(ctx, "config failed", err, nil)
 	}
 
-	// !!! maybe this code should somehow use the kavka v3 lib ?
-
-	// Create Kafka Producer
-	pConfig := &kafka.ProducerConfig{
-		BrokerAddrs:     cfg.KafkaConfig.Addr,
-		Topic:           cfg.KafkaConfig.ExportStartTopic,
-		KafkaVersion:    &cfg.KafkaConfig.Version,
-		MaxMessageBytes: &cfg.KafkaConfig.MaxBytes,
-	}
-	if cfg.KafkaConfig.SecProtocol == config.KafkaTLSProtocolFlag {
-		pConfig.SecurityConfig = kafka.GetSecurityConfig(
-			cfg.KafkaConfig.SecCACerts,
-			cfg.KafkaConfig.SecClientCert,
-			cfg.KafkaConfig.SecClientKey,
-			cfg.KafkaConfig.SecSkipVerify,
-		)
-	}
-	kafkaProducer, err := kafka.NewProducer(ctx, pConfig)
-	if err != nil {
-		logFatal(ctx, "fatal error trying to create kafka producer", err, log.Data{"topic": cfg.KafkaConfig.ExportStartTopic})
-		os.Exit(1)
-	}
-
-	// kafka error logging go-routines
-	kafkaProducer.LogErrors(ctx)
-
-	//time.Sleep(500 * time.Millisecond)
-
-	//	token, err := readInput()
 	token, err := getToken()
 	if err != nil {
 		fmt.Println("error reading input: ", err)
@@ -144,7 +114,6 @@ func main() {
 	// prefix time stamp of initiating the integration test
 	// (the specific format chosen is to be compatible with the ones in the docker logs, and thus makes
 	//  comparison of time's easily possible)
-	//	_, err = fmt.Fprintf(idTextFile, "%s %s\n", t.Format("2006-01-02T15:04:05.000000000Z"), res.ID) // the JobID
 	instanceID := res.Links.Instances[0].ID
 	_, err = fmt.Fprintf(idTextFile, "%s %s\n", t.Format("2006-01-02T15:04:05.000000000Z"), instanceID) // instance ID
 	check(err)
@@ -153,10 +122,8 @@ func main() {
 		fmt.Printf("problem closing: %s : %v\n", idFileName, cerr)
 	}
 
-	//!!! need to read the datasets collection and get the instance as per:
+	// read the datasets collection and get the instance as per:
 	fmt.Printf("\nThe instance'id' is: %s\n", instanceID)
-
-	// then check that state is : 'edition-confirmed' ... under some sort of repeat timeout
 
 	// Create wrapped datasetAPI client
 	datasetAPI := &api.DatasetAPI{
@@ -169,13 +136,14 @@ func main() {
 	instanceFromAPI, isFatal, err := datasetAPI.GetInstance(ctx, instanceID)
 	if err != nil {
 		fmt.Printf("isFatal: %v\n", isFatal)
-		logFatal(ctx, "config failed", err, nil) // !!! this needs to be different if waiting for desired instance state
-		//return isFatal, err
+		logFatal(ctx, "GetInstance 1 failed", err, nil)
 	}
 
 	fmt.Printf("\ninstanceFromAPI: %v\n", instanceFromAPI)
 
 	fmt.Printf("\nState: %v\n", instanceFromAPI.Version.State)
+
+	// then check that state is : 'edition-confirmed' ... under some sort of repeat timeout
 
 	attempts := 50
 
@@ -185,7 +153,7 @@ func main() {
 		instanceFromAPI, isFatal, err = datasetAPI.GetInstance(ctx, instanceID)
 		if err != nil {
 			fmt.Printf("isFatal: %v\n", isFatal)
-			logFatal(ctx, "GetInstance 1 failed", err, nil)
+			logFatal(ctx, "GetInstance 2 failed", err, nil)
 		}
 		if instanceFromAPI.Version.State == "edition-confirmed" {
 			//fmt.Printf("\ninstanceFromAPI: %v\n", instanceFromAPI)
@@ -267,7 +235,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// then read the instance document again, looking for desired file creation
+	// then read the instance document again, looking for desired encrypted (private) file creation
 
 	fmt.Printf("\nWaiting for 4 Private files to be created (for upt to 5 seconds):\n")
 	attempts = 50
@@ -278,7 +246,7 @@ func main() {
 		instanceFromAPI, isFatal, err = datasetAPI.GetInstance(ctx, instanceID)
 		if err != nil {
 			fmt.Printf("isFatal: %v\n", isFatal)
-			logFatal(ctx, "GetInstance 2 failed", err, nil)
+			logFatal(ctx, "GetInstance 3 failed", err, nil)
 		}
 		if instanceFromAPI.Version.Downloads["csv"].Private != "" &&
 			instanceFromAPI.Version.Downloads["csvw"].Private != "" &&
@@ -302,6 +270,10 @@ func main() {
 	spew.Dump(instanceFromAPI.Version.Downloads["csvw"].Private)
 	spew.Dump(instanceFromAPI.Version.Downloads["txt"].Private)
 	spew.Dump(instanceFromAPI.Version.Downloads["xls"].Private)
+
+	// do the steps that produces the unencrypted files ...
+
+	//!!! add code to do above
 
 	// now delete the dataset, so this can run again with the same recipe ...
 
@@ -334,19 +306,6 @@ func ensureDirectoryExists(dirName string) {
 		check(os.Mkdir(dirName, 0700))
 	}
 }
-
-/*func readInput() (string, error) {
-	rdr := bufio.NewReader(os.Stdin)
-
-	s, err := rdr.ReadString('\n')
-	if err != nil && err != io.EOF {
-		return "", fmt.Errorf("failed to read from stdin: %s", err)
-	}
-
-	fmt.Println("florence-token:", s)
-
-	return s, nil
-}*/
 
 func getToken() (string, error) {
 	fmt.Printf("Running get-florence-token\n")
@@ -475,12 +434,8 @@ func prettyPrint(s interface{}) string {
 	}
 }
 
-func addDataset(token, datasetID, datasetType string) error {
-	fmt.Println("addDataset: POST /datasets/{dataset_id}:")
-
-	someBody := fmt.Sprintf(`{"type":"%s"}`, datasetType)
-
-	r, err := http.NewRequest("POST", datasetAPIHost+"/datasets/"+datasetID, bytes.NewBufferString(someBody))
+func doAPICall(token, action, uri, body string) error {
+	r, err := http.NewRequest(action, uri, bytes.NewBufferString(body))
 	if err != nil {
 		return fmt.Errorf("error creating request: %s", err)
 	}
@@ -503,214 +458,73 @@ func addDataset(token, datasetID, datasetType string) error {
 		return fmt.Errorf("error reading response body: %s", err)
 	}
 
-	fmt.Printf("Got response from POST: %d\n", res.StatusCode)
+	fmt.Printf("Got response from API: %d\n", res.StatusCode)
 	fmt.Println(prettyPrint(string(b)))
 
 	return nil
+}
+
+func addDataset(token, datasetID, datasetType string) error {
+	fmt.Println("addDataset: POST /datasets/{dataset_id}:")
+
+	uri := datasetAPIHost + "/datasets/" + datasetID
+	body := fmt.Sprintf(`{"type":"%s"}`, datasetType)
+
+	return doAPICall(token, "POST", uri, body)
 }
 
 func putMetadata(token, datasetID string) error {
 	fmt.Println("putMetadata: PUT /datasets/{dataset_id}:")
 
+	uri := datasetAPIHost + "/datasets/" + datasetID
 	// !!! might want to add something extra in for the qmi/url so as to see something in the metadata
 	// !!! also, the following may be missing the insertion of the 'release_date' that is needed in net step, but i did not see it in any of the logs
-	someBody := fmt.Sprintf(`{"contacts": [{}],"id": "%s","links": {"access_rights": {},"editions": {},"latest_version": {},"self": {},"taxonomy": {}},"qmi": {},"title": "a2 test"}`, datasetID) //!!! ??
+	body := fmt.Sprintf(`{"contacts": [{}],"id": "%s","links": {"access_rights": {},"editions": {},"latest_version": {},"self": {},"taxonomy": {}},"qmi": {},"title": "a2 test"}`, datasetID) //!!! ??
 
-	r, err := http.NewRequest("PUT", datasetAPIHost+"/datasets/"+datasetID, bytes.NewBufferString(someBody))
-	if err != nil {
-		return fmt.Errorf("error creating request: %s", err)
-	}
-
-	r.Header.Set("X-Florence-Token", token)
-
-	res, err := client.Do(r)
-	if err != nil {
-		return fmt.Errorf("error making request: %s", err)
-	}
-	defer func() {
-		cerr := res.Body.Close()
-		if cerr != nil {
-			fmt.Printf("problem closing: response body : %v\n", cerr)
-		}
-	}()
-
-	b, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return fmt.Errorf("error reading response body: %s", err)
-	}
-
-	fmt.Printf("Got response from PUT: %d\n", res.StatusCode)
-	fmt.Println(prettyPrint(string(b)))
-
-	return nil
+	return doAPICall(token, "PUT", uri, body)
 }
 
 func putVersion(token, datasetID, edition, version string) error {
 	fmt.Println("putVersion: PUT /datasets/{dataset_id}/editions/{edition}/versions/{version}:")
 
-	someBody := fmt.Sprintf(`{"release_date": "2021-12-01T00:00:00.000Z"}`) // seems to need this, but did not see it in any of the logs for this action, maybe its done in a previous step that i missed ?
+	uri := datasetAPIHost + "/datasets/" + datasetID + "/editions/" + edition + "/versions/" + version
+	body := fmt.Sprintf(`{"release_date": "2021-12-01T00:00:00.000Z"}`) // seems to need this, but did not see it in any of the logs for this action, maybe its done in a previous step that i missed ?
 
-	r, err := http.NewRequest("PUT", datasetAPIHost+"/datasets/"+datasetID+"/editions/"+edition+"/versions/"+version, bytes.NewBufferString(someBody))
-	if err != nil {
-		return fmt.Errorf("error creating request: %s", err)
-	}
-
-	r.Header.Set("X-Florence-Token", token)
-
-	res, err := client.Do(r)
-	if err != nil {
-		return fmt.Errorf("error making request: %s", err)
-	}
-	defer func() {
-		cerr := res.Body.Close()
-		if cerr != nil {
-			fmt.Printf("problem closing: response body : %v\n", cerr)
-		}
-	}()
-
-	b, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return fmt.Errorf("error reading response body: %s", err)
-	}
-
-	fmt.Printf("Got response from PUT: %d\n", res.StatusCode)
-	fmt.Println(prettyPrint(string(b)))
-
-	return nil
+	return doAPICall(token, "PUT", uri, body)
 }
 
 func updateInstance(token, instanceID string) error {
 	fmt.Println("updateInstance: PUT /instances/{instance_id}:")
 
-	someBody := fmt.Sprintf(`{"dimensions": [{"id": "city","label": "City","links": {"code_list": {},"options": {},"version": {}},"name": "City"},{"id": "siblings_3","label": "Number of siblings (3 mappings)","links": {"code_list": {},"options": {},"version": {}},"name": "Number of siblings (3 mappings)"},{"id": "sex","label": "Sex","links": {"code_list": {},"options": {},"version": {}},"name": "Sex"}],"import_tasks": null,"last_updated": "0001-01-01T00:00:00Z"}`)
+	uri := datasetAPIHost + "/instances/" + instanceID
+	body := fmt.Sprintf(`{"dimensions": [{"id": "city","label": "City","links": {"code_list": {},"options": {},"version": {}},"name": "City"},{"id": "siblings_3","label": "Number of siblings (3 mappings)","links": {"code_list": {},"options": {},"version": {}},"name": "Number of siblings (3 mappings)"},{"id": "sex","label": "Sex","links": {"code_list": {},"options": {},"version": {}},"name": "Sex"}],"import_tasks": null,"last_updated": "0001-01-01T00:00:00Z"}`)
 
-	r, err := http.NewRequest("PUT", datasetAPIHost+"/instances/"+instanceID, bytes.NewBufferString(someBody))
-	if err != nil {
-		return fmt.Errorf("error creating request: %s", err)
-	}
-
-	r.Header.Set("X-Florence-Token", token)
-
-	res, err := client.Do(r)
-	if err != nil {
-		return fmt.Errorf("error making request: %s", err)
-	}
-	defer func() {
-		cerr := res.Body.Close()
-		if cerr != nil {
-			fmt.Printf("problem closing: response body : %v\n", cerr)
-		}
-	}()
-
-	b, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return fmt.Errorf("error reading response body: %s", err)
-	}
-
-	fmt.Printf("Got response from PUT: %d\n", res.StatusCode)
-	fmt.Println(prettyPrint(string(b)))
-
-	return nil
+	return doAPICall(token, "PUT", uri, body)
 }
 
 func putCollection(token, datasetID, collectionName, collectionUniqueNumber string) error {
 	fmt.Println("putCollection: PUT /datasets/{dataset_id}:")
 
-	someBody := fmt.Sprintf(`{"collection_id": "%s-%s","state": "associated"}`, collectionName, collectionUniqueNumber)
+	uri := datasetAPIHost + "/datasets/" + datasetID
+	body := fmt.Sprintf(`{"collection_id": "%s-%s","state": "associated"}`, collectionName, collectionUniqueNumber)
 
-	r, err := http.NewRequest("PUT", datasetAPIHost+"/datasets/"+datasetID, bytes.NewBufferString(someBody))
-	if err != nil {
-		return fmt.Errorf("error creating request: %s", err)
-	}
-
-	r.Header.Set("X-Florence-Token", token)
-
-	res, err := client.Do(r)
-	if err != nil {
-		return fmt.Errorf("error making request: %s", err)
-	}
-	defer func() {
-		cerr := res.Body.Close()
-		if cerr != nil {
-			fmt.Printf("problem closing: response body : %v\n", cerr)
-		}
-	}()
-
-	b, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return fmt.Errorf("error reading response body: %s", err)
-	}
-
-	fmt.Printf("Got response from PUT: %d\n", res.StatusCode)
-	fmt.Println(prettyPrint(string(b)))
-
-	return nil
+	return doAPICall(token, "PUT", uri, body)
 }
 
 func putVersionCollection(token, datasetID, edition, version, collectionName, collectionUniqueNumber, instance_id string) error {
 	fmt.Println("putVersionCollection: PUT /datasets/{dataset_id}/editions/{edition}/versions/{version}:")
 
-	someBody := fmt.Sprintf(`{"collection_id": "%s-%s","dataset_id": "%s","id": "%s","state": "associated"}`, collectionName, collectionUniqueNumber, datasetID, instance_id)
+	uri := datasetAPIHost + "/datasets/" + datasetID + "/editions/" + edition + "/versions/" + version
+	body := fmt.Sprintf(`{"collection_id": "%s-%s","dataset_id": "%s","id": "%s","state": "associated"}`, collectionName, collectionUniqueNumber, datasetID, instance_id)
 
-	r, err := http.NewRequest("PUT", datasetAPIHost+"/datasets/"+datasetID+"/editions/"+edition+"/versions/"+version, bytes.NewBufferString(someBody))
-	if err != nil {
-		return fmt.Errorf("error creating request: %s", err)
-	}
-
-	r.Header.Set("X-Florence-Token", token)
-
-	res, err := client.Do(r)
-	if err != nil {
-		return fmt.Errorf("error making request: %s", err)
-	}
-	defer func() {
-		cerr := res.Body.Close()
-		if cerr != nil {
-			fmt.Printf("problem closing: response body : %v\n", cerr)
-		}
-	}()
-
-	b, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return fmt.Errorf("error reading response body: %s", err)
-	}
-
-	fmt.Printf("Got response from PUT: %d\n", res.StatusCode)
-	fmt.Println(prettyPrint(string(b)))
-
-	return nil
+	return doAPICall(token, "PUT", uri, body)
 }
 
 func deleteDataset(token, datasetID string) error {
 	fmt.Println("deleteDataset: DELETE /datasets/{dataset_id}:")
 
-	someBody := fmt.Sprintf(`{}`)
+	uri := datasetAPIHost + "/datasets/" + datasetID
+	body := fmt.Sprintf(`{}`)
 
-	r, err := http.NewRequest("DELETE", datasetAPIHost+"/datasets/"+datasetID, bytes.NewBufferString(someBody))
-	if err != nil {
-		return fmt.Errorf("error creating request: %s", err)
-	}
-
-	r.Header.Set("X-Florence-Token", token)
-
-	res, err := client.Do(r)
-	if err != nil {
-		return fmt.Errorf("error making request: %s", err)
-	}
-	defer func() {
-		cerr := res.Body.Close()
-		if cerr != nil {
-			fmt.Printf("problem closing: response body : %v\n", cerr)
-		}
-	}()
-
-	b, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return fmt.Errorf("error reading response body: %s", err)
-	}
-
-	fmt.Printf("Got response from DELETE: %d\n", res.StatusCode)
-	fmt.Println(prettyPrint(string(b)))
-
-	return nil
+	return doAPICall(token, "DELETE", uri, body)
 }
