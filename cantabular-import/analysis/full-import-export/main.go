@@ -237,8 +237,8 @@ func main() {
 
 	// then read the instance document again, looking for desired encrypted (private) file creation
 
-	fmt.Printf("\nWaiting for 4 Private files to be created (for upt to 5 seconds):\n")
-	attempts = 50
+	fmt.Printf("\nWaiting for 4 Private files to be created (for upt0 to 10 seconds):\n")
+	attempts = 100
 
 	for attempts > 0 {
 		time.Sleep(100 * time.Millisecond)
@@ -253,13 +253,13 @@ func main() {
 			instanceFromAPI.Version.Downloads["txt"].Private != "" &&
 			instanceFromAPI.Version.Downloads["xls"].Private != "" {
 
-			fmt.Printf("\nGot all 4 private files after: %d milliseconds:\n", 100*(51-attempts))
+			fmt.Printf("\nGot all 4 private files after: %d milliseconds:\n", 100*(101-attempts))
 			break
 		}
 		attempts--
 	}
 	if attempts == 0 {
-		fmt.Printf("failed to see get all 4 private files after 5 seconds\nOnly got:")
+		fmt.Printf("failed to see get all 4 private files after 10 seconds\nOnly got:\n")
 		spew.Dump(instanceFromAPI.Version.Downloads["csv"].Private)
 		spew.Dump(instanceFromAPI.Version.Downloads["csvw"].Private)
 		spew.Dump(instanceFromAPI.Version.Downloads["txt"].Private)
@@ -273,7 +273,109 @@ func main() {
 
 	// do the steps that produces the unencrypted files ...
 
-	//!!! add code to do above
+	fmt.Printf("\nPublic Export Step 7:\n")
+	err = putMetadata2step7(token, instanceFromAPI.Version.Links.Dataset.ID)
+
+	if err != nil {
+		fmt.Println("error doing putMetadata2step7: ", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("\nPublic Export Step 8:\n")
+	err = putVersion2step8(token,
+		instanceFromAPI.Version.Links.Dataset.ID,
+		instanceFromAPI.Version.Links.Edition.ID,
+		instanceFromAPI.Version.Links.Version.ID)
+
+	if err != nil {
+		fmt.Println("error doing putVersion2step8: ", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("\nPublic Export Step 9:\n")
+	err = updateInstance2step9(token, instanceFromAPI.Version.ID) // the instance_id
+
+	if err != nil {
+		fmt.Println("error doing updateInstance2step9: ", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("\nPublic Export Step 10 (identical to step 7 ?):\n")
+	err = putMetadata2step7(token, instanceFromAPI.Version.Links.Dataset.ID)
+
+	if err != nil {
+		fmt.Println("error doing putMetadata2step7: ", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("\nPublic Export Step 11 (identical to step 8 ?):\n")
+	err = putVersion2step8(token,
+		instanceFromAPI.Version.Links.Dataset.ID,
+		instanceFromAPI.Version.Links.Edition.ID,
+		instanceFromAPI.Version.Links.Version.ID)
+
+	if err != nil {
+		fmt.Println("error doing putVersion2step8: ", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("\nPublic Export Step 12 (identical to step 9 ?):\n")
+	err = updateInstance2step9(token, instanceFromAPI.Version.ID) // the instance_id
+
+	if err != nil {
+		fmt.Println("error doing updateInstance2step9: ", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("\nPublic Export Step 13:\n")
+	err = putUpdateVersionToPublished(token,
+		instanceFromAPI.Version.Links.Dataset.ID,
+		instanceFromAPI.Version.Links.Edition.ID,
+		instanceFromAPI.Version.Links.Version.ID,
+		instanceFromAPI.Version.ID) // the instance_id !!! this may be wrong, see the called function for more comments
+
+	if err != nil {
+		fmt.Println("error doing putUpdateVersionToPublished: ", err)
+		os.Exit(1)
+	}
+
+	// then read the instance document again, looking for desired encrypted (private) file creation
+
+	fmt.Printf("\nWaiting for 4 Public files to be created (for upto to 10 seconds):\n")
+	attempts = 100
+
+	for attempts > 0 {
+		time.Sleep(100 * time.Millisecond)
+
+		instanceFromAPI, isFatal, err = datasetAPI.GetInstance(ctx, instanceID)
+		if err != nil {
+			fmt.Printf("isFatal: %v\n", isFatal)
+			logFatal(ctx, "GetInstance 3 failed", err, nil)
+		}
+		if instanceFromAPI.Version.Downloads["csv"].Public != "" &&
+			instanceFromAPI.Version.Downloads["csvw"].Public != "" &&
+			instanceFromAPI.Version.Downloads["txt"].Public != "" &&
+			instanceFromAPI.Version.Downloads["xls"].Public != "" {
+
+			fmt.Printf("\nGot all 4 public files after: %d milliseconds:\n", 100*(101-attempts))
+			break
+		}
+		attempts--
+	}
+	if attempts == 0 {
+		fmt.Printf("failed to see get all 4 public files after 10 seconds\nOnly got:\n")
+		spew.Dump(instanceFromAPI.Version.Downloads["csv"].Public)
+		spew.Dump(instanceFromAPI.Version.Downloads["csvw"].Public)
+		spew.Dump(instanceFromAPI.Version.Downloads["txt"].Public)
+		spew.Dump(instanceFromAPI.Version.Downloads["xls"].Public)
+		os.Exit(1)
+	}
+	spew.Dump(instanceFromAPI.Version.Downloads["csv"].Public)
+	spew.Dump(instanceFromAPI.Version.Downloads["csvw"].Public)
+	spew.Dump(instanceFromAPI.Version.Downloads["txt"].Public)
+	spew.Dump(instanceFromAPI.Version.Downloads["xls"].Public)
+
+	time.Sleep(500 * time.Millisecond)
 
 	// now delete the dataset, so this can run again with the same recipe ...
 
@@ -285,12 +387,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	/*
-		spew.Dump(instanceFromAPI.Version.Downloads["csv"].Public)
-		spew.Dump(instanceFromAPI.Version.Downloads["csvw"].Public)
-		spew.Dump(instanceFromAPI.Version.Downloads["txt"].Public)
-		spew.Dump(instanceFromAPI.Version.Downloads["xls"].Public)
-	*/
+	// !!! above fails with: Got response from API: 403  ... which means Forbidden
 
 	os.Exit(0)
 }
@@ -461,6 +558,10 @@ func doAPICall(token, action, uri, body string) error {
 	fmt.Printf("Got response from API: %d\n", res.StatusCode)
 	fmt.Println(prettyPrint(string(b)))
 
+	if res.StatusCode < 200 || res.StatusCode > 228 {
+		return fmt.Errorf("Oops not OK")
+	}
+
 	return nil
 }
 
@@ -477,9 +578,11 @@ func putMetadata(token, datasetID string) error {
 	fmt.Println("putMetadata: PUT /datasets/{dataset_id}:")
 
 	uri := datasetAPIHost + "/datasets/" + datasetID
-	// !!! might want to add something extra in for the qmi/url so as to see something in the metadata
 	// !!! also, the following may be missing the insertion of the 'release_date' that is needed in net step, but i did not see it in any of the logs
-	body := fmt.Sprintf(`{"contacts": [{}],"id": "%s","links": {"access_rights": {},"editions": {},"latest_version": {},"self": {},"taxonomy": {}},"qmi": {},"title": "a2 test"}`, datasetID) //!!! ??
+	body := fmt.Sprintf(`{"contacts": [{}],"id": "%s","keywords": ["a4"],"links": {"access_rights": {},"editions": {},"latest_version": {},"self": {},"taxonomy": {}},"qmi": {"href": "ons.gov.uk"},"title": "a4"}`, datasetID)
+
+	//!!! might actually need the following, but then a different function to add the vars bit on the end
+	//body := fmt.Sprintf(`{"contacts": [{}],"id": "%s","keywords": ["a4"],"links": {"access_rights": {},"editions": {},"latest_version": {},"self": {},"taxonomy": {}},"qmi": {"href": "ons.gov.uk"},"title": "a4"},"vars: Dataset_id": "%s"`, datasetID, datasetID)
 
 	return doAPICall(token, "PUT", uri, body)
 }
@@ -516,6 +619,48 @@ func putVersionCollection(token, datasetID, edition, version, collectionName, co
 
 	uri := datasetAPIHost + "/datasets/" + datasetID + "/editions/" + edition + "/versions/" + version
 	body := fmt.Sprintf(`{"collection_id": "%s-%s","dataset_id": "%s","id": "%s","state": "associated"}`, collectionName, collectionUniqueNumber, datasetID, instance_id)
+
+	return doAPICall(token, "PUT", uri, body)
+}
+
+func putMetadata2step7(token, datasetID string) error {
+	fmt.Println("putMetadata 2: PUT /datasets/{dataset_id}:")
+
+	uri := datasetAPIHost + "/datasets/" + datasetID
+	// !!! also, the following may be missing the insertion of the 'release_date' that is needed in net step, but i did not see it in any of the logs
+	body := fmt.Sprintf(`{"contacts": [{}],"id": "%s","keywords": ["a4"],"links": {"access_rights": {},"editions": {},"latest_version": {},"self": {},"taxonomy": {}},"qmi": {"href": "ons.gov.uk"},"title": "a4"}`, datasetID)
+
+	//!!! might actually need the following, but then a different function to add the vars bit on the end:
+	// ,"vars: Dataset_id": "cantabular-example-1"},
+
+	return doAPICall(token, "PUT", uri, body)
+}
+
+func putVersion2step8(token, datasetID, edition, version string) error {
+	fmt.Println("putVersion: PUT /datasets/{dataset_id}/editions/{edition}/versions/{version}:")
+
+	uri := datasetAPIHost + "/datasets/" + datasetID + "/editions/" + edition + "/versions/" + version
+	//body := fmt.Sprintf(`{"release_date": "2021-12-01T00:00:00.000Z"}`) // seems to need this, but did not see it in any of the logs for this action, maybe its done in a previous step that i missed ?
+	//body := fmt.Sprintf(`{"DatasetID": "%s"}`, datasetID) // seems to need this, but did not see it in any of the logs for this action, maybe its done in a previous step that i missed ?
+	body := fmt.Sprintf(`{}`)
+
+	return doAPICall(token, "PUT", uri, body)
+}
+
+func updateInstance2step9(token, instanceID string) error {
+	fmt.Println("updateInstance: PUT /instances/{instance_id}:")
+
+	uri := datasetAPIHost + "/instances/" + instanceID
+	body := fmt.Sprintf(`{"dimensions": [{"id": "city","label": "City","links": {"code_list": {},"options": {},"version": {}},"name": "City"},{"id": "siblings_3","label": "Number of siblings (3 mappings)","links": {"code_list": {},"options": {},"version": {}},"name": "Number of siblings (3 mappings)"},{"id": "sex","label": "Sex","links": {"code_list": {},"options": {},"version": {}},"name": "Sex"}],"import_tasks": null,"last_updated": "0001-01-01T00:00:00Z"}`)
+
+	return doAPICall(token, "PUT", uri, body)
+}
+
+func putUpdateVersionToPublished(token, datasetID, edition, version, instanceID string) error {
+	fmt.Println("putVersion: PUT /datasets/{dataset_id}/editions/{edition}/versions/{version}:")
+
+	uri := datasetAPIHost + "/datasets/" + datasetID + "/editions/" + edition + "/versions/" + version
+	body := fmt.Sprintf(`{"state": "published"}`)
 
 	return doAPICall(token, "PUT", uri, body)
 }
