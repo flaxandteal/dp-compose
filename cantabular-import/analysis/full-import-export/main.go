@@ -75,7 +75,7 @@ func logFatal(ctx context.Context, contextMessage string, err error, data log.Da
 }
 
 func main() {
-	fmt.Printf("Full import and export with database monitoring\n")
+	fmt.Printf("Full import and export for Cantabular API's creating private and public (published) files:\n\n")
 	ensureDirectoryExists(idDir)
 
 	ctx := context.Background()
@@ -185,6 +185,13 @@ func main() {
 	// and once we have the instance and the state is as required ...
 
 	// do the steps that produces the encrypted files ...
+
+	// NOTE: These steps together with the parameters used have been deduced from examining docker logs
+	// in the local dp-compose stack for cantabular after manually doing the florence steps to create
+	// both the private and public (published) files.
+	// There may be some other steps needed to fully replicate the aspects of collection database stuff,
+	// but such steps do not impact the exercising of the various cantabular apis that end up achieving
+	// the import, export of private and export of public (published) files.
 
 	fmt.Printf("\nPrivate Export Step 1:\n")
 	err = addDataset(token, instanceFromAPI.Version.Links.Dataset.ID, datasetType)
