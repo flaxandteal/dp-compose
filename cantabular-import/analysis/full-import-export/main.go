@@ -17,6 +17,7 @@ import (
 	"github.com/ONSdigital/dp-api-clients-go/dataset"
 	"github.com/ONSdigital/log.go/log"
 	"github.com/davecgh/go-spew/spew"
+	uuid "github.com/satori/go.uuid"
 )
 
 type PutJobRequest struct {
@@ -40,9 +41,10 @@ type Link struct {
 }
 
 var (
-	importAPIHost          = "http://localhost:21800"
-	datasetAPIHost         = "http://localhost:22000"
-	recipeID               = "38542eb6-d3a6-4cc4-ba3f-32b25f23223a"
+	importAPIHost  = "http://localhost:21800"
+	datasetAPIHost = "http://localhost:22000"
+	recipeAPIHost  = "http://localhost:22300"
+	//	recipeID               = "38542eb6-d3a6-4cc4-ba3f-32b25f23223a"
 	datasetType            = "cantabular_table"
 	collectionName         = "a1"
 	collectionUniqueNumber = "17073b56a18b3af2f3c8220be6df9fcdaac9b5394925a9980c98bfd84ad3a003"
@@ -92,7 +94,13 @@ func main() {
 	// operation is put in log file for Docker container(s)
 	t := time.Now()
 
-	res, err := postJob(token)
+	recipeID, err := postCreateUniqueRecipe(token)
+	if err != nil {
+		fmt.Println("error creating recipe via recipe API: ", err)
+		os.Exit(1)
+	}
+
+	res, err := postJob(token, recipeID)
 	if err != nil {
 		fmt.Println("error posting job to importAPI: ", err)
 		os.Exit(1)
@@ -156,8 +164,8 @@ func main() {
 			logFatal(ctx, "GetInstance 2 failed", err, nil)
 		}
 		if instanceFromAPI.Version.State == "edition-confirmed" {
-			//fmt.Printf("\ninstanceFromAPI: %v\n", instanceFromAPI)
-			//spew.Dump(instanceFromAPI)
+			// fmt.Printf("\ninstanceFromAPI: %v\n", instanceFromAPI)
+			// spew.Dump(instanceFromAPI)
 			fmt.Printf("Got 'edition-confirmed' after: %d milliseconds\n", 100*(51-attempts))
 			break
 		}
@@ -375,19 +383,7 @@ func main() {
 	spew.Dump(instanceFromAPI.Version.Downloads["txt"].Public)
 	spew.Dump(instanceFromAPI.Version.Downloads["xls"].Public)
 
-	time.Sleep(500 * time.Millisecond)
-
-	// now delete the dataset, so this can run again with the same recipe ...
-
-	fmt.Printf("\nFinished, now deleting dataset:\n")
-	err = deleteDataset(token, instanceFromAPI.Version.Links.Dataset.ID)
-
-	if err != nil {
-		fmt.Println("error doing deleteDataset: ", err)
-		os.Exit(1)
-	}
-
-	// !!! above fails with: Got response from API: 403  ... which means Forbidden
+	// time.Sleep(500 * time.Millisecond)
 
 	os.Exit(0)
 }
@@ -433,8 +429,33 @@ func getToken() (string, error) {
 	return s, nil
 }
 
-func postJob(token string) (*PostJobResponse, error) {
-	fmt.Printf("Making request to POST import-api/jobs:")
+func postCreateUniqueRecipe(token string) (string, error) {
+	fmt.Printf("\nMaking request to POST recipe-api/recipes (to create unique recipe)\n")
+	uuid := uuid.NewV4().String() // !!! why is this calling some version that returns 2 parameters, when in dataset-api:
+	// this:
+	// https://github.com/ONSdigital/dp-dataset-api/blob/efd5c82f2121c1cb713101bc29ac3a729885f984/models/dataset.go#L344
+	// calls a version that returns one parameter ?
+
+	fmt.Printf("unique uuid: %s\n", uuid)
+
+	// create unique dataset name
+	// (its a MUST for this app to be run multiple times without manually deleting a dataset of the same name)
+	datasetIdName := "aa-1" + "-" + uuid
+
+	aliasAndTtile := "aa Cantabular Test"
+
+	uri := recipeAPIHost + "/recipes"
+	fmt.Printf("uri: %s\n", uri)
+
+	body := fmt.Sprintf(`{"alias": "%s","cantabular_blob": "Example","format": "cantabular_table","id": "%s","output_instances": [{"code_lists": [{"href": "http://localhost:22400/code-lists/city-regions","id": "city","is_hierarchy": false,"name": "City"},{"href": "http://localhost:22400/code-lists/siblings_3","id": "siblings_3","is_hierarchy": false,"name": "Number Of Siblings (3 mappings)"},{"href": "http://localhost:22400/code-lists/sex","id": "sex","is_hierarchy": false,"name": "Sex"}],"dataset_id": "%s","editions": ["2021"],"title": "%s"}]}`, aliasAndTtile, uuid, datasetIdName, aliasAndTtile)
+
+	fmt.Printf("Body: %s\n", body)
+
+	return uuid, doAPICall(token, "POST", uri, body)
+}
+
+func postJob(token, recipeID string) (*PostJobResponse, error) {
+	fmt.Printf("\nMaking request to POST import-api/jobs:\n")
 
 	b := []byte(fmt.Sprintf(`{"recipe":"%s"}`, recipeID))
 
@@ -484,7 +505,7 @@ func putJob(token string, resp *PostJobResponse) error {
 		Links: resp.Links,
 	}
 
-	//spew.Dump(resp)
+	// spew.Dump(resp)
 
 	b, err := json.Marshal(req)
 	if err != nil {
@@ -582,7 +603,7 @@ func putMetadata(token, datasetID string) error {
 	body := fmt.Sprintf(`{"contacts": [{}],"id": "%s","keywords": ["a4"],"links": {"access_rights": {},"editions": {},"latest_version": {},"self": {},"taxonomy": {}},"qmi": {"href": "ons.gov.uk"},"title": "a4"}`, datasetID)
 
 	//!!! might actually need the following, but then a different function to add the vars bit on the end
-	//body := fmt.Sprintf(`{"contacts": [{}],"id": "%s","keywords": ["a4"],"links": {"access_rights": {},"editions": {},"latest_version": {},"self": {},"taxonomy": {}},"qmi": {"href": "ons.gov.uk"},"title": "a4"},"vars: Dataset_id": "%s"`, datasetID, datasetID)
+	// body := fmt.Sprintf(`{"contacts": [{}],"id": "%s","keywords": ["a4"],"links": {"access_rights": {},"editions": {},"latest_version": {},"self": {},"taxonomy": {}},"qmi": {"href": "ons.gov.uk"},"title": "a4"},"vars: Dataset_id": "%s"`, datasetID, datasetID)
 
 	return doAPICall(token, "PUT", uri, body)
 }
@@ -640,8 +661,8 @@ func putVersion2step8(token, datasetID, edition, version string) error {
 	fmt.Println("putVersion: PUT /datasets/{dataset_id}/editions/{edition}/versions/{version}:")
 
 	uri := datasetAPIHost + "/datasets/" + datasetID + "/editions/" + edition + "/versions/" + version
-	//body := fmt.Sprintf(`{"release_date": "2021-12-01T00:00:00.000Z"}`) // seems to need this, but did not see it in any of the logs for this action, maybe its done in a previous step that i missed ?
-	//body := fmt.Sprintf(`{"DatasetID": "%s"}`, datasetID) // seems to need this, but did not see it in any of the logs for this action, maybe its done in a previous step that i missed ?
+	// body := fmt.Sprintf(`{"release_date": "2021-12-01T00:00:00.000Z"}`) // seems to need this, but did not see it in any of the logs for this action, maybe its done in a previous step that i missed ?
+	// body := fmt.Sprintf(`{"DatasetID": "%s"}`, datasetID) // seems to need this, but did not see it in any of the logs for this action, maybe its done in a previous step that i missed ?
 	body := fmt.Sprintf(`{}`)
 
 	return doAPICall(token, "PUT", uri, body)
@@ -666,6 +687,7 @@ func putUpdateVersionToPublished(token, datasetID, edition, version, instanceID 
 }
 
 func deleteDataset(token, datasetID string) error {
+	// this only works for unpublished datasets
 	fmt.Println("deleteDataset: DELETE /datasets/{dataset_id}:")
 
 	uri := datasetAPIHost + "/datasets/" + datasetID

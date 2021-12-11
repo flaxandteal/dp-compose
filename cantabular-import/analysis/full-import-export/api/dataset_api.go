@@ -2,9 +2,10 @@ package api
 
 import (
 	"context"
-	"net/url"
+	"net/http"
 
 	dataset "github.com/ONSdigital/dp-api-clients-go/dataset"
+	importapi "github.com/ONSdigital/dp-api-clients-go/importapi"
 	"github.com/ONSdigital/log.go/log"
 )
 
@@ -16,75 +17,40 @@ type DatasetAPI struct {
 	BatchSize        int
 }
 
+// DatasetClient is an interface to represent methods called to action upon Dataset REST interface
+type DatasetClient interface {
+	GetInstance(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, instanceID string) (m dataset.Instance, err error)
+}
+
+// errorChecker determines if an error is fatal. Only errors corresponding to http responses on the range 500+ will be considered non-fatal.
+func errorChecker(ctx context.Context, tag string, err error, logData *log.Data) (isFatal bool) {
+	if err == nil {
+		return false
+	}
+	switch err.(type) {
+	case *dataset.ErrInvalidDatasetAPIResponse:
+		httpCode := err.(*dataset.ErrInvalidDatasetAPIResponse).Code()
+		(*logData)["httpCode"] = httpCode
+		if httpCode < http.StatusInternalServerError {
+			isFatal = true
+		}
+	case *importapi.ErrInvalidAPIResponse:
+		httpCode := err.(*importapi.ErrInvalidAPIResponse).Code()
+		(*logData)["httpCode"] = httpCode
+		if httpCode < http.StatusInternalServerError {
+			isFatal = true
+		}
+	default:
+		isFatal = true
+	}
+	(*logData)["is_fatal"] = isFatal
+	log.Event(ctx, tag, log.ERROR, log.Error(err), *logData)
+	return
+}
+
 // GetInstance asks the Dataset API for the details for instanceID
 func (api *DatasetAPI) GetInstance(ctx context.Context, instanceID string) (instance dataset.Instance, isFatal bool, err error) {
 	instance, err = api.Client.GetInstance(ctx, "", api.ServiceAuthToken, "", instanceID)
 	isFatal = errorChecker(ctx, "GetInstance", err, &log.Data{"instanceID": instanceID})
-	return
-}
-
-// GetInstances asks the Dataset API for all instances filtered by vars
-func (api *DatasetAPI) GetInstances(ctx context.Context, vars url.Values) (instances dataset.Instances, isFatal bool, err error) {
-	instances, err = api.Client.GetInstancesInBatches(ctx, "", api.ServiceAuthToken, "", vars, api.BatchSize, api.MaxWorkers)
-	isFatal = errorChecker(ctx, "GetInstance", err, &log.Data{})
-	return
-}
-
-// SetImportObservationTaskComplete marks the import observation task state as completed for an instance
-func (api *DatasetAPI) SetImportObservationTaskComplete(ctx context.Context, instanceID string) (isFatal bool, err error) {
-	err = api.Client.PutInstanceImportTasks(ctx, api.ServiceAuthToken, instanceID,
-		dataset.InstanceImportTasks{
-			ImportObservations: &dataset.ImportObservationsTask{
-				State: dataset.StateCompleted.String(),
-			},
-		},
-	)
-	isFatal = errorChecker(ctx, "SetImportObservationTaskComplete", err, &log.Data{})
-	return
-}
-
-// UpdateInstanceWithNewInserts increments the observation inserted count for an instance
-func (api *DatasetAPI) UpdateInstanceWithNewInserts(ctx context.Context, instanceID string, observationsInserted int32) (isFatal bool, err error) {
-	err = api.Client.UpdateInstanceWithNewInserts(ctx, api.ServiceAuthToken, instanceID, observationsInserted)
-	isFatal = errorChecker(ctx, "UpdateInstanceWithNewInserts", err, &log.Data{})
-	return
-}
-
-// UpdateInstanceWithHierarchyBuilt marks a hierarchy build task state as completed for an instance.
-func (api *DatasetAPI) UpdateInstanceWithHierarchyBuilt(ctx context.Context, instanceID, dimensionID string) (isFatal bool, err error) {
-	err = api.Client.PutInstanceImportTasks(ctx, api.ServiceAuthToken, instanceID,
-		dataset.InstanceImportTasks{
-			BuildHierarchyTasks: []*dataset.BuildHierarchyTask{
-				&dataset.BuildHierarchyTask{
-					DimensionName: dimensionID,
-					State:         dataset.StateCompleted.String(),
-				},
-			},
-		},
-	)
-	isFatal = errorChecker(ctx, "UpdateInstanceWithHierarchyBuilt", err, &log.Data{})
-	return
-}
-
-// UpdateInstanceWithSearchIndexBuilt marks a search index build task state as completed for an instance.
-func (api *DatasetAPI) UpdateInstanceWithSearchIndexBuilt(ctx context.Context, instanceID, dimensionID string) (isFatal bool, err error) {
-	err = api.Client.PutInstanceImportTasks(ctx, api.ServiceAuthToken, instanceID,
-		dataset.InstanceImportTasks{
-			BuildSearchIndexTasks: []*dataset.BuildSearchIndexTask{
-				&dataset.BuildSearchIndexTask{
-					DimensionName: dimensionID,
-					State:         dataset.StateCompleted.String(),
-				},
-			},
-		},
-	)
-	isFatal = errorChecker(ctx, "UpdateInstanceWithHierarchyBuilt", err, &log.Data{})
-	return
-}
-
-// UpdateInstanceState tells the Dataset API that the state has changed of a Dataset instance
-func (api *DatasetAPI) UpdateInstanceState(ctx context.Context, instanceID string, newState dataset.State) (isFatal bool, err error) {
-	err = api.Client.PutInstanceState(ctx, api.ServiceAuthToken, instanceID, newState)
-	isFatal = errorChecker(ctx, "UpdateInstanceWithHierarchyBuilt", err, &log.Data{})
 	return
 }
