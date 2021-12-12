@@ -315,39 +315,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("\nPublic Export Step 10 (identical to step 7 ?):\n")
-	err = putMetadata2step7(token, instanceFromAPI.Version.Links.Dataset.ID)
-
-	if err != nil {
-		fmt.Println("error doing putMetadata2step7: ", err)
-		os.Exit(1)
-	}
-
-	fmt.Printf("\nPublic Export Step 11 (identical to step 8 ?):\n")
-	err = putVersion2step8(token,
-		instanceFromAPI.Version.Links.Dataset.ID,
-		instanceFromAPI.Version.Links.Edition.ID,
-		instanceFromAPI.Version.Links.Version.ID)
-
-	if err != nil {
-		fmt.Println("error doing putVersion2step8: ", err)
-		os.Exit(1)
-	}
-
-	fmt.Printf("\nPublic Export Step 12 (identical to step 9 ?):\n")
-	err = updateInstance2step9(token, instanceFromAPI.Version.ID) // the instance_id
-
-	if err != nil {
-		fmt.Println("error doing updateInstance2step9: ", err)
-		os.Exit(1)
-	}
-
-	fmt.Printf("\nPublic Export Step 13:\n")
+	fmt.Printf("\nPublic Export Step 10:\n")
 	err = putUpdateVersionToPublished(token,
 		instanceFromAPI.Version.Links.Dataset.ID,
 		instanceFromAPI.Version.Links.Edition.ID,
-		instanceFromAPI.Version.Links.Version.ID,
-		instanceFromAPI.Version.ID) // the instance_id !!! this may be wrong, see the called function for more comments
+		instanceFromAPI.Version.Links.Version.ID)
 
 	if err != nil {
 		fmt.Println("error doing putUpdateVersionToPublished: ", err)
@@ -447,14 +419,15 @@ func postCreateUniqueRecipe(token string) (string, error) {
 
 	// create unique dataset name
 	// (its a MUST for this app to be run multiple times without manually deleting a dataset of the same name)
-	datasetIdName := "aa-1" + "-" + uuid
+	datasetIdName := "cantabular-example-1" + "-" + uuid
 
-	aliasAndTtile := "aa Cantabular Test"
+	alias := "Cantabular Example 1"
+	title := "Example Cantabular Dataset City Siblings (3 mappings) And Sex"
 
 	uri := recipeAPIHost + "/recipes"
 	fmt.Printf("uri: %s\n", uri)
 
-	body := fmt.Sprintf(`{"alias": "%s","cantabular_blob": "Example","format": "cantabular_table","id": "%s","output_instances": [{"code_lists": [{"href": "http://localhost:22400/code-lists/city-regions","id": "city","is_hierarchy": false,"name": "City"},{"href": "http://localhost:22400/code-lists/siblings_3","id": "siblings_3","is_hierarchy": false,"name": "Number Of Siblings (3 mappings)"},{"href": "http://localhost:22400/code-lists/sex","id": "sex","is_hierarchy": false,"name": "Sex"}],"dataset_id": "%s","editions": ["2021"],"title": "%s"}]}`, aliasAndTtile, uuid, datasetIdName, aliasAndTtile)
+	body := fmt.Sprintf(`{"alias": "%s","format": "cantabular_table","id": "%s","cantabular_blob": "Example","output_instances": [{"code_lists": [{"href": "http://localhost:22400/code-lists/city-regions","id": "city","is_hierarchy": false,"name": "City"},{"href": "http://localhost:22400/code-lists/siblings_3","id": "siblings_3","is_hierarchy": false,"name": "Number Of Siblings (3 mappings)"},{"href": "http://localhost:22400/code-lists/sex","id": "sex","is_hierarchy": false,"name": "Sex"}],"dataset_id": "%s","editions": ["2021"],"title": "%s"}]}`, alias, uuid, datasetIdName, title)
 
 	fmt.Printf("Body: %s\n", body)
 
@@ -619,7 +592,7 @@ func putVersion(token, datasetID, edition, version string) error {
 	fmt.Println("putVersion: PUT /datasets/{dataset_id}/editions/{edition}/versions/{version}:")
 
 	uri := datasetAPIHost + "/datasets/" + datasetID + "/editions/" + edition + "/versions/" + version
-	body := fmt.Sprintf(`{"release_date": "2021-12-01T00:00:00.000Z"}`) // seems to need this, but did not see it in any of the logs for this action, maybe its done in a previous step that i missed ?
+	body := fmt.Sprintf(`{"release_date": "2021-12-01T00:00:00.000Z"}`) // seems to be needed, though could not see in manual full import logs
 
 	return doAPICall(token, "PUT", uri, body)
 }
@@ -646,7 +619,8 @@ func putVersionCollection(token, datasetID, edition, version, collectionName, co
 	fmt.Println("putVersionCollection: PUT /datasets/{dataset_id}/editions/{edition}/versions/{version}:")
 
 	uri := datasetAPIHost + "/datasets/" + datasetID + "/editions/" + edition + "/versions/" + version
-	body := fmt.Sprintf(`{"collection_id": "%s-%s","dataset_id": "%s","id": "%s","state": "associated"}`, collectionName, collectionUniqueNumber, datasetID, instance_id)
+	//	body := fmt.Sprintf(`{"collection_id": "%s-%s","dataset_id": "%s","id": "%s","state": "associated"}`, collectionName, collectionUniqueNumber, datasetID, instance_id)
+	body := fmt.Sprintf(`{"collection_id": "%s-%s","state": "associated"}`, collectionName, collectionUniqueNumber)
 
 	return doAPICall(token, "PUT", uri, body)
 }
@@ -684,7 +658,7 @@ func updateInstance2step9(token, instanceID string) error {
 	return doAPICall(token, "PUT", uri, body)
 }
 
-func putUpdateVersionToPublished(token, datasetID, edition, version, instanceID string) error {
+func putUpdateVersionToPublished(token, datasetID, edition, version string) error {
 	fmt.Println("putVersion: PUT /datasets/{dataset_id}/editions/{edition}/versions/{version}:")
 
 	uri := datasetAPIHost + "/datasets/" + datasetID + "/editions/" + edition + "/versions/" + version
