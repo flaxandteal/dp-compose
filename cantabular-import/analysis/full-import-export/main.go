@@ -579,11 +579,8 @@ func putMetadata(token, datasetID string) error {
 	fmt.Println("putMetadata: PUT /datasets/{dataset_id}:")
 
 	uri := datasetAPIHost + "/datasets/" + datasetID
-	// !!! also, the following may be missing the insertion of the 'release_date' that is needed in net step, but i did not see it in any of the logs
+	// !!! also, the following may be missing the insertion of the 'release_date' that is needed in next step, but i did not see it in any of the logs
 	body := fmt.Sprintf(`{"contacts": [{}],"id": "%s","keywords": ["a4"],"links": {"access_rights": {},"editions": {},"latest_version": {},"self": {},"taxonomy": {}},"qmi": {"href": "ons.gov.uk"},"title": "a4"}`, datasetID)
-
-	//!!! might actually need the following, but then a different function to add the vars bit on the end
-	// body := fmt.Sprintf(`{"contacts": [{}],"id": "%s","keywords": ["a4"],"links": {"access_rights": {},"editions": {},"latest_version": {},"self": {},"taxonomy": {}},"qmi": {"href": "ons.gov.uk"},"title": "a4"},"vars: Dataset_id": "%s"`, datasetID, datasetID)
 
 	return doAPICall(token, "PUT", uri, body)
 }
@@ -619,7 +616,6 @@ func putVersionCollection(token, datasetID, edition, version, collectionName, co
 	fmt.Println("putVersionCollection: PUT /datasets/{dataset_id}/editions/{edition}/versions/{version}:")
 
 	uri := datasetAPIHost + "/datasets/" + datasetID + "/editions/" + edition + "/versions/" + version
-	//	body := fmt.Sprintf(`{"collection_id": "%s-%s","dataset_id": "%s","id": "%s","state": "associated"}`, collectionName, collectionUniqueNumber, datasetID, instance_id)
 	body := fmt.Sprintf(`{"collection_id": "%s-%s","state": "associated"}`, collectionName, collectionUniqueNumber)
 
 	return doAPICall(token, "PUT", uri, body)
@@ -631,9 +627,6 @@ func putMetadata2step7(token, datasetID string) error {
 	uri := datasetAPIHost + "/datasets/" + datasetID
 	// !!! also, the following may be missing the insertion of the 'release_date' that is needed in net step, but i did not see it in any of the logs
 	body := fmt.Sprintf(`{"contacts": [{}],"id": "%s","keywords": ["a4"],"links": {"access_rights": {},"editions": {},"latest_version": {},"self": {},"taxonomy": {}},"qmi": {"href": "ons.gov.uk"},"title": "a4"}`, datasetID)
-
-	//!!! might actually need the following, but then a different function to add the vars bit on the end:
-	// ,"vars: Dataset_id": "cantabular-example-1"},
 
 	return doAPICall(token, "PUT", uri, body)
 }
