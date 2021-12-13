@@ -301,7 +301,7 @@ func main() {
 
 	diffsPlot.NominalY(cNamesYaxis...)
 
-	err = diffsPlot.Save(100*vg.Centimeter, 20*vg.Centimeter, plotOutputFileName)
+	err = diffsPlot.Save(1000*vg.Centimeter, 20*vg.Centimeter, plotOutputFileName)
 	check(err)
 }
 
