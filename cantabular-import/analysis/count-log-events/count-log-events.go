@@ -17,7 +17,7 @@ const (
 	plotDataFileName          = "../tmp/plot.txt"
 	countResultsFileName      = "count-log-events-results.txt"
 	instanceEventsFileName    = "instance-events.txt"
-	filterHealthEtcFromEvents = true
+	filterHealthEtcFromEvents = false //true
 )
 
 // Using pre-read docker logs file, for all job id's deduce the combined first and last times in the log files.
@@ -331,7 +331,7 @@ func main() {
 		})
 
 		// create regex to remove timestamp string: "created_at": "2021-12-01T09:33:58.1004706Z",
-		reg := regexp.MustCompile(`"created_at": "[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])T(2[0-3]|[01][0-9]):[0-5][0-9].*Z",`)
+		reg := regexp.MustCompile(`"created_at": "[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])T(2[0-3]|[01][0-9]):[0-5][0-9]:[0-5][0-9]\.[0-9]+Z",`)
 
 		// save event lines
 		for _, s := range allInstanceEvents {
