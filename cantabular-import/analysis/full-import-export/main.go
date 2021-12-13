@@ -1,8 +1,7 @@
 package main
 
 import (
-	"ONSdigital/full-import-export/api"
-	"ONSdigital/full-import-export/config"
+	//"ONSdigital/full-import-export/api"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -15,9 +14,11 @@ import (
 	"time"
 
 	"github.com/ONSdigital/dp-api-clients-go/dataset"
+	"github.com/ONSdigital/dp-api-clients-go/importapi"
 	"github.com/ONSdigital/log.go/log"
 	"github.com/davecgh/go-spew/spew"
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
+	"github.com/kelseyhightower/envconfig"
 )
 
 type PutJobRequest struct {
@@ -68,6 +69,92 @@ var (
 
 const serviceName = "full-import-export"
 
+// Config represents the app configuration
+type Config struct {
+	ImportAPIAddr              string        `envconfig:"IMPORT_API_ADDR"`
+	DatasetAPIAddr             string        `envconfig:"DATASET_API_ADDR"`
+	DatasetAPIMaxWorkers       int           `envconfig:"DATASET_API_MAX_WORKERS"` // maximum number of concurrent go-routines requesting items to datast api at the same time
+	DatasetAPIBatchSize        int           `envconfig:"DATASET_API_BATCH_SIZE"`  // maximum size of a response by dataset api when requesting items in batches
+	ShutdownTimeout            time.Duration `envconfig:"GRACEFUL_SHUTDOWN_TIMEOUT"`
+	ServiceAuthToken           string        `envconfig:"SERVICE_AUTH_TOKEN"                   json:"-"`
+	HealthCheckInterval        time.Duration `envconfig:"HEALTHCHECK_INTERVAL"`
+	HealthCheckCriticalTimeout time.Duration `envconfig:"HEALTHCHECK_CRITICAL_TIMEOUT"`
+}
+
+// NewConfig creates the config object
+func NewConfig() (*Config, error) {
+	cfg := Config{
+		ServiceAuthToken:           "AB0A5CFA-3C55-4FA8-AACC-F98039BED0AC",
+		ImportAPIAddr:              "http://localhost:21800",
+		DatasetAPIAddr:             "http://localhost:22000",
+		DatasetAPIMaxWorkers:       100,
+		DatasetAPIBatchSize:        1000,
+		ShutdownTimeout:            5 * time.Second,
+		HealthCheckInterval:        30 * time.Second,
+		HealthCheckCriticalTimeout: 90 * time.Second,
+	}
+	if err := envconfig.Process("", &cfg); err != nil {
+		return nil, err
+	}
+
+	cfg.ServiceAuthToken = "Bearer " + cfg.ServiceAuthToken
+
+	return &cfg, nil
+}
+
+// String is implemented to prevent sensitive fields being logged.
+// The config is returned as JSON with sensitive fields omitted.
+func (config Config) String() string {
+	json, _ := json.Marshal(config)
+	return string(json)
+}
+
+// DatasetAPI extends the dataset api Client with json - bson mapping, specific calls, and error management
+type DatasetAPI struct {
+	ServiceAuthToken string
+	Client           DatasetClient
+	MaxWorkers       int
+	BatchSize        int
+}
+
+// DatasetClient is an interface to represent methods called to action upon Dataset REST interface
+type DatasetClient interface {
+	GetInstance(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, instanceID string) (m dataset.Instance, err error)
+}
+
+// errorChecker determines if an error is fatal. Only errors corresponding to http responses on the range 500+ will be considered non-fatal.
+func errorChecker(ctx context.Context, tag string, err error, logData *log.Data) (isFatal bool) {
+	if err == nil {
+		return false
+	}
+	switch err.(type) {
+	case *dataset.ErrInvalidDatasetAPIResponse:
+		httpCode := err.(*dataset.ErrInvalidDatasetAPIResponse).Code()
+		(*logData)["httpCode"] = httpCode
+		if httpCode < http.StatusInternalServerError {
+			isFatal = true
+		}
+	case *importapi.ErrInvalidAPIResponse:
+		httpCode := err.(*importapi.ErrInvalidAPIResponse).Code()
+		(*logData)["httpCode"] = httpCode
+		if httpCode < http.StatusInternalServerError {
+			isFatal = true
+		}
+	default:
+		isFatal = true
+	}
+	(*logData)["is_fatal"] = isFatal
+	log.Event(ctx, tag, log.ERROR, log.Error(err), *logData)
+	return
+}
+
+// GetInstance asks the Dataset API for the details for instanceID
+func (api *DatasetAPI) GetInstance(ctx context.Context, instanceID string) (instance dataset.Instance, isFatal bool, err error) {
+	instance, err = api.Client.GetInstance(ctx, "", api.ServiceAuthToken, "", instanceID)
+	isFatal = errorChecker(ctx, "GetInstance", err, &log.Data{"instanceID": instanceID})
+	return
+}
+
 // logFatal is a utility method for a common failure pattern in main()
 func logFatal(ctx context.Context, contextMessage string, err error, data log.Data) {
 	log.Event(ctx, contextMessage, log.FATAL, log.Error(err), data)
@@ -79,7 +166,7 @@ func main() {
 	ensureDirectoryExists(idDir)
 
 	ctx := context.Background()
-	cfg, err := config.NewConfig()
+	cfg, err := NewConfig()
 	if err != nil {
 		logFatal(ctx, "config failed", err, nil)
 	}
@@ -134,7 +221,7 @@ func main() {
 	fmt.Printf("\nThe instance'id' is: %s\n", instanceID)
 
 	// Create wrapped datasetAPI client
-	datasetAPI := &api.DatasetAPI{
+	datasetAPI := &DatasetAPI{
 		Client:           dataset.NewAPIClient(cfg.DatasetAPIAddr),
 		ServiceAuthToken: cfg.ServiceAuthToken,
 		MaxWorkers:       cfg.DatasetAPIMaxWorkers,
@@ -286,6 +373,11 @@ func main() {
 	spew.Dump(instanceFromAPI.Version.Downloads["txt"].Private)
 	spew.Dump(instanceFromAPI.Version.Downloads["xls"].Private)
 
+	checkFileHasContents("../../minio/data" + strings.Replace(instanceFromAPI.Version.Downloads["csv"].Private, "http://minio:9000", "", 1))
+	checkFileHasContents("../../minio/data" + strings.Replace(instanceFromAPI.Version.Downloads["csvw"].Private, "http://minio:9000", "", 1))
+	checkFileHasContents("../../minio/data" + strings.Replace(instanceFromAPI.Version.Downloads["txt"].Private, "http://minio:9000", "", 1))
+	checkFileHasContents("../../minio/data" + strings.Replace(instanceFromAPI.Version.Downloads["xls"].Private, "http://minio:9000", "", 1))
+
 	// do the steps that produces the unencrypted files ...
 
 	fmt.Printf("\nPublic Export Step 7:\n")
@@ -363,7 +455,10 @@ func main() {
 	spew.Dump(instanceFromAPI.Version.Downloads["txt"].Public)
 	spew.Dump(instanceFromAPI.Version.Downloads["xls"].Public)
 
-	// time.Sleep(500 * time.Millisecond)
+	checkFileHasContents("../../minio/data" + strings.Replace(instanceFromAPI.Version.Downloads["csv"].Public, "http://minio:9000", "", 1))
+	checkFileHasContents("../../minio/data" + strings.Replace(instanceFromAPI.Version.Downloads["csvw"].Public, "http://minio:9000", "", 1))
+	checkFileHasContents("../../minio/data" + strings.Replace(instanceFromAPI.Version.Downloads["txt"].Public, "http://minio:9000", "", 1))
+	checkFileHasContents("../../minio/data" + strings.Replace(instanceFromAPI.Version.Downloads["xls"].Public, "http://minio:9000", "", 1))
 
 	os.Exit(0)
 }
@@ -377,6 +472,19 @@ func check(err error) {
 func ensureDirectoryExists(dirName string) {
 	if _, err := os.Stat(dirName); os.IsNotExist(err) {
 		check(os.Mkdir(dirName, 0700))
+	}
+}
+
+func checkFileHasContents(fileName string) {
+	fi, err := os.Stat(fileName)
+	if err != nil {
+		fmt.Printf("Cant get information for: %s\n", fileName)
+		os.Exit(1)
+	}
+	// get the size
+	if fi.Size() == 0 {
+		fmt.Printf("File must not have zero length: %s\n", fileName)
+		os.Exit(1)
 	}
 }
 
@@ -411,9 +519,7 @@ func getToken() (string, error) {
 
 func postCreateUniqueRecipe(token string) (string, error) {
 	fmt.Printf("\nMaking request to POST recipe-api/recipes (to create unique recipe)\n")
-	u := uuid.NewV4()
-
-	uuid := u.String()
+	uuid := uuid.New().String()
 
 	fmt.Printf("unique uuid: %s\n", uuid)
 
