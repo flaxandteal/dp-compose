@@ -411,7 +411,9 @@ func getToken() (string, error) {
 
 func postCreateUniqueRecipe(token string) (string, error) {
 	fmt.Printf("\nMaking request to POST recipe-api/recipes (to create unique recipe)\n")
-	uuid := uuid.NewV4().String()
+	u := uuid.NewV4()
+
+	uuid := u.String()
 
 	fmt.Printf("unique uuid: %s\n", uuid)
 
