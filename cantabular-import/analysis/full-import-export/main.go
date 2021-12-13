@@ -411,11 +411,7 @@ func getToken() (string, error) {
 
 func postCreateUniqueRecipe(token string) (string, error) {
 	fmt.Printf("\nMaking request to POST recipe-api/recipes (to create unique recipe)\n")
-	u, _ := uuid.NewV4()
-	uuid := u.String()
-	// this:
-	// https://github.com/ONSdigital/dp-dataset-api/blob/efd5c82f2121c1cb713101bc29ac3a729885f984/models/dataset.go#L344
-	// calls a version that returns one parameter ?
+	uuid := uuid.NewV4().String()
 
 	fmt.Printf("unique uuid: %s\n", uuid)
 
@@ -583,7 +579,6 @@ func putMetadata(token, datasetID string) error {
 	fmt.Println("putMetadata: PUT /datasets/{dataset_id}:")
 
 	uri := datasetAPIHost + "/datasets/" + datasetID
-	// !!! also, the following may be missing the insertion of the 'release_date' that is needed in next step, but i did not see it in any of the logs
 	body := fmt.Sprintf(`{"contacts": [{}],"id": "%s","keywords": ["a4"],"links": {"access_rights": {},"editions": {},"latest_version": {},"self": {},"taxonomy": {}},"qmi": {"href": "ons.gov.uk"},"title": "a4"}`, datasetID)
 
 	return doAPICall(token, "PUT", uri, body)
@@ -594,11 +589,7 @@ func putVersion(token, datasetID, edition, version, instanceID string) error {
 	fmt.Println("putVersion: PUT /datasets/{dataset_id}/editions/{edition}/versions/{version}:")
 
 	uri := datasetAPIHost + "/datasets/" + datasetID + "/editions/" + edition + "/versions/" + version
-	//	body := fmt.Sprintf(`{"release_date": "2021-12-01T00:00:00.000Z"}`) // seems to be needed, though could not see in manual full import logs
-
 	body := fmt.Sprintf(`{"alerts": [],"id": "%s","links": {"dataset": {},"dimensions": {},"edition": {},"self": {}},"release_date": "2021-12-12T00:00:00.000Z","usage_notes": []}`, instanceID)
-
-	//body := fmt.Sprintf(`{"state": "","temporal": null,"usage_notes": [],"version": 0, "release_date": "2021-12-01T00:00:00.000Z"}`)
 
 	return doAPICall(token, "PUT", uri, body)
 }
@@ -637,7 +628,6 @@ func putMetadata2step7(token, datasetID string) error {
 	fmt.Println("putMetadata 2: PUT /datasets/{dataset_id}:")
 
 	uri := datasetAPIHost + "/datasets/" + datasetID
-	// !!! also, the following may be missing the insertion of the 'release_date' that is needed in net step, but i did not see it in any of the logs
 	body := fmt.Sprintf(`{"contacts": [{}],"id": "%s","keywords": ["a4"],"links": {"access_rights": {},"editions": {},"latest_version": {},"self": {},"taxonomy": {}},"qmi": {"href": "ons.gov.uk"},"title": "a4"}`, datasetID)
 
 	return doAPICall(token, "PUT", uri, body)
@@ -647,11 +637,6 @@ func putVersion2step8(token, datasetID, edition, version, instanceID string) err
 	fmt.Println("putVersion: PUT /datasets/{dataset_id}/editions/{edition}/versions/{version}:")
 
 	uri := datasetAPIHost + "/datasets/" + datasetID + "/editions/" + edition + "/versions/" + version
-	// body := fmt.Sprintf(`{"release_date": "2021-12-01T00:00:00.000Z"}`) // seems to need this, but did not see it in any of the logs for this action, maybe its done in a previous step that i missed ?
-	// body := fmt.Sprintf(`{"DatasetID": "%s"}`, datasetID) // seems to need this, but did not see it in any of the logs for this action, maybe its done in a previous step that i missed ?
-	//body := fmt.Sprintf(`{}`)
-	//body := fmt.Sprintf(`{"state": "","temporal": null,"usage_notes": [],"version": 0}`)
-
 	body := fmt.Sprintf(`{"alerts": [],"id": "%s","links": {"dataset": {},"dimensions": {},"edition": {},"self": {}},"release_date": "2021-12-12T00:00:00.000Z","usage_notes": []}`, instanceID)
 
 	return doAPICall(token, "PUT", uri, body)
