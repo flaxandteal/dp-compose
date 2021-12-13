@@ -213,7 +213,8 @@ func main() {
 	err = putVersion(token,
 		instanceFromAPI.Version.Links.Dataset.ID,
 		instanceFromAPI.Version.Links.Edition.ID,
-		instanceFromAPI.Version.Links.Version.ID)
+		instanceFromAPI.Version.Links.Version.ID,
+		instanceFromAPI.Version.ID)
 
 	if err != nil {
 		fmt.Println("error doing putVersion: ", err)
@@ -242,8 +243,7 @@ func main() {
 		instanceFromAPI.Version.Links.Edition.ID,
 		instanceFromAPI.Version.Links.Version.ID,
 		collectionName,
-		collectionUniqueNumber,
-		instanceFromAPI.Version.ID) // the instance_id
+		collectionUniqueNumber)
 
 	if err != nil {
 		fmt.Println("error doing putVersionCollection: ", err)
@@ -300,7 +300,8 @@ func main() {
 	err = putVersion2step8(token,
 		instanceFromAPI.Version.Links.Dataset.ID,
 		instanceFromAPI.Version.Links.Edition.ID,
-		instanceFromAPI.Version.Links.Version.ID)
+		instanceFromAPI.Version.Links.Version.ID,
+		instanceFromAPI.Version.ID)
 
 	if err != nil {
 		fmt.Println("error doing putVersion2step8: ", err)
@@ -410,7 +411,8 @@ func getToken() (string, error) {
 
 func postCreateUniqueRecipe(token string) (string, error) {
 	fmt.Printf("\nMaking request to POST recipe-api/recipes (to create unique recipe)\n")
-	uuid := uuid.NewV4().String() // !!! why is this calling some version that returns 2 parameters, when in dataset-api:
+	u, _ := uuid.NewV4()
+	uuid := u.String()
 	// this:
 	// https://github.com/ONSdigital/dp-dataset-api/blob/efd5c82f2121c1cb713101bc29ac3a729885f984/models/dataset.go#L344
 	// calls a version that returns one parameter ?
@@ -566,6 +568,7 @@ func doAPICall(token, action, uri, body string) error {
 	return nil
 }
 
+// step 1
 func addDataset(token, datasetID, datasetType string) error {
 	fmt.Println("addDataset: POST /datasets/{dataset_id}:")
 
@@ -575,6 +578,7 @@ func addDataset(token, datasetID, datasetType string) error {
 	return doAPICall(token, "POST", uri, body)
 }
 
+// step 2
 func putMetadata(token, datasetID string) error {
 	fmt.Println("putMetadata: PUT /datasets/{dataset_id}:")
 
@@ -585,15 +589,21 @@ func putMetadata(token, datasetID string) error {
 	return doAPICall(token, "PUT", uri, body)
 }
 
-func putVersion(token, datasetID, edition, version string) error {
+// step 3
+func putVersion(token, datasetID, edition, version, instanceID string) error {
 	fmt.Println("putVersion: PUT /datasets/{dataset_id}/editions/{edition}/versions/{version}:")
 
 	uri := datasetAPIHost + "/datasets/" + datasetID + "/editions/" + edition + "/versions/" + version
-	body := fmt.Sprintf(`{"release_date": "2021-12-01T00:00:00.000Z"}`) // seems to be needed, though could not see in manual full import logs
+	//	body := fmt.Sprintf(`{"release_date": "2021-12-01T00:00:00.000Z"}`) // seems to be needed, though could not see in manual full import logs
+
+	body := fmt.Sprintf(`{"alerts": [],"id": "%s","links": {"dataset": {},"dimensions": {},"edition": {},"self": {}},"release_date": "2021-12-12T00:00:00.000Z","usage_notes": []}`, instanceID)
+
+	//body := fmt.Sprintf(`{"state": "","temporal": null,"usage_notes": [],"version": 0, "release_date": "2021-12-01T00:00:00.000Z"}`)
 
 	return doAPICall(token, "PUT", uri, body)
 }
 
+// step 4
 func updateInstance(token, instanceID string) error {
 	fmt.Println("updateInstance: PUT /instances/{instance_id}:")
 
@@ -603,6 +613,7 @@ func updateInstance(token, instanceID string) error {
 	return doAPICall(token, "PUT", uri, body)
 }
 
+// step 5
 func putCollection(token, datasetID, collectionName, collectionUniqueNumber string) error {
 	fmt.Println("putCollection: PUT /datasets/{dataset_id}:")
 
@@ -612,7 +623,8 @@ func putCollection(token, datasetID, collectionName, collectionUniqueNumber stri
 	return doAPICall(token, "PUT", uri, body)
 }
 
-func putVersionCollection(token, datasetID, edition, version, collectionName, collectionUniqueNumber, instance_id string) error {
+// step 6
+func putVersionCollection(token, datasetID, edition, version, collectionName, collectionUniqueNumber string) error {
 	fmt.Println("putVersionCollection: PUT /datasets/{dataset_id}/editions/{edition}/versions/{version}:")
 
 	uri := datasetAPIHost + "/datasets/" + datasetID + "/editions/" + edition + "/versions/" + version
@@ -631,13 +643,16 @@ func putMetadata2step7(token, datasetID string) error {
 	return doAPICall(token, "PUT", uri, body)
 }
 
-func putVersion2step8(token, datasetID, edition, version string) error {
+func putVersion2step8(token, datasetID, edition, version, instanceID string) error {
 	fmt.Println("putVersion: PUT /datasets/{dataset_id}/editions/{edition}/versions/{version}:")
 
 	uri := datasetAPIHost + "/datasets/" + datasetID + "/editions/" + edition + "/versions/" + version
 	// body := fmt.Sprintf(`{"release_date": "2021-12-01T00:00:00.000Z"}`) // seems to need this, but did not see it in any of the logs for this action, maybe its done in a previous step that i missed ?
 	// body := fmt.Sprintf(`{"DatasetID": "%s"}`, datasetID) // seems to need this, but did not see it in any of the logs for this action, maybe its done in a previous step that i missed ?
-	body := fmt.Sprintf(`{}`)
+	//body := fmt.Sprintf(`{}`)
+	//body := fmt.Sprintf(`{"state": "","temporal": null,"usage_notes": [],"version": 0}`)
+
+	body := fmt.Sprintf(`{"alerts": [],"id": "%s","links": {"dataset": {},"dimensions": {},"edition": {},"self": {}},"release_date": "2021-12-12T00:00:00.000Z","usage_notes": []}`, instanceID)
 
 	return doAPICall(token, "PUT", uri, body)
 }
