@@ -1,7 +1,6 @@
 package main
 
 import (
-	//"ONSdigital/full-import-export/api"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -460,6 +459,7 @@ func main() {
 	checkFileHasContents("../../minio/data" + strings.Replace(instanceFromAPI.Version.Downloads["txt"].Public, "http://minio:9000", "", 1))
 	checkFileHasContents("../../minio/data" + strings.Replace(instanceFromAPI.Version.Downloads["xls"].Public, "http://minio:9000", "", 1))
 
+	fmt.Printf("\nALL steps completed OK ...\n\n")
 	os.Exit(0)
 }
 
@@ -766,14 +766,4 @@ func putUpdateVersionToPublished(token, datasetID, edition, version string) erro
 	body := fmt.Sprintf(`{"state": "published"}`)
 
 	return doAPICall(token, "PUT", uri, body)
-}
-
-func deleteDataset(token, datasetID string) error {
-	// this only works for unpublished datasets
-	fmt.Println("deleteDataset: DELETE /datasets/{dataset_id}:")
-
-	uri := datasetAPIHost + "/datasets/" + datasetID
-	body := fmt.Sprintf(`{}`)
-
-	return doAPICall(token, "DELETE", uri, body)
 }
