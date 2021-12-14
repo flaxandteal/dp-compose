@@ -1,5 +1,11 @@
 To use this application, follow these steps:
 
+Ensure the florence password is configured in these files:
+
+cantabular-import/get-florence-token.sh
+cantabular-import/helpers/get-florence-token.sh
+
+
 STEP 1:
 
 In one terminal, goto to directory:
