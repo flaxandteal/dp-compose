@@ -1,6 +1,8 @@
 #!/usr/local/bin/bash
 rm tmp/id.txt
 
+set -ex # 'e' to stop on error (non zero return from script), 'x' to show command as it runs
+
 cd full-import-export
 go run main.go
 cd ..
