@@ -36,14 +36,16 @@ var requiredServices = []string{
 	"dp-publishing-dataset-controller",
 	"dp-recipe-api",
 	"florence",
-	"kafka",
+	"kafka-1",
+	"kafka-2",
+	"kafka-3",
 	"minio",
 	"mongodb",
 	"postgres",
 	"the-train",
 	"vault",
 	"zebedee",
-	"zookeeper",
+	"zookeeper-1",
 }
 
 // It can take a while to read all container logs, so all logs are read into one file and then this file is
