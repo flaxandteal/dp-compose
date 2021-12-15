@@ -14,20 +14,52 @@ import (
 )
 
 const (
-	dockerLogName      = "../tmp/all-container-logs.txt"
-	maxContainersInJob = 25 // adjust this to suite the number of continers docker-compose runs up for cantabular
+	dockerLogName = "../tmp/all-container-logs.txt"
 )
+
+// this list MUST contain the names of the required services
+var requiredServices = []string{
+	"babbage",
+	"dp-api-router",
+	"dp-cantabular-api-ext",
+	"dp-cantabular-csv-exporter",
+	"dp-cantabular-metadata-exporter",
+	"dp-cantabular-server",
+	"dp-cantabular-xlsx-exporter",
+	"dp-dataset-api",
+	"dp-download-service",
+	"dp-frontend-dataset-controller",
+	"dp-frontend-router",
+	"dp-import-api",
+	"dp-import-cantabular-dataset",
+	"dp-import-cantabular-dimension-options",
+	"dp-publishing-dataset-controller",
+	"dp-recipe-api",
+	"florence",
+	"kafka",
+	"minio",
+	"mongodb",
+	"postgres",
+	"the-train",
+	"vault",
+	"zebedee",
+	"zookeeper",
+}
 
 // It can take a while to read all container logs, so all logs are read into one file and then this file is
 // scanned through repeatedly for required info by other apps.
 func main() {
-	count, err := getCantabularContainerCount()
+	count, serviceNames, err := getCantabularContainerCount()
 	if err != nil {
 		fmt.Printf("Error getting container count: %v\n", err)
 		os.Exit(1)
 	}
+	maxContainersInJob := len(requiredServices)
 	if count != maxContainersInJob {
-		fmt.Printf("Incorrect number of Cantabular containers found.\nWanted: %d, found: %d\n... have you started the containers ?", maxContainersInJob, count)
+		fmt.Printf("Incorrect number of Cantabular containers found.\nWanted: %d, found: %d\n... have you started the containers ?\n", maxContainersInJob, count)
+		if count > 0 {
+			listMissingServices(serviceNames)
+		}
 		os.Exit(2)
 	}
 
@@ -38,17 +70,19 @@ func main() {
 	}
 }
 
-func getCantabularContainerCount() (int, error) {
+func getCantabularContainerCount() (int, []string, error) {
+	var serviceNames []string
+
 	ctx := context.Background()
 
 	cli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
-		return 0, err
+		return 0, serviceNames, err
 	}
 
 	containers, err := cli.ContainerList(ctx, types.ContainerListOptions{})
 	if err != nil {
-		return 0, err
+		return 0, serviceNames, err
 	}
 
 	cantabularContainersCount := 0
@@ -57,10 +91,31 @@ func getCantabularContainerCount() (int, error) {
 
 		if strings.Contains(container.Names[0], "/cantabular-import-journey") {
 			cantabularContainersCount++
+			serviceNames = append(serviceNames, container.Labels["com.docker.compose.service"])
 		}
 	}
 
-	return cantabularContainersCount, nil
+	return cantabularContainersCount, serviceNames, nil
+}
+
+func listMissingServices(serviceNames []string) {
+	var serviceList []string = requiredServices
+	//copy(serviceList, requiredServices)
+	for _, foundService := range serviceNames {
+		for index, service := range serviceList {
+			if service == foundService {
+				serviceList[index] = "" // remove found service
+				break
+			}
+		}
+	}
+
+	// display the remaining service names that have not been found
+	for _, service := range serviceList {
+		if service != "" {
+			fmt.Printf("Docker container not found: %s\n", service)
+		}
+	}
 }
 
 func createLogFileForAllDockerContainers() error {
