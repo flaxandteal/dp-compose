@@ -5,7 +5,9 @@ services:
             context: ../../The-Train
             dockerfile: Dockerfile
         depends_on:
-            - kafka
+            - kafka-1
+            - kafka-2
+            - kafka-3
         ports:
             - 8084:8084
         restart: unless-stopped

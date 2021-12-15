@@ -13,13 +13,15 @@ services:
         volumes:
             - ../../dp-import-cantabular-dataset:/dp-import-cantabular-dataset
         depends_on:
-            - kafka
+            - kafka-1
+            - kafka-2
+            - kafka-3
         ports:
             - 26100:26100
         restart: unless-stopped
         environment:
             BIND_ADDR:          ":26100"
-            KAFKA_ADDR:         "kafka:9092"
+            KAFKA_ADDR:         "kafka-1:19092,kafka-2:19092,kafka-3:19092"
             DATASET_API_URL:    "http://dp-dataset-api:22000"
             RECIPE_API_URL:     "http://dp-recipe-api:22300"
             CANTABULAR_URL:     "http://dp-cantabular-server:8491"

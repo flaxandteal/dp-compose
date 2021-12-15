@@ -7,7 +7,9 @@ services:
         volumes:
             - ../../dp-recipe-api:/dp-recipe-api
         depends_on:
-            - kafka
+            - kafka-1
+            - kafka-2
+            - kafka-3
         ports:
             - 8082:8082
         volumes:
