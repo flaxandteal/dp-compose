@@ -13,14 +13,16 @@ services:
         volumes:
             - ../../dp-cantabular-csv-exporter:/dp-cantabular-csv-exporter
         depends_on:
-            - kafka
+            - kafka-1
+            - kafka-2
+            - kafka-3
             - minio
         ports:
             - 26300:26300
         restart: unless-stopped
         environment:
             BIND_ADDR:                  ":26300"
-            KAFKA_ADDR:                 "kafka:9092"
+            KAFKA_ADDR:                 "kafka-1:19092,kafka-2:19092,kafka-3:19092"
             DATASET_API_URL:            "http://dp-dataset-api:22000"
             RECIPE_API_URL:             "http://dp-recipe-api:22300"
             CANTABULAR_URL:             "http://dp-cantabular-server:8491"
