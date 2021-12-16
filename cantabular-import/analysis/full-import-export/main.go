@@ -338,8 +338,8 @@ func main() {
 
 	// then read the instance document again, looking for desired encrypted (private) file creation
 
-	fmt.Printf("\nWaiting for 4 Private files to be created (for upt0 to 10 seconds):\n")
-	attempts = 100
+	fmt.Printf("\nWaiting for 4 Private files to be created (for upt0 to 20 seconds):\n")
+	attempts = 200
 
 	for attempts > 0 {
 		time.Sleep(100 * time.Millisecond)
@@ -354,13 +354,13 @@ func main() {
 			instanceFromAPI.Version.Downloads["txt"].Private != "" &&
 			instanceFromAPI.Version.Downloads["xls"].Private != "" {
 
-			fmt.Printf("\nGot all 4 private files after: %d milliseconds:\n", 100*(101-attempts))
+			fmt.Printf("\nGot all 4 private files after: %d milliseconds:\n", 100*(201-attempts))
 			break
 		}
 		attempts--
 	}
 	if attempts == 0 {
-		fmt.Printf("failed to see get all 4 private files after 10 seconds\nOnly got:\n")
+		fmt.Printf("failed to see get all 4 private files after 20 seconds\nOnly got:\n")
 		spew.Dump(instanceFromAPI.Version.Downloads["csv"].Private)
 		spew.Dump(instanceFromAPI.Version.Downloads["csvw"].Private)
 		spew.Dump(instanceFromAPI.Version.Downloads["txt"].Private)
@@ -420,8 +420,8 @@ func main() {
 
 	// then read the instance document again, looking for desired encrypted (private) file creation
 
-	fmt.Printf("\nWaiting for 4 Public files to be created (for upto to 10 seconds):\n")
-	attempts = 100
+	fmt.Printf("\nWaiting for 4 Public files to be created (for upto to 20 seconds):\n")
+	attempts = 200
 
 	for attempts > 0 {
 		time.Sleep(100 * time.Millisecond)
@@ -436,13 +436,13 @@ func main() {
 			instanceFromAPI.Version.Downloads["txt"].Public != "" &&
 			instanceFromAPI.Version.Downloads["xls"].Public != "" {
 
-			fmt.Printf("\nGot all 4 public files after: %d milliseconds:\n", 100*(101-attempts))
+			fmt.Printf("\nGot all 4 public files after: %d milliseconds:\n", 100*(201-attempts))
 			break
 		}
 		attempts--
 	}
 	if attempts == 0 {
-		fmt.Printf("failed to see get all 4 public files after 10 seconds\nOnly got:\n")
+		fmt.Printf("failed to see get all 4 public files after 20 seconds\nOnly got:\n")
 		spew.Dump(instanceFromAPI.Version.Downloads["csv"].Public)
 		spew.Dump(instanceFromAPI.Version.Downloads["csvw"].Public)
 		spew.Dump(instanceFromAPI.Version.Downloads["txt"].Public)
