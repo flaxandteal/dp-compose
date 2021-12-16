@@ -14,7 +14,7 @@ src/github.com/ONSdigital/dp-compose/cantabular-import
 
 and run:
 
-./run-cantabular-without-sudo.sh
+make start
 
 STEP 2:
 
@@ -46,7 +46,7 @@ and in the 'analysis' directory run:
 
 This should run a full import and export.
 
-If there are any errors you may need to in the terminal for STEP 1, do CTRL-C and when the docker compose finishes (which it may not), run 'docker compose down' (this may also fail - in which case restart docker and do 'docker compose down' again) - after that clean out any volumes in docker and repeat all 4 steps again. Hopefully STEP 4 will then run to completion and in your local minio directory you should find 4 newly created files in the private bucket and also 4 files in public bucket.
+If there are any errors you may need to in the terminal for STEP 1, do CTRL-C and when the docker compose finishes (which it may not), run 'make clean' (this may also fail - in which case restart docker and do 'make clean' again) - after that clean out any volumes in docker and repeat all 4 steps again. Hopefully STEP 4 will then run to completion and in your local minio directory you should find 4 newly created files in the private bucket and also 4 files in public bucket.
 
 -=-
 
