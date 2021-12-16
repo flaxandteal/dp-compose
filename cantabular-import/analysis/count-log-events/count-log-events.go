@@ -438,8 +438,8 @@ func main() {
 					} else {
 						eventHasId = append(eventHasId, true)
 					}
-					printAndSave(resultFile, fmt.Sprintf("current: %.9f seconds", total.Seconds()))
-					printAndSave(resultFile, fmt.Sprintf("diff: %.9f seconds", diffNanoseconds.Seconds()))
+					save(resultFile, fmt.Sprintf("current: %.9f seconds", total.Seconds()))
+					save(resultFile, fmt.Sprintf("diff: %.9f seconds", diffNanoseconds.Seconds()))
 
 					serviceNames = append(serviceNames, fields[2])
 					wrappedOffset = append(wrappedOffset, fields[1])
@@ -461,17 +461,17 @@ func main() {
 			f1 += line[len(fields[1])+1+len(fields[2])+1+len(fields[3]):]
 			f1 = fields[1] + " " + f1 // prefix the wrapped offset value
 			f1 = fields[0] + " " + f1 // prefix the kafka consume indication
-			printAndSave(resultFile, fmt.Sprintf("%s", f1))
+			save(resultFile, fmt.Sprintf("%s", f1))
 		}
 
 		if len(serviceNames) > 0 {
 			// save data for plotting
 			// The first service name is effectively time '0'
-			printAndSave(plotDataFile, fmt.Sprintf("k=n 0.0 %s 0.0000 true", firstServiceName))
+			save(plotDataFile, fmt.Sprintf("k=n 0.0 %s 0.0000 true", firstServiceName))
 			var timeOffest time.Duration
 			for i := 0; i < len(diffsFound); i++ {
 				timeOffest += diffsFound[i]
-				printAndSave(plotDataFile, fmt.Sprintf("%s %s %s %.4f %v", kafkaIndication[i], wrappedOffset[i], serviceNames[i], timeOffest.Seconds(), eventHasId[i]))
+				save(plotDataFile, fmt.Sprintf("%s %s %s %.4f %v", kafkaIndication[i], wrappedOffset[i], serviceNames[i], timeOffest.Seconds(), eventHasId[i]))
 			}
 		}
 
@@ -480,7 +480,7 @@ func main() {
 			// compare and sort by the durations
 			return diffsFound[i] < diffsFound[j]
 		})
-		printAndSave(resultFile, fmt.Sprintf("diffs: %v\n", diffsFound))
+		save(resultFile, fmt.Sprintf("diffs: %v\n", diffsFound))
 		printAndSave(resultFile, fmt.Sprintf("len of diffs: %v\n", len(diffsFound)))
 
 		// deduce how much of the overall time is taken by the ~10% of the largest diffs
@@ -530,6 +530,11 @@ func printAndSave(file *os.File, line string) {
 	_, err := fmt.Fprintf(file, "%s\n", line)
 	check(err)
 	fmt.Println(line)
+}
+
+func save(file *os.File, line string) {
+	_, err := fmt.Fprintf(file, "%s\n", line)
+	check(err)
 }
 
 func check(err error) {

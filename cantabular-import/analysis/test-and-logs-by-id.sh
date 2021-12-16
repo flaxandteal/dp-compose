@@ -14,3 +14,5 @@ cd ..
 cd count-log-events
 go run count-log-events.go
 cd ..
+
+python3 report-errors.py
