@@ -21,3 +21,6 @@ if my_file.is_file():
                     error_found = 1
                     print("\nFound error(s) in: ", filename, "\n")
                 print("line: ", line_number, "\n  ", line.lstrip())
+
+if error_found == 0:
+    print("    no error(s) found\n")
