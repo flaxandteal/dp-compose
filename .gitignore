@@ -6,7 +6,10 @@
 .DS_Store
 
 # files created / used in import process analysis
-id.txt
-all-container-logs.txt
 count-log-events-results.txt
 extract-job-info-results.txt
+
+cantabular-import/analysis/count-log-events/*.txt
+cantabular-import/analysis/tmp/*.txt
+
+cantabular-import/analysis/simple-plot/*.svg
