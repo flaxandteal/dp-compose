@@ -239,7 +239,7 @@ func main() {
 
 	// then check that state is : 'edition-confirmed' ... under some sort of repeat timeout
 
-	attempts := 50
+	attempts := 200
 
 	for attempts > 0 {
 		time.Sleep(100 * time.Millisecond)
@@ -252,13 +252,13 @@ func main() {
 		if instanceFromAPI.Version.State == "edition-confirmed" {
 			// fmt.Printf("\ninstanceFromAPI: %v\n", instanceFromAPI)
 			// spew.Dump(instanceFromAPI)
-			fmt.Printf("Got 'edition-confirmed' after: %d milliseconds\n", 100*(51-attempts))
+			fmt.Printf("Got 'edition-confirmed' after: %d milliseconds\n", 100*(201-attempts))
 			break
 		}
 		attempts--
 	}
 	if attempts == 0 {
-		fmt.Printf("failed to see 'edition-confirmed' after 5 seconds\n")
+		fmt.Printf("failed to see 'edition-confirmed' after 20 seconds\n")
 		os.Exit(1)
 	}
 
