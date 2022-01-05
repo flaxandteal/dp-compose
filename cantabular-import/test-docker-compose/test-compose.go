@@ -48,7 +48,7 @@ var (
 const (
 	idDir              = "../analysis/tmp"
 	idFileName         = "../analysis/tmp/id.txt"
-	maxContainersInJob = 14 // adjust this to suite the number of continers docker-compose runs up
+	maxContainersInJob = 27 // adjust this to suite the number of continers docker-compose runs up
 	maxRuns            = 2  // number of times to run up containers, perform integration test and stop containers
 )
 
