@@ -53,8 +53,10 @@ var (
 )
 
 const (
-	idDir      = "../tmp"
-	idFileName = "../tmp/id.txt"
+	idDir             = "../tmp"
+	idFileName        = "../tmp/id.txt"
+	MaxAttempts       = 200 // number of 100ms delays
+	StateVerifyPeriod = 100 // number of milliseconds per period
 )
 
 var (
@@ -239,10 +241,10 @@ func main() {
 
 	// then check that state is : 'edition-confirmed' ... under some sort of repeat timeout
 
-	attempts := 200
+	attempts := MaxAttempts
 
 	for attempts > 0 {
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(StateVerifyPeriod * time.Millisecond)
 
 		instanceFromAPI, isFatal, err = datasetAPI.GetInstance(ctx, instanceID)
 		if err != nil {
@@ -252,13 +254,13 @@ func main() {
 		if instanceFromAPI.Version.State == "edition-confirmed" {
 			// fmt.Printf("\ninstanceFromAPI: %v\n", instanceFromAPI)
 			// spew.Dump(instanceFromAPI)
-			fmt.Printf("Got 'edition-confirmed' after: %d milliseconds\n", 100*(201-attempts))
+			fmt.Printf("Got 'edition-confirmed' after: %d milliseconds\n", StateVerifyPeriod*(MaxAttempts+1-attempts))
 			break
 		}
 		attempts--
 	}
 	if attempts == 0 {
-		fmt.Printf("failed to see 'edition-confirmed' after 20 seconds\n")
+		fmt.Printf("failed to see 'edition-confirmed' after %d seconds\n", MaxAttempts/10)
 		os.Exit(1)
 	}
 
@@ -338,11 +340,11 @@ func main() {
 
 	// then read the instance document again, looking for desired encrypted (private) file creation
 
-	fmt.Printf("\nWaiting for 4 Private files to be created (for upt0 to 20 seconds):\n")
-	attempts = 200
+	fmt.Printf("\nWaiting for 4 Private files to be created (for upt0 to %d seconds):\n", MaxAttempts/10)
+	attempts = MaxAttempts
 
 	for attempts > 0 {
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(StateVerifyPeriod * time.Millisecond)
 
 		instanceFromAPI, isFatal, err = datasetAPI.GetInstance(ctx, instanceID)
 		if err != nil {
@@ -354,7 +356,7 @@ func main() {
 			instanceFromAPI.Version.Downloads["txt"].Private != "" &&
 			instanceFromAPI.Version.Downloads["xls"].Private != "" {
 
-			fmt.Printf("\nGot all 4 private files after: %d milliseconds:\n", 100*(201-attempts))
+			fmt.Printf("\nGot all 4 private files after: %d milliseconds:\n", StateVerifyPeriod*(MaxAttempts+1-attempts))
 			break
 		}
 		attempts--
@@ -421,10 +423,10 @@ func main() {
 	// then read the instance document again, looking for desired encrypted (private) file creation
 
 	fmt.Printf("\nWaiting for 4 Public files to be created (for upto to 20 seconds):\n")
-	attempts = 200
+	attempts = MaxAttempts
 
 	for attempts > 0 {
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(StateVerifyPeriod * time.Millisecond)
 
 		instanceFromAPI, isFatal, err = datasetAPI.GetInstance(ctx, instanceID)
 		if err != nil {
@@ -436,13 +438,13 @@ func main() {
 			instanceFromAPI.Version.Downloads["txt"].Public != "" &&
 			instanceFromAPI.Version.Downloads["xls"].Public != "" {
 
-			fmt.Printf("\nGot all 4 public files after: %d milliseconds:\n", 100*(201-attempts))
+			fmt.Printf("\nGot all 4 public files after: %d milliseconds:\n", StateVerifyPeriod*(MaxAttempts+1-attempts))
 			break
 		}
 		attempts--
 	}
 	if attempts == 0 {
-		fmt.Printf("failed to see get all 4 public files after 20 seconds\nOnly got:\n")
+		fmt.Printf("failed to see get all 4 public files after %d seconds\nOnly got:\n", MaxAttempts/10)
 		spew.Dump(instanceFromAPI.Version.Downloads["csv"].Public)
 		spew.Dump(instanceFromAPI.Version.Downloads["csvw"].Public)
 		spew.Dump(instanceFromAPI.Version.Downloads["txt"].Public)
