@@ -239,7 +239,7 @@ func main() {
 
 	// then check that state is : 'edition-confirmed' ... under some sort of repeat timeout
 
-	attempts := 50
+	attempts := 200
 
 	for attempts > 0 {
 		time.Sleep(100 * time.Millisecond)
@@ -252,13 +252,13 @@ func main() {
 		if instanceFromAPI.Version.State == "edition-confirmed" {
 			// fmt.Printf("\ninstanceFromAPI: %v\n", instanceFromAPI)
 			// spew.Dump(instanceFromAPI)
-			fmt.Printf("Got 'edition-confirmed' after: %d milliseconds\n", 100*(51-attempts))
+			fmt.Printf("Got 'edition-confirmed' after: %d milliseconds\n", 100*(201-attempts))
 			break
 		}
 		attempts--
 	}
 	if attempts == 0 {
-		fmt.Printf("failed to see 'edition-confirmed' after 5 seconds\n")
+		fmt.Printf("failed to see 'edition-confirmed' after 20 seconds\n")
 		os.Exit(1)
 	}
 
@@ -534,6 +534,13 @@ func postCreateUniqueRecipe(token string) (string, error) {
 	fmt.Printf("uri: %s\n", uri)
 
 	body := fmt.Sprintf(`{"alias": "%s","format": "cantabular_table","id": "%s","cantabular_blob": "Example","output_instances": [{"code_lists": [{"href": "http://localhost:22400/code-lists/city-regions","id": "city","is_hierarchy": false,"name": "City"},{"href": "http://localhost:22400/code-lists/siblings_3","id": "siblings_3","is_hierarchy": false,"name": "Number Of Siblings (3 mappings)"},{"href": "http://localhost:22400/code-lists/sex","id": "sex","is_hierarchy": false,"name": "Sex"}],"dataset_id": "%s","editions": ["2021"],"title": "%s"}]}`, alias, uuid, datasetIdName, title)
+
+	// This is Fran's recipie as of 20.12.2021 for generating more than 1M rows, for Census V12
+	// !!! BUT need to set up recipie, etc in mongo for it to play ball (and there may be some cantabular database stuff as well)
+	/*datasetIdName := "Testing-xlsx-census-v12" + "-" + uuid
+	alias := "Testing xlsx census v12"
+	title := "Testing xlsx census v12"
+	body := fmt.Sprintf(`{"alias": "%s","cantabular_blob": "People-Households","format": "cantabular_table","id": "%s","output_instances": [{"code_lists": [{ "href": "http://localhost:22400/code-lists/lsoa","id": "lsoa","is_hierarchy": false,"name": "Lower Super Output Area"},{ "href": "http://localhost:22400/code-lists/age", "id": "age","is_hierarchy": false,"name": "age"}],"dataset_id": "%s","editions": ["2021"],"title": "%s"}]}`, alias, uuid, datasetIdName, title)*/
 
 	fmt.Printf("Body: %s\n", body)
 
