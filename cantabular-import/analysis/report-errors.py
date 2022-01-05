@@ -2,13 +2,13 @@ from pathlib import Path
 
 filename = "count-log-events/instance-events.txt"
 
+line_number = 0
+error_found = 0
+download_error_count = 0
+
 my_file = Path(filename)
 if my_file.is_file():
     # file exists
-
-    line_number = 0
-    error_found = 0
-    download_error_count = 0
 
     with open(filename) as file:
         for line in file:
@@ -29,3 +29,26 @@ if download_error_count > 0:
 
 if error_found == 0:
     print("    No unexpected error(s) found\n")
+
+# now look for `DATA RACE` in 'all-container-logs.txt'
+
+filename = "tmp/all-container-logs.txt"
+
+line_number = 0
+error_found = 0
+
+my_file = Path(filename)
+if my_file.is_file():
+    # file exists
+
+    with open(filename) as file:
+        for line in file:
+            line_number += 1
+            if "DATA RACE" in line:
+                if error_found == 0:
+                    error_found = 1
+                    print("\nFound DATA RACE in: ", filename, "\n")
+                print("line: ", line_number, "\n  ", line.lstrip())
+
+if error_found == 0:
+    print("    No DATA RACE's found\n")
