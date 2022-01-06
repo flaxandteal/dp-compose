@@ -260,7 +260,7 @@ func main() {
 		attempts--
 	}
 	if attempts == 0 {
-		fmt.Printf("failed to see 'edition-confirmed' after %d seconds\n", MaxAttempts/10)
+		fmt.Printf("failed to see 'edition-confirmed' after %d seconds\n", MaxAttempts*StateVerifyPeriod/1000)
 		os.Exit(1)
 	}
 
@@ -340,7 +340,7 @@ func main() {
 
 	// then read the instance document again, looking for desired encrypted (private) file creation
 
-	fmt.Printf("\nWaiting for 4 Private files to be created (for upt0 to %d seconds):\n", MaxAttempts/10)
+	fmt.Printf("\nWaiting for 4 Private files to be created (for upt0 to %d seconds):\n", MaxAttempts*StateVerifyPeriod/1000)
 	attempts = MaxAttempts
 
 	for attempts > 0 {
@@ -444,7 +444,7 @@ func main() {
 		attempts--
 	}
 	if attempts == 0 {
-		fmt.Printf("failed to see get all 4 public files after %d seconds\nOnly got:\n", MaxAttempts/10)
+		fmt.Printf("failed to see get all 4 public files after %d seconds\nOnly got:\n", MaxAttempts*StateVerifyPeriod/1000)
 		spew.Dump(instanceFromAPI.Version.Downloads["csv"].Public)
 		spew.Dump(instanceFromAPI.Version.Downloads["csvw"].Public)
 		spew.Dump(instanceFromAPI.Version.Downloads["txt"].Public)
