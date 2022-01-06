@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 filename = "count-log-events/instance-events.txt"
@@ -35,7 +36,7 @@ if error_found == 0:
 filename = "tmp/all-container-logs.txt"
 
 line_number = 0
-error_found = 0
+race_error_found = 0
 
 my_file = Path(filename)
 if my_file.is_file():
@@ -45,10 +46,13 @@ if my_file.is_file():
         for line in file:
             line_number += 1
             if "DATA RACE" in line:
-                if error_found == 0:
-                    error_found = 1
+                if race_error_found == 0:
+                    race_error_found = 1
                     print("\nFound DATA RACE in: ", filename, "\n")
                 print("line: ", line_number, "\n  ", line.lstrip())
 
-if error_found == 0:
+if race_error_found == 0:
     print("    No DATA RACE's found\n")
+
+if race_error_found > 0 or error_found > 0:
+    sys.exit(1)
