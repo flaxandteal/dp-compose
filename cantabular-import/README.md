@@ -19,6 +19,12 @@ as `dp-compose` (this repository):
 
 `dp-import-cantabular-dimension-options`
 
+`dp-cantabular-metadata-exporter`  
+
+`dp-cantabular-xlsx-exporter`  
+
+`dp-download-service`  
+
 `dp-recipe-api`
 
 `dp-api-router`
