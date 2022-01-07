@@ -4,8 +4,7 @@ set -e # 'e' to stop on error (non zero return from script)
 
 N="1"
 
-if [ -n "$1" ]
-then
+if [ -n "$1" ]; then
     N=$1
 fi
 
@@ -14,7 +13,9 @@ do
     printf "===================================================================\n\n"
     printf "Running integration test number: %s  of %s\n\n" "$i" "$N"
 
-    rm tmp/id.txt
+    if [ -f tmp/id.txt ]; then
+        rm tmp/id.txt
+    fi
 
     cd full-import-export
     go run main.go
