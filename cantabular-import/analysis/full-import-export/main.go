@@ -389,7 +389,7 @@ func main() {
 
 	// then read the instance document again, looking for desired encrypted (private) file creation
 
-	fmt.Printf("\nWaiting for 4 Private files to be created (for upt0 to %d seconds):\n", MaxAttempts*StateVerifyPeriod/1000)
+	fmt.Printf("\nWaiting for 4 Private files to be created (for upto to %d seconds):\n", MaxAttempts*StateVerifyPeriod/1000)
 	attempts = MaxAttempts
 
 	for attempts > 0 {
