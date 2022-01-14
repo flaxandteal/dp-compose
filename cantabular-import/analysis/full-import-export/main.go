@@ -18,6 +18,9 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/google/uuid"
 	"github.com/kelseyhightower/envconfig"
+
+	"github.com/docker/docker/api/types"
+	dockerclient "github.com/docker/docker/client"
 )
 
 type PutJobRequest struct {
@@ -162,8 +165,54 @@ func logFatal(ctx context.Context, contextMessage string, err error, data log.Da
 	os.Exit(1)
 }
 
+// this list MUST contain the names of the required services
+var requiredServices = []string{
+	"babbage",
+	"dp-api-router",
+	"dp-cantabular-api-ext",
+	"dp-cantabular-csv-exporter",
+	"dp-cantabular-metadata-exporter",
+	"dp-cantabular-server",
+	"dp-cantabular-xlsx-exporter",
+	"dp-dataset-api",
+	"dp-download-service",
+	"dp-frontend-dataset-controller",
+	"dp-frontend-router",
+	"dp-import-api",
+	"dp-import-cantabular-dataset",
+	"dp-import-cantabular-dimension-options",
+	"dp-publishing-dataset-controller",
+	"dp-recipe-api",
+	"florence",
+	"kafka-1",
+	"kafka-2",
+	"kafka-3",
+	"minio",
+	"mongodb",
+	"postgres",
+	"the-train",
+	"vault",
+	"zebedee",
+	"zookeeper-1",
+}
+
 func main() {
 	fmt.Printf("Full import and export for Cantabular API's creating private and public (published) files:\n\n")
+
+	count, serviceNames, err := getCantabularContainerCount()
+	if err != nil {
+		fmt.Printf("Error getting container count: %v\n", err)
+		os.Exit(1)
+	}
+	maxContainersInJob := len(requiredServices)
+	if count != maxContainersInJob {
+		fmt.Printf("Incorrect number of Cantabular containers found.\nWanted: %d, found: %d\n... have you started the containers ?\n", maxContainersInJob, count)
+		if count > 0 {
+			listMissingServices(serviceNames)
+		}
+		os.Exit(2)
+	}
+
 	ensureDirectoryExists(idDir)
 
 	ctx := context.Background()
@@ -487,6 +536,54 @@ func checkFileHasContents(fileName string) {
 	if fi.Size() == 0 {
 		fmt.Printf("File must not have zero length: %s\n", fileName)
 		os.Exit(1)
+	}
+}
+
+func getCantabularContainerCount() (int, []string, error) {
+	var serviceNames []string
+
+	ctx := context.Background()
+
+	cli, err := dockerclient.NewClientWithOpts(dockerclient.FromEnv)
+	if err != nil {
+		return 0, serviceNames, err
+	}
+
+	containers, err := cli.ContainerList(ctx, types.ContainerListOptions{})
+	if err != nil {
+		return 0, serviceNames, err
+	}
+
+	cantabularContainersCount := 0
+
+	for _, container := range containers {
+
+		if strings.Contains(container.Names[0], "/cantabular-import-journey") {
+			cantabularContainersCount++
+			serviceNames = append(serviceNames, container.Labels["com.docker.compose.service"])
+		}
+	}
+
+	return cantabularContainersCount, serviceNames, nil
+}
+
+func listMissingServices(serviceNames []string) {
+	var serviceList []string = requiredServices
+	//copy(serviceList, requiredServices)
+	for _, foundService := range serviceNames {
+		for index, service := range serviceList {
+			if service == foundService {
+				serviceList[index] = "" // remove found service
+				break
+			}
+		}
+	}
+
+	// display the remaining service names that have not been found
+	for _, service := range serviceList {
+		if service != "" {
+			fmt.Printf("Docker container not found: %s\n", service)
+		}
 	}
 }
 
