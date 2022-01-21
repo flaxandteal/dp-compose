@@ -12,9 +12,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ONSdigital/dp-api-clients-go/dataset"
-	"github.com/ONSdigital/dp-api-clients-go/importapi"
-	"github.com/ONSdigital/log.go/log"
+	"github.com/ONSdigital/dp-api-clients-go/v2/dataset"
+	"github.com/ONSdigital/dp-api-clients-go/v2/importapi"
+	"github.com/ONSdigital/log.go/v2/log"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/google/uuid"
 	"github.com/kelseyhightower/envconfig"
@@ -123,7 +123,8 @@ type DatasetAPI struct {
 
 // DatasetClient is an interface to represent methods called to action upon Dataset REST interface
 type DatasetClient interface {
-	GetInstance(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, instanceID string) (m dataset.Instance, err error)
+	//	GetInstance(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, instanceID string) (m dataset.Instance, err error)
+	GetInstance(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, instanceID, ifMatch string) (m dataset.Instance, eTag string, err error)
 }
 
 // errorChecker determines if an error is fatal. Only errors corresponding to http responses on the range 500+ will be considered non-fatal.
@@ -148,20 +149,20 @@ func errorChecker(ctx context.Context, tag string, err error, logData *log.Data)
 		isFatal = true
 	}
 	(*logData)["is_fatal"] = isFatal
-	log.Event(ctx, tag, log.ERROR, log.Error(err), *logData)
+	log.Error(ctx, tag, err, *logData)
 	return
 }
 
 // GetInstance asks the Dataset API for the details for instanceID
 func (api *DatasetAPI) GetInstance(ctx context.Context, instanceID string) (instance dataset.Instance, isFatal bool, err error) {
-	instance, err = api.Client.GetInstance(ctx, "", api.ServiceAuthToken, "", instanceID)
+	instance, _, err = api.Client.GetInstance(ctx, "", api.ServiceAuthToken, "", instanceID, "")
 	isFatal = errorChecker(ctx, "GetInstance", err, &log.Data{"instanceID": instanceID})
 	return
 }
 
 // logFatal is a utility method for a common failure pattern in main()
 func logFatal(ctx context.Context, contextMessage string, err error, data log.Data) {
-	log.Event(ctx, contextMessage, log.FATAL, log.Error(err), data)
+	log.Error(ctx, contextMessage, err, data)
 	os.Exit(1)
 }
 
@@ -197,6 +198,10 @@ var requiredServices = []string{
 }
 
 func main() {
+	/*	cfg2 := spew.ConfigState{SortKeys: true, HighlightValues: true}
+		// dump this in colour (for instance):
+		cfg2.Dump(map[int]string{1: "1", 3: "3", 2: "2"})*/
+
 	fmt.Printf("Full import and export for Cantabular API's creating private and public (published) files:\n\n")
 
 	count, serviceNames, err := getCantabularContainerCount()
@@ -240,6 +245,7 @@ func main() {
 	res, err := postJob(token, recipeID)
 	if err != nil {
 		fmt.Println("error posting job to importAPI: ", err)
+		fmt.Println("Have you done: 'make init-db' ?\nYou may need to stop the compose stack, do 'docker compose down',\nrestart docker, do 'docker compose down' again, delete the volumes in docker and retart everything.")
 		os.Exit(1)
 	}
 
@@ -411,7 +417,7 @@ func main() {
 		attempts--
 	}
 	if attempts == 0 {
-		fmt.Printf("failed to see get all 4 private files after 20 seconds\nOnly got:\n")
+		fmt.Printf("failed to see all 4 private files after 20 seconds\nOnly got:\n")
 		spew.Dump(instanceFromAPI.Version.Downloads["csv"].Private)
 		spew.Dump(instanceFromAPI.Version.Downloads["csvw"].Private)
 		spew.Dump(instanceFromAPI.Version.Downloads["txt"].Private)
@@ -490,10 +496,11 @@ func main() {
 			fmt.Printf("\nGot all 4 public files after: %d milliseconds:\n", StateVerifyPeriod*(MaxAttempts+1-attempts))
 			break
 		}
+		spew.Dump(instanceFromAPI.Version.Downloads)
 		attempts--
 	}
 	if attempts == 0 {
-		fmt.Printf("failed to see get all 4 public files after %d seconds\nOnly got:\n", MaxAttempts*StateVerifyPeriod/1000)
+		fmt.Printf("failed to see all 4 public files after %d seconds\nOnly got:\n", MaxAttempts*StateVerifyPeriod/1000)
 		spew.Dump(instanceFromAPI.Version.Downloads["csv"].Public)
 		spew.Dump(instanceFromAPI.Version.Downloads["csvw"].Public)
 		spew.Dump(instanceFromAPI.Version.Downloads["txt"].Public)
