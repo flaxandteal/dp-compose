@@ -18,15 +18,15 @@ do
     fi
 
     cd full-import-export
-    go run main.go
+    go run -race main.go
     cd ..
 
     cd extract-docker-logs
-    go run extract-docker-logs.go
+    go run -race extract-docker-logs.go
     cd ..
 
     cd count-log-events
-    go run count-log-events.go
+    go run -race count-log-events.go
     cd ..
 
     python3 report-errors.py

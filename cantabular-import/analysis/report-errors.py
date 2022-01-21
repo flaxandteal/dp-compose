@@ -6,6 +6,8 @@ filename = "count-log-events/instance-events.txt"
 line_number = 0
 error_found = 0
 download_error_count = 0
+kafka_timeout_count = 0
+put_version_count = 0
 
 my_file = Path(filename)
 if my_file.is_file():
@@ -20,6 +22,12 @@ if my_file.is_file():
                     # have been set up and to avoid false positive error reporting we ignore any of its errors.
                     download_error_count += 1
                     continue
+                if "Request exceeded the user-specified time limit in the request" in line:
+                    kafka_timeout_count += 1
+                    continue
+                if "putVersion endpoint: failed to update version document" in line:
+                    put_version_count += 1
+                    continue
                 if error_found == 0:
                     error_found = 1
                     print("\nFound error(s) in: ", filename, "\n")
@@ -27,6 +35,12 @@ if my_file.is_file():
 
 if download_error_count > 0:
     print("    Had a download-service error count of: ", download_error_count, " -> ignore these !")
+
+if kafka_timeout_count > 0:
+    print("    Had a kafka timeout error count of: ", kafka_timeout_count, " -> ignore these ! (but this needs fixing in sarama lib)")
+
+if put_version_count > 0:
+    print("    Had a put version error count of: ", put_version_count)
 
 if error_found == 0:
     print("    No unexpected error(s) found\n")
@@ -54,5 +68,5 @@ if my_file.is_file():
 if race_error_found == 0:
     print("    No DATA RACE's found\n")
 
-if race_error_found > 0 or error_found > 0:
+if race_error_found > 0 or error_found > 0 or put_version_count > 0:
     sys.exit(1)
