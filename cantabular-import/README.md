@@ -60,20 +60,7 @@ and datasets import scripts (which you will need later).*
 
 ```
 import-recipes % ./import-recipes.sh mongodb://localhost:27017
-MongoDB shell version v5.0.0
-connecting to: mongodb://localhost:27017/?compressors=disabled&gssapiServiceName=mongodb
-Implicit session: session { "id" : UUID("6303fc1e-xxxx-xxxx-xxxx-17b18cb08bdc") }
-MongoDB server version: 3.6.23
-WARNING: shell and server versions do not match
-================
-Warning: the "mongo" shell has been superseded by "mongosh",
-which delivers improved usability and compatibility.The "mongo" shell has been deprecated and will be removed in
-an upcoming release.
-We recommend you begin using "mongosh".
-For installation instructions, see
-https://docs.mongodb.com/mongodb-shell/install/
-================
-switched to db recipes
+. . .
 BulkWriteResult({
 	"writeErrors" : [ ],
 	"writeConcernErrors" : [ ],
@@ -98,31 +85,7 @@ For the full-stack journey:
 
 You will need to run `make assets` in dp-frontend-router. Assets generated using the  `-debug` flag won't work.
 
-```
-dp-frontend-router % make assets
-cd assets; go run github.com/jteeuwen/go-bindata/go-bindata -o redirects.go -pkg assets redirects/...
-go: downloading github.com/jteeuwen/go-bindata v3.0.7+incompatible
-```
-
 You will also need to run `make generate-prod` in the dp-frontend-dataset-controller to generate the asset files.
-```
-dp-frontend-dataset-controller % make generate-prod
-go: downloading github.com/ONSdigital/dp-renderer v1.10.7
-go: downloading github.com/unrolled/render v1.4.0
-go: downloading github.com/c2h5oh/datasize v0.0.0-20200825124411-48ed595a09d2
-go: downloading github.com/nicksnyder/go-i18n/v2 v2.1.2
-go: downloading github.com/gosimple/slug v1.9.0
-go: downloading golang.org/x/text v0.3.6
-go: downloading github.com/russross/blackfriday/v2 v2.1.0
-go: downloading github.com/mattn/go-isatty v0.0.13
-go: downloading github.com/fsnotify/fsnotify v1.4.9
-go: downloading github.com/rainycape/unidecode v0.0.0-20150907023854-cb7f23ec59be
-go: downloading golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e
-cd assets; go run github.com/kevinburke/go-bindata/go-bindata -prefix /Users/andrewgibson/src/pkg/mod/github.com/!o!n!sdigital/dp-renderer@v1.10.7/assets -o data.go -pkg assets locales/... templates/... /Users/andrewgibson/src/pkg/mod/github.com/!o!n!sdigital/dp-renderer@v1.10.7/assets/locales/... /Users/andrewgibson/src/pkg/mod/github.com/!o!n!sdigital/dp-renderer@v1.10.7/assets/templates/...
-go: downloading github.com/kevinburke/go-bindata v3.22.0+incompatible
-{ echo "// +build production\n"; cat assets/data.go; } > assets/data.go.new
-mv assets/data.go.new assets/data.go
-```
 
 You will also need to make sure you have some datasets into your Mongo collections.
 To do this there is an import script: `dp-dataset-api/import-script/import-script.sh`.
@@ -131,37 +94,6 @@ To do this there is an import script: `dp-dataset-api/import-script/import-scrip
 `helpers` directory that runs both the recipes and datasets import scripts.*
 
 ```
-import-script % brew install mongodb-community@3.6
-Running `brew update --preinstall`...
-==> Auto-updated Homebrew!
-Updated 1 tap (homebrew/core).
-==> Updated Formulae
-Updated 5 formulae.
-
-==> Downloading https://fastdl.mongodb.org/osx/mongodb-osx-ssl-x86_64-3.6.23.tgz
-######################################################################## 100.0%
-==> Installing mongodb-community@3.6 from mongodb/brew
-==> Caveats
-mongodb-community@3.6 is keg-only, which means it was not symlinked into /usr/local,
-because this is an alternate version of another formula.
-
-If you need to have mongodb-community@3.6 first in your PATH, run:
-  echo 'export PATH="/usr/local/opt/mongodb-community@3.6/bin:$PATH"' >> ~/.zshrc
-
-
-To start mongodb/brew/mongodb-community@3.6 now and restart at login:
-  brew services start mongodb/brew/mongodb-community@3.6
-Or, if you don't want/need a background service you can just run:
-  mongod --config /usr/local/etc/mongod.conf
-==> Summary
-🍺  /usr/local/Cellar/mongodb-community@3.6/3.6.23: 22 files, 265.4MB, built in 4 seconds
-==> Running `brew cleanup mongodb-community@3.6`...
-Disable this behaviour by setting HOMEBREW_NO_INSTALL_CLEANUP.
-Hide these hints with HOMEBREW_NO_ENV_HINTS (see `man brew`).
-```
-```
-import-script % echo 'export PATH="/usr/local/opt/mongodb-community@3.6/bin:$PATH"' >> ~/.zshrc
-import-script % source ~/.zshrc
 import-script % ./import-script.sh
 2022-01-24T15:38:36.576+0000	connected to: localhost
 2022-01-24T15:38:36.597+0000	imported 1 document
