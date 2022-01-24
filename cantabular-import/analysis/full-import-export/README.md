@@ -121,7 +121,7 @@ the system tesh script and also take two parameters thus:
 
 ./test-and-logs-by-id.sh 1 skip
 
-which runs the test once and skips cjecking if all the containers have started, which is a situation
+which runs the test once and skips checking if all the containers have started, which is a situation
 that you might deliberately want if you are doing some work with healthcheckers and for example
 you only want 2 of 3 kafka containers running.
 
