@@ -10,7 +10,7 @@ require (
 )
 
 require (
-	github.com/ONSdigital/dp-api-clients-go/v2 v2.6.1
+	github.com/ONSdigital/dp-api-clients-go/v2 v2.7.0
 	github.com/davecgh/go-spew v1.1.1
 )
 

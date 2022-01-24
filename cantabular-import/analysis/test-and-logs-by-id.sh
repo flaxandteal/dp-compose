@@ -8,6 +8,12 @@ if [ -n "$1" ]; then
     N=$1
 fi
 
+SKIP="NO"
+
+if [ -n "$2" ]; then
+    SKIP=$2
+fi
+
 for i in $(seq 1 "$N")
 do
     printf "===================================================================\n\n"
@@ -18,7 +24,7 @@ do
     fi
 
     cd full-import-export
-    go run -race main.go
+    go run -race main.go $SKIP
     cd ..
 
     cd extract-docker-logs

@@ -112,4 +112,24 @@ All the steps in step 6 can alternatively be achieved by using:
 
 ./test-and-logs-by-id.sh
 
+This also a python script that checks for errors for the import/export job run,
+and checks for DATA RACE in all logs for all containers since they were started.
 
+-=-=-
+
+the system tesh script and also take two parameters thus:
+
+./test-and-logs-by-id.sh 1 skip
+
+which runs the test once and skips checking if all the containers have started, which is a situation
+that you might deliberately want if you are doing some work with healthcheckers and for example
+you only want 2 of 3 kafka containers running.
+
+or you might run it as:
+
+./test-and-logs-by-id.sh 15
+
+to run the system test 15 times ... which is typically what is needed to observe DATA RACE's
+as they don't always show up on just one run.
+
+-=-=-
