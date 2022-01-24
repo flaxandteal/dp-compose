@@ -5,13 +5,31 @@
 Make sure you have the following repositories cloned to the same root directory
 as `dp-compose` (this repository):
 
-`dp-cantabular-server`
+`babbage`
+
+`florence`
+
+`the-train`
+
+`zebedee`
+
+`dp-api-router`
 
 `dp-cantabular-api-ext`
 
 `dp-cantabular-csv-exporter`
 
+`dp-cantabular-metadata-exporter`
+
+`dp-cantabular-server`
+
+`dp-cantabular-xlsx-exporter`
+
+`dp-download-service`
+
 `dp-dataset-api`
+
+`dp-frontend-router`
 
 `dp-import-api`
 
@@ -19,25 +37,19 @@ as `dp-compose` (this repository):
 
 `dp-import-cantabular-dimension-options`
 
-`dp-cantabular-metadata-exporter`  
-
-`dp-cantabular-xlsx-exporter`  
-
-`dp-download-service`  
-
 `dp-recipe-api`
 
-`dp-api-router`
+# Bring Up Cantabular Import Services #
 
-`dp-frontend-router`
 
-`dp-publishing-dataset-controller`
-
+`dp-publishing-dataset-controller``florence
 `dp-frontend-dataset-controller`
+`dp-cantabular-csv-exporter`
+`dp-import-cantabular-dataset`
+`dp-cantabular-dimension-api`
+`dp-cantabular-filter-flex-api`
 
-`florence`
 
-`zebedee`
 
 Expects you to have environment variables `zebedee_root` and 
 `SERVICE_AUTH_TOKEN` set in your local environment
@@ -53,15 +65,13 @@ root directories.
 
 For the full-stack journey:
 
- You will need to run `make assets` in dp-frontend-router.
-Assets generated using the  `-debug` flag won't work. 
+
+
 
 You will also need to run `make generate-prod` in the dp-frontend-dataset-controller to generate the asset files.
 
 You will also need to make sure you have some
-datasets into your Mongo collections. The easiest way to do this is to use the
 import script in `dp-dataset-api`. Currently it can be found on it's own branch
-`feature/import-script`. Alternatively there is an `init-db.sh` script in this
 repositories `helpers` directory that runs both the recipes and datasets import
 scripts.
 
@@ -69,7 +79,7 @@ For Florence to work you will need to have built npm modules and production asse
 You can do this by running `make node-modules` followed by `make generate-go-prod`.
 This only needs to be done once (or until you generate debug assets). 
 
-# Bring Up Cantabular Import Services #
+
 
 `make start`
 
