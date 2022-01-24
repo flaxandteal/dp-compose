@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"reflect"
 	"strings"
 	"time"
 
@@ -204,18 +205,34 @@ func main() {
 
 	fmt.Printf("Full import and export for Cantabular API's creating private and public (published) files:\n\n")
 
-	count, serviceNames, err := getCantabularContainerCount()
-	if err != nil {
-		fmt.Printf("Error getting container count: %v\n", err)
-		os.Exit(1)
-	}
-	maxContainersInJob := len(requiredServices)
-	if count != maxContainersInJob {
-		fmt.Printf("Incorrect number of Cantabular containers found.\nWanted: %d, found: %d\n... have you started the containers ?\n", maxContainersInJob, count)
-		if count > 0 {
-			listMissingServices(serviceNames)
+	skip := false
+	if len(os.Args) > 1 {
+		param := os.Args[1]
+		if reflect.TypeOf(param).Kind() == reflect.String {
+			param = strings.ToLower(param)
+			if param == "skip" {
+				skip = true
+			}
 		}
-		os.Exit(2)
+	}
+
+	if skip == false {
+		count, serviceNames, err := getCantabularContainerCount()
+		if err != nil {
+			fmt.Printf("Error getting container count: %v\n", err)
+			os.Exit(1)
+		}
+		maxContainersInJob := len(requiredServices)
+		if count != maxContainersInJob {
+			fmt.Printf("Incorrect number of Cantabular containers found.\nWanted: %d, found: %d\n... have you started the containers ?\n", maxContainersInJob, count)
+			if count > 0 {
+				listMissingServices(serviceNames)
+			}
+			os.Exit(2)
+		}
+		fmt.Printf("All %d containers present\n\n", maxContainersInJob)
+	} else {
+		fmt.Printf("    ****  Skipping checking if all containers present  ****\n\n")
 	}
 
 	ensureDirectoryExists(idDir)
