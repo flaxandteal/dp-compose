@@ -112,7 +112,7 @@ This only needs to be done once (or until you generate debug assets).
 stop responding but may still complete successfully. `make generate-go-prod` completes
 very quickly.
 
-# Bring Up Cantabular Import Services #
+# Bring up Cantabular Import Services #
 
 `make start`
 
