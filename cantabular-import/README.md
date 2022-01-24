@@ -19,6 +19,10 @@ as `dp-compose` (this repository):
 
 `dp-cantabular-csv-exporter`
 
+`dp-cantabular-dimension-api`
+
+`dp-cantabular-filter-flex-api`
+
 `dp-cantabular-metadata-exporter`
 
 `dp-cantabular-server`
