@@ -41,16 +41,6 @@ as `dp-compose` (this repository):
 
 # Bring Up Cantabular Import Services #
 
-
-`dp-publishing-dataset-controller``florence
-`dp-frontend-dataset-controller`
-`dp-cantabular-csv-exporter`
-`dp-import-cantabular-dataset`
-`dp-cantabular-dimension-api`
-`dp-cantabular-filter-flex-api`
-
-
-
 Expects you to have environment variables `zebedee_root` and 
 `SERVICE_AUTH_TOKEN` set in your local environment
 
@@ -65,9 +55,6 @@ root directories.
 
 For the full-stack journey:
 
-
-
-
 You will also need to run `make generate-prod` in the dp-frontend-dataset-controller to generate the asset files.
 
 You will also need to make sure you have some
@@ -78,8 +65,6 @@ scripts.
 For Florence to work you will need to have built npm modules and production assets.
 You can do this by running `make node-modules` followed by `make generate-go-prod`.
 This only needs to be done once (or until you generate debug assets). 
-
-
 
 `make start`
 
