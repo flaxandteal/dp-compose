@@ -120,7 +120,7 @@ very quickly.
 volume it creates. `sudo` requires the `-E` in order to preserve existing
 environment variables)
 
-# Bring Up Cantabular Import Services Detached (running in background) #
+# Bring up Cantabular Import Services Detached (running in background) #
 
 `make start-detached`
 
