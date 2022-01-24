@@ -53,18 +53,22 @@ Also make sure you have setup the `dp-cantabular-server` and
 `dp-cantabular-api-ext` services by running `make setup` in each of their
 root directories.
 
-For the full-stack journey:
+For the full-stack journey you will need to:
 
-You will also need to run `make generate-prod` in the dp-frontend-dataset-controller to generate the asset files.
+- Run `make assets` in dp-frontend-router.
+Assets generated using the  `-debug` flag won't work. 
 
-You will also need to make sure you have some
-import script in `dp-dataset-api`. Currently it can be found on it's own branch
-repositories `helpers` directory that runs both the recipes and datasets import
-scripts.
+- Run `make generate-prod` in the dp-frontend-dataset-controller to generate the asset files.
+
+- Make sure you have some datasets into your Mongo collections. 
+  To do this there is an import script in `dp-dataset-api` or use `helpers/init-db.sh` in this
+  repository. 
 
 For Florence to work you will need to have built npm modules and production assets.
 You can do this by running `make node-modules` followed by `make generate-go-prod`.
 This only needs to be done once (or until you generate debug assets). 
+
+# Bring up Cantabular Import Services #
 
 `make start`
 
