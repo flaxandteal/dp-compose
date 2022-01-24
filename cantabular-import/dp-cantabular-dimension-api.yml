@@ -1,0 +1,25 @@
+version: '3.3'
+services:
+    dp-cantabular-dimension-api:
+        build:
+            context: ../../dp-cantabular-dimension-api
+            dockerfile: Dockerfile.local
+        command:
+            - reflex
+            - -d
+            - none
+            - -c
+            - ./reflex
+        volumes:
+            - ../../dp-cantabular-dimension-api:/dp-cantabular-dimension-api
+        ports:
+            - 27200:27200
+        restart: unless-stopped
+        environment:
+            BIND_ADDR:                   ":27200"
+            SERVICE_AUTH_TOKEN:          $SERVICE_AUTH_TOKEN
+            CANTABULAR_URL:              "http://dp-cantabular-server:8491"
+            ENABLE_PRIVATE_ENDPOINTS:    "true"
+            ENABLE_PERMISSIONS_AUTH:     "true"
+            ZEBEDEE_URL:                 "http://zebedee:8082"
+            CANTABULAR_URL:              "http://dp-cantabular-server:8491"
