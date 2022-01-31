@@ -23,3 +23,4 @@ services:
             ENABLE_PERMISSIONS_AUTH:     "true"
             ZEBEDEE_URL:                 "http://zebedee:8082"
             CANTABULAR_URL:              "http://dp-cantabular-server:8491"
+            CANTABULAR_EXT_API_URL:      "http://dp-cantabular-api-ext:8492"
