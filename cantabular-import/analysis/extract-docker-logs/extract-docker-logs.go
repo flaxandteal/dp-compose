@@ -23,6 +23,8 @@ var requiredServices = []string{
 	"dp-api-router",
 	"dp-cantabular-api-ext",
 	"dp-cantabular-csv-exporter",
+	"dp-cantabular-dimension-api",
+	"dp-cantabular-filter-flex-api",
 	"dp-cantabular-metadata-exporter",
 	"dp-cantabular-server",
 	"dp-cantabular-xlsx-exporter",
