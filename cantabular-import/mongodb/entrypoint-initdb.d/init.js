@@ -9,7 +9,7 @@ var databases = [
 	},
 	{
 		name: "filters",
-		collections: ["filters", "filterOutputs"]
+		collections: ["filters", "filterOutputs", "censusFilters", "censusFilterOutputs"]
 	},
 	{
 		name: "imports",
