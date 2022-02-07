@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"reflect"
 	"strings"
 
 	"context"
@@ -53,21 +54,39 @@ var requiredServices = []string{
 // It can take a while to read all container logs, so all logs are read into one file and then this file is
 // scanned through repeatedly for required info by other apps.
 func main() {
-	count, serviceNames, err := getCantabularContainerCount()
-	if err != nil {
-		fmt.Printf("Error getting container count: %v\n", err)
-		os.Exit(1)
-	}
-	maxContainersInJob := len(requiredServices)
-	if count != maxContainersInJob {
-		fmt.Printf("Incorrect number of Cantabular containers found.\nWanted: %d, found: %d\n... have you started the containers ?\n", maxContainersInJob, count)
-		if count > 0 {
-			listMissingServices(serviceNames)
+	fmt.Println("\nExtracting Docker Logs...")
+
+	skip := false
+	if len(os.Args) > 1 {
+		param := os.Args[1]
+		if reflect.TypeOf(param).Kind() == reflect.String {
+			param = strings.ToLower(param)
+			if param == "skip" {
+				skip = true
+			}
 		}
-		os.Exit(2)
 	}
 
-	err = createLogFileForAllDockerContainers()
+	if skip == false {
+		count, serviceNames, err := getCantabularContainerCount()
+		if err != nil {
+			fmt.Printf("Error getting container count: %v\n", err)
+			os.Exit(1)
+		}
+		maxContainersInJob := len(requiredServices)
+		if count != maxContainersInJob {
+			fmt.Printf("Incorrect number of Cantabular containers found.\nWanted: %d, found: %d\n... have you started the containers ?\n", maxContainersInJob, count)
+			if count > 0 {
+				listMissingServices(serviceNames)
+			}
+			os.Exit(2)
+		}
+		fmt.Printf("All %d containers present\n\n", maxContainersInJob)
+	} else {
+		fmt.Printf("    ****  Skipping checking if all containers present  ****\n\n")
+	}
+
+	err := createLogFileForAllDockerContainers()
 	if err != nil {
 		fmt.Printf("createLogFileForAllDockerContainers failed: %v\n", err)
 		os.Exit(3)
@@ -123,7 +142,7 @@ func listMissingServices(serviceNames []string) {
 }
 
 func createLogFileForAllDockerContainers() error {
-	fmt.Printf("Getting all Container Logs\n")
+	fmt.Printf("Getting Container Logs\n")
 	ctx := context.Background()
 
 	cli, err := client.NewClientWithOpts(client.FromEnv)
