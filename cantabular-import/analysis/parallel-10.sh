@@ -1,4 +1,4 @@
-#!/usr/local/bin/bash
+#!/usr/bin/env bash
 
 # kick off ten jobs in parallel
 for i in {1..10}; do

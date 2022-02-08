@@ -13,7 +13,7 @@ var databases = [
 	},
 	{
 		name: "imports",
-		collections: ["imports"]
+		collections: ["imports", "imports_locks"]
 	},
 	{
 		name: "search",
