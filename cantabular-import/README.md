@@ -33,6 +33,8 @@ as `dp-compose` (this repository):
 
 `dp-dataset-api`
 
+`dp-filter-api`
+
 `dp-frontend-router`
 
 `dp-import-api`
