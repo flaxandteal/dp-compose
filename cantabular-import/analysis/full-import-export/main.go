@@ -180,6 +180,7 @@ var requiredServices = []string{
 	"dp-cantabular-xlsx-exporter",
 	"dp-dataset-api",
 	"dp-download-service",
+	"dp-filter-api",
 	"dp-frontend-dataset-controller",
 	"dp-frontend-router",
 	"dp-import-api",

@@ -35,7 +35,7 @@ for i in $(seq 1 "$N");do
     fi
 
     cd extract-docker-logs
-    go run -race extract-docker-logs.go
+    go run -race extract-docker-logs.go "$SKIP"
     cd -
 
     cd count-log-events
