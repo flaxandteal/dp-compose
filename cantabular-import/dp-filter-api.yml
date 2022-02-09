@@ -12,7 +12,6 @@ services:
             - ./reflex
         volumes:
             - ../../dp-filter-api:/dp-filter-api
-            - /home/jpm/go-modules/onsdigital/dp-api-clients-go:/home/jpm/go-modules/onsdigital/dp-api-clients-go
         ports:
             - 22100:22100
         restart: unless-stopped
