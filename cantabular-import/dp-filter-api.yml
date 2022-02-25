@@ -32,3 +32,4 @@ services:
             ZEBEDEE_URL:                 "http://zebedee:8082"
             DOWNLOAD_SERVICE_URL:        "http://dp-download-service:23600"
             DATASET_API_URL:             "http://dp-dataset-api:22000"
+            FILTER_FLEX_API_URL:         "http://dp-cantabular-filter-flex-api:27100"
