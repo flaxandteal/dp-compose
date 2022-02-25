@@ -28,4 +28,6 @@ services:
             ENABLE_PRIVATE_ENDPOINTS:    "true"
             ENABLE_PERMISSIONS_AUTH:     "true"
             ZEBEDEE_URL:                 "http://zebedee:8082"
+            CANTABULAR_URL:              "http://dp-cantabular-server:8491"
+            CANTABULAR_API_EXT_URL:      "http://dp-cantabular-api-ext:8492"
             MONGODB_BIND_ADDR:           "mongodb:27017"
