@@ -24,8 +24,10 @@ services:
             BIND_ADDR:                   ":27100"
             SERVICE_AUTH_TOKEN:           $SERVICE_AUTH_TOKEN
             KAFKA_ADDR:                  "kafka-1:19092,kafka-2:19092,kafka-3:19092"
-            CANTABULAR_URL:              "http://dp-cantabular-server:8491"
+            DATASET_API_URL:             "http://dp-dataset-api:22000"
             ENABLE_PRIVATE_ENDPOINTS:    "true"
             ENABLE_PERMISSIONS_AUTH:     "true"
             ZEBEDEE_URL:                 "http://zebedee:8082"
+            CANTABULAR_URL:              "http://dp-cantabular-server:8491"
+            CANTABULAR_API_EXT_URL:      "http://dp-cantabular-api-ext:8492"
             MONGODB_BIND_ADDR:           "mongodb:27017"
