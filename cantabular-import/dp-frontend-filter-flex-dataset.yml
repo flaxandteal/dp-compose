@@ -1,0 +1,20 @@
+version: '3.3'
+services:
+    dp-frontend-filter-flex-dataset:
+        build:
+            context: ../../dp-frontend-filter-flex-dataset
+            dockerfile: Dockerfile.local
+        command:
+            - reflex
+            - -d
+            - none
+            - -c
+            - ./reflex
+        volumes:
+            - ../../dp-frontend-filter-flex-dataset:/dp-frontend-filter-flex-dataset
+        ports:
+            - 20200
+        restart: unless-stopped
+        environment:
+            BIND_ADDR:                ":20100"
+            API_ROUTER_URL:           "http://dp-api-router:23200/v1"

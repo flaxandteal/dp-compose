@@ -37,6 +37,10 @@ as `dp-compose` (this repository):
 
 `dp-frontend-router`
 
+`dp-frontend-dataset-controller`
+
+`dp-frontend-filter-flex-dataset`
+
 `dp-import-api`
 
 `dp-import-cantabular-dataset`
@@ -91,7 +95,7 @@ For the full-stack journey:
 
 You will need to run `make assets` in dp-frontend-router. Assets generated using the  `-debug` flag won't work.
 
-You will also need to run `make generate-prod` in the dp-frontend-dataset-controller to generate the asset files.
+You will also need to run `make generate-prod` in the `dp-frontend-dataset-controller` and `dp-frontend-filter-flex-dataset` to generate the asset files.
 
 You will also need to make sure you have some datasets into your Mongo collections.
 To do this there is an import script: `dp-dataset-api/import-script/import-script.sh`.
@@ -117,6 +121,12 @@ This only needs to be done once (or until you generate debug assets).
 :bulb: `make node-modules` may take a long time to run (e.g. 7 minutes) and may appear to
 stop responding but may still complete successfully. `make generate-go-prod` completes
 very quickly.
+
+## Frontend note ##
+
+There is a CORS error when loading the `dp-design-system` JavaScript (JS) files resulting in JS interactivity to fail.
+
+To test JS interactions, you can set/add the `debug` environment variable to `true` in `dp-frontend-filter-flex-dataset` and `dp-frontend-dataset-controller` then run the [dp-design-system](https://github.com/ONSdigital/dp-design-system#readme).
 
 # Bring up Cantabular Import Services #
 
