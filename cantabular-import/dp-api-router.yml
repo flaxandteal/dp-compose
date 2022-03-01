@@ -28,4 +28,5 @@ services:
             RECIPE_API_URL:           "http://dp-recipe-api:22300"
             IMPORT_API_URL:           "http://dp-import-api:21800"
             DATASET_API_URL:          "http://dp-dataset-api:22000"
+            FILTER_API_URL:           "http://dp-filter-api:22100"
             SERVICE_AUTH_TOKEN:       $SERVICE_AUTH_TOKEN
