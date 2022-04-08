@@ -12,3 +12,4 @@ services:
         restart: unless-stopped
         environment:
             CANTABULAR_API_URL: "http://dp-cantabular-server:8491"
+            CANTABULAR_METADATA_URL: "http://dp-cantabular-metadata-service:8493"

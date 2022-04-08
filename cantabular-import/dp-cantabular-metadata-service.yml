@@ -1,0 +1,12 @@
+version: '3.3'
+services:
+    dp-cantabular-metadata-service:
+        build:
+            context: ../../dp-cantabular-metadata-service
+            dockerfile: Dockerfile
+        ports:
+            - 8493:8493
+        volumes:
+            - ../../dp-cantabular-metadata-service/cantabular/metadata:/app/metadata
+            - ../../dp-cantabular-metadata-service/cantabular/scripts:/app/scripts
+        restart: unless-stopped
