@@ -25,6 +25,7 @@ services:
             KAFKA_ADDR:                 "kafka-1:19092,kafka-2:19092,kafka-3:19092"
             DATASET_API_URL:            "http://dp-dataset-api:22000"
             RECIPE_API_URL:             "http://dp-recipe-api:22300"
+            FILTER_API_URL:             "http://dp-filter-api:22100"
             CANTABULAR_URL:             "http://dp-cantabular-server:8491"
             CANTABULAR_EXT_API_URL:     "http://dp-cantabular-api-ext:8492"
             LOCAL_OBJECT_STORE:         "http://minio:9000"
