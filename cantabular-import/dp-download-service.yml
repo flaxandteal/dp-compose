@@ -27,6 +27,7 @@ services:
             DATASET_API_URL:        "http://dp-dataset-api:22000"
             LOCAL_OBJECT_STORE:     "http://minio:9000"
             ZEBEDEE_URL:            "http://zebedee:8082"
+            FILTER_API_URL:         "http://dp-filter-api:22100"
             MINIO_ACCESS_KEY:       "minio-access-key"
             MINIO_SECRET_KEY:       "minio-secret-key"
             SERVICE_AUTH_TOKEN:     $SERVICE_AUTH_TOKEN
