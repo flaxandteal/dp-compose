@@ -13,7 +13,7 @@ services:
         volumes:
             - ../../dp-publishing-dataset-controller:/dp-publishing-dataset-controller
         ports:
-            - 24000
+          - 24000:24000
         restart: unless-stopped
         environment:
             BIND_ADDR:          ":24000"
