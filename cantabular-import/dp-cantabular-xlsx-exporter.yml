@@ -32,4 +32,4 @@ services:
             VAULT_TOKEN:                "0000-0000-0000-0000"
             UPLOAD_BUCKET_NAME:         "public-bucket"
             PRIVATE_UPLOAD_BUCKET_NAME: "private-bucket"
-#            ENCRYPTION_DISABLED:        "true"
+            ENCRYPTION_DISABLED:        "false"
