@@ -88,3 +88,26 @@ services:
     environment:
       - VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200
       - VAULT_DEV_ROOT_TOKEN_ID=0000-0000-0000-0000
+  kafdrop:
+    image: 'obsidiandynamics/kafdrop'
+    restart: "no"
+    ports:
+      - "9090:9000"
+    environment:
+      KAFKA_BROKERCONNECT: "kafka-1:19092"
+      JVM_OPTS: "-Xms16M -Xmx48M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify"
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+  kouncil:
+    image: consdata/kouncil:latest
+    ports:
+      - '8888:8080'
+    environment:
+      bootstrapServers:
+        kafka-1:19092
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
