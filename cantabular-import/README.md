@@ -214,3 +214,13 @@ not already included in the compose cluster add them to `deps.yml`. Be cognizant
 services the new service is dependant on and add under the `depends_on` clause.
 - Test the new service runs as expected and can be reached by other services and you're
 good to go!
+
+
+# Monitoring Apache Kafka clusters #
+
+On the Docker network we have a couple of Web UIs to monitor our Kafka Cluster on the docker network.
+The tools display information such as brokers, topics, partitions, consumers and lets you view messages
+on our docker network.
+
+* [**Kafdrop**](https://github.com/obsidiandynamics/kafdrop) - [http://localhost:9090](http://localhost:9090)
+* [**Kouncil**](https://docs.kouncil.io/) - [http://localhost:8888](http://localhost:8888)
