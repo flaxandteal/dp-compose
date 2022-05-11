@@ -218,9 +218,8 @@ good to go!
 
 # Monitoring Apache Kafka clusters #
 
-On the Docker network we have a couple of Web UIs to monitor our Kafka Cluster on the docker network.
-The tools display information such as brokers, topics, partitions, consumers and lets you view messages
-on our docker network.
+On the Docker network we have a Kowl as our UI to monitor our Kafka Cluster on the docker network.
+The tools display information such as brokers, topics, partitions, consumers, message schemas and 
+lets you view messages on our docker network.
 
-* [**Kafdrop**](https://github.com/obsidiandynamics/kafdrop) - [http://localhost:9090](http://localhost:9090)
-* [**Kouncil**](https://docs.kouncil.io/) - [http://localhost:8888](http://localhost:8888)
+* [**Kowl**](https://github.com/redpanda-data/kowl) - [http://localhost:9888](http://localhost:9090)
