@@ -1,0 +1,21 @@
+version: '3.3'
+services:
+    dp-population-types-api:
+        build:
+            context: ../../dp-population-types-api
+            dockerfile: Dockerfile.local
+        command:
+            - reflex
+            - -d
+            - none
+            - -c
+            - ./reflex
+        ports:
+            - 27300:27300
+        volumes:
+            - ../../dp-population-types-api:/dp-population-types-api
+        restart: unless-stopped
+        environment:
+            BIND_ADDR:      ":27300"
+            CANTABULAR_URL: "http://dp-cantabular-server:8491"
+            CANTABULAR_EXT_API_URL: "http://dp-cantabular-api-ext:8492"

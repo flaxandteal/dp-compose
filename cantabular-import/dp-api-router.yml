@@ -24,6 +24,8 @@ services:
             MONGODB_BIND_ADDR:        "mongodb:27017"
             KAFKA_ADDR:               "kafka-1:19092,kafka-2:19092,kafka-3:19092"
             DIMENSIONS_API_URL:       "http://dp-cantabular-dimension-api:27200"
+            POPULATION_TYPES_API_URL: "http://dp-population-types-api:27300"
+            ENABLE_POPULATION_TYPES_API: "true"
             ENABLE_PRIVATE_ENDPOINTS: "true"
             ZEBEDEE_URL:              "http://zebedee:8082"
             RECIPE_API_URL:           "http://dp-recipe-api:22300"
@@ -31,4 +33,3 @@ services:
             DATASET_API_URL:          "http://dp-dataset-api:22000"
             FILTER_API_URL:           "http://dp-filter-api:22100"
             SERVICE_AUTH_TOKEN:       $SERVICE_AUTH_TOKEN
-            DIMENSIONS_API_URL:       "http://dp-cantabular-dimension-api:27200"
