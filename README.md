@@ -28,12 +28,11 @@ The ONS website and CMD both require Elastic search but (annoyingly) require dif
 :warning: **Gotcha Warning** :warning:
 You'll need to overwrite your ES config for the `dp-dimension-search-builder` and `dp-dimension-search-api` to use ports `10200` & `10300` to ensure they are using the correct instance.
 
-## Postgres
+## Postgis
 
-**Important**: Zebedee requires _**Postgres 9.6**_. 
-If you have error when Zebedee starts up due to a failed database connection make sure that your postgres images is version **9.6*
+**Important**: Zebedee requires _**Postgis**_. 
 
-The _dp-compose_postgres_ container by default uses port `5432` 
+The _dp-compose_postgis_ container by default uses port `5432` 
 
 ### Checking postgres version
 
@@ -41,8 +40,8 @@ The _dp-compose_postgres_ container by default uses port `5432`
 
 You should see something similar to (see IMAGE):
 ```
-CONTAINER ID    IMAGE           COMMAND                   CREATED           STATUS           PORTS                     NAMES
-d343558fd467    postgres:9.6    "docker-entrypoint.s…"    11 minutes ago    Up 11 minutes    0.0.0.0:5432->5432/tcp    dp-compose_postgres_1
+CONTAINER ID    IMAGE                 COMMAND                   CREATED           STATUS           PORTS                     NAMES
+d343558fd467    dp-compose_postgis    "docker-entrypoint.s…"    11 minutes ago    Up 11 minutes    0.0.0.0:5432->5432/tcp    dp-compose-postgis-1
 ```
 
 Or (see TAG)
@@ -50,21 +49,15 @@ Or (see TAG)
 docker images
 ```
 ```
-REPOSITORY    TAG    IMAGE ID        CREATED       SIZE
-postgres      9.6    ed34a2d5eb79    3 days ago    230MB
-```
-
-If you have a newer version of postgres you can remove it:
-
-```
-docker rmi <IMAGE_ID>
+REPOSITORY    TAG     IMAGE ID        CREATED           SIZE
+postgis      latest   ed34a2d5eb79    25 minutes ago    567MB
 ```
 
 ### Connecting to Postgres
 To connect to the container and query via the postgres _cli_
 
 ```
-docker run -it --rm --link dp-compose_postgres_1:postgres --net dp-compose_default postgres:9.6 psql -h postgres -U postgres
+docker run -it --rm --link dp-compose_postgis_1:postgis --net dp-compose_default postgis/postgis psql -h postgis -U postgres
 ```
 
 ## Versioning
