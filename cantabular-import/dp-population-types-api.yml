@@ -16,6 +16,10 @@ services:
             - ../../dp-population-types-api:/dp-population-types-api
         restart: unless-stopped
         environment:
-            BIND_ADDR:      ":27300"
-            CANTABULAR_URL: "http://dp-cantabular-server:8491"
-            CANTABULAR_EXT_API_URL: "http://dp-cantabular-api-ext:8492"
+            BIND_ADDR:                ":27300"
+            CANTABULAR_URL:           "http://dp-cantabular-server:8491"
+            CANTABULAR_API_EXT_URL:   "http://dp-cantabular-api-ext:8492"
+            DATASET_API_URL:          "http://dp-dataset-api:22000"
+            ZEBEDEE_URL:              "http://zebedee:8082"
+            SERVICE_AUTH_TOKEN:        $SERVICE_AUTH_TOKEN
+            ENABLE_PRIVATE_ENDPOINTS: "true"
