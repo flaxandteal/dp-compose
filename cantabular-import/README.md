@@ -241,3 +241,25 @@ The tools display information such as brokers, topics, partitions, consumers, me
 lets you view messages on our docker network.
 
 * [**Kowl**](https://github.com/redpanda-data/kowl) - [http://localhost:9888](http://localhost:9090)
+
+# Developing services and libraries with the stack
+
+While developing service code any changes will be automatically picked up by `reflex` when files are
+saved and the services will be automatically rebuilt.
+
+When developing a library that is used by the services as a dependency (i.e. `dp-api-clients-go`,
+`dp-net` etc) a couple of extra steps are needed to pick up local changes. Firstly, in order to
+point the service to use your local copy of the library you will need to add a replace directive
+in `go.mod` pointing to the local copy you're working on. For example
+
+`replace github.com/ONSdigital/dp-api-clients-go/v2 => /Users/FlorenceRoundabout/path/to/dp-api-clients-go`
+
+Secondly you'll need to add a volume to the service's docker container in dp-compose. For example to
+work with the above in `dp-filter-api` you would add:
+
+`- /Users/FlorenceRoundabout/path/to/dp-api-clients-go:/Users/FlorenceRoundabout/path/to/dp-api-clients-go`
+
+under `volumes:` in `dp-compose/cantabular-import/dp-filter-api.yml`
+
+To pick up changes made to the library you need to save/update a file in the service that imports the
+library. Reflex won't automatically detect changes made to the library code itself.
