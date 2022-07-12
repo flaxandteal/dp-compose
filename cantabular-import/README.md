@@ -122,49 +122,67 @@ This only needs to be done once (or until you generate debug assets).
 stop responding but may still complete successfully. `make generate-go-prod` completes
 very quickly.
 
-## Frontend note ##
+## Frontend note
 
 There is a CORS error when loading the `dp-design-system` JavaScript (JS) files resulting in JS interactivity to fail.
 
 To test JS interactions, you can set/add the `debug` environment variable to `true` in `dp-frontend-filter-flex-dataset` and `dp-frontend-dataset-controller` then run the [dp-design-system](https://github.com/ONSdigital/dp-design-system#readme).
 
-# Bring up Cantabular Import Services #
+## Start the Cantabular Import Services
 
-`make start`
+This assumes that all your setup has been done and all you need to do 
+is to start the docker network. 
+In order to setup the service and start the docker network, please read [this section](#Setup environment and start the Cantabular Import Services). 
 
-(note: we use `sudo` to prevent docker having issues accessing the `GOCACHE`
-volume it creates. `sudo` requires the `-E` in order to preserve existing
-environment variables)
+* **Start all Services**: `make start`
+* **Start services in the background**: `make start-detached`
+* **Stop Services**: `make stop`
+* **Stop Services And Remove Containers**: `make down`
+* **Stop Services And Remove All Containers, Volumes and Networks**: `make clean`
+* **Restart Services**: `make restart`
+* **Recall Logs**: `make logs` or `./logs`
+* **Recall Logs For Specific Service**: `make logs t=<service-name>` or `./logs <service-name>`
 
-# Bring up Cantabular Import Services Detached (running in background) #
+## Setup environment and start the Cantabular Import Services
 
-`make start-detached`
+1. Ensure you have the following environment variable set up on your `~/.zshrc` or `~/.bashrc` profile:led **zebedee_root**
+```shell
+ DP_CLI_CONFIG
+ zebedee_root
+```
+2. Add a new alias to your `~/.zshrc` ou `~/.bashrc` profile:
+```shell
+alias scs='PATH_TO_ONS_WORKSPACE/dp-compose/cantabular-import/scs.sh'
+```
+3. Source your profile, or simple close and open a new terminal window
+```shell
+source ~/.zshrc
+```
+4. Check if the `scs.sh` is now available on your command line, by simply typing `scs`
+```shell
+> scs help
 
-# Stop Services #
+Start Cantabular Services (SCS)
 
-`make stop`
+Simple script to run cantabular import service locally and all the dependencies
 
-# Stop Services And Remove Containers #
+List of commands: 
+   chown     - change the service '.go' folder permissions from root to the user and group.
+               Useful for linux users.
+   clone     - git clone all the required GitHub repos
+   down      - stop running the containers via docker-compose
+   init-db   - preparing db services. Run this once
+   help      - splash screen with all these options
+   pull      - git pull the latest from your remote repos
+   setup     - preparing services. Run this once, before 'up'
+   up        - run the containers via docker-compose
+```
 
-`make down`
+5. Setup your environment and start the service
+```shell
+scs setup
+```
 
-# Stop Services And Remove All Containers, Volumes and Networks #
-
-`make clean`
-
-# Restart Services #
-
-`make restart`
-
-# Recall Logs #
-
-`make logs` or `./logs`
-
-# Recall Logs For Specific Service #
-
-`make logs t=<service-name>` or `./logs <service-name>`
-
-## Notes ##
 
 # Making Changes #
 
