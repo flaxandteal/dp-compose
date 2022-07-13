@@ -252,12 +252,12 @@ When developing a library that is used by the services as a dependency (i.e. `dp
 point the service to use your local copy of the library you will need to add a replace directive
 in `go.mod` pointing to the local copy you're working on. For example
 
-`replace github.com/ONSdigital/dp-api-clients-go/v2 => /Users/FlorenceRoundabout/path/to/dp-api-clients-go`
+`replace github.com/ONSdigital/dp-api-clients-go/v2 => LOCAL_PATH_TO/dp-api-clients-go`
 
 Secondly you'll need to add a volume to the service's docker container in dp-compose. For example to
 work with the above in `dp-filter-api` you would add:
 
-`- /Users/FlorenceRoundabout/path/to/dp-api-clients-go:/Users/FlorenceRoundabout/path/to/dp-api-clients-go`
+`- LOCAL_PATH_TO/dp-api-clients-go:LOCAL_PATH_TO/dp-api-clients-go`
 
 under `volumes:` in `dp-compose/cantabular-import/dp-filter-api.yml`
 
