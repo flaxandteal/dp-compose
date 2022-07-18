@@ -17,10 +17,10 @@ dp-cantabular-xlsx-exporter dp-download-service dp-dataset-api dp-filter-api dp-
 dp-import-api dp-import-cantabular-dataset dp-import-cantabular-dimension-options dp-recipe-api 
 dp-frontend-filter-flex-dataset dp-zebedee-utils dp-cantabular-metadata-service"
 
-EXTRA_SERVICES="dp-cantabular-ui dp-cantabular-server dp-kafka dp-setup"
+EXTRA_SERVICES="dp-cantabular-ui dp-cantabular-server dp-kafka dp-setup dp-cantabular-uat"
 
 # current directory
-DIR="$( cd "$( dirname "$0" )" && pwd )"
+DIR="$( cd "$( dirname "$0" )/../.." && pwd )"
 
 # directories
 DP_COMPOSE_DIR="$DIR/dp-compose"
