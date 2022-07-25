@@ -69,7 +69,7 @@ splash() {
 }
 
 cloneServices() {
-    cd $DIR
+    cd "$DIR"
     allServices="${SERVICES} ${EXTRA_SERVICES}"
     for service in $allServices; do
         git clone git@github.com:ONSdigital/${service}.git 2> /dev/null
@@ -83,9 +83,9 @@ cloneServices() {
 
 
 pull() {
-    cd $DIR
+    cd "$DIR"
     for repo in $(ls -d $DIR/*/); do
-        cd ${repo}
+        cd "${repo}"
         if [ -d ".git" ]; then
           git pull
           logSuccess "'$repo' updated"
@@ -96,7 +96,7 @@ pull() {
 
 initDB() {
     echo "Importing Recipes & Dataset documents..."
-    cd $DP_CANTABULAR_IMPORT_DIR
+    cd "$DP_CANTABULAR_IMPORT_DIR"
     make init-db
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to import MongoDB initial datasets"
@@ -111,12 +111,12 @@ florenceLoginInfo () {
 }
 
 checkEnvironmentVariables() {
-  if [ -z $(echo $DP_CLI_CONFIG) ]; then
+  if [ -z $(echo "$DP_CLI_CONFIG") ]; then
     logError "Error - Environment variable [DP_CLI_CONFIG] is not defined"
     exit 129
   fi
 
-  if [ -z $(echo $zebedee_root) ]; then
+  if [ -z $(echo "$zebedee_root") ]; then
     logError "Error - Environment variable [zebedee_root] is not defined"
     exit 129
   fi
@@ -135,7 +135,7 @@ setupServices () {
     logSuccess "Remove zebedee docker image and container... Done."
 
     logSuccess "Build zebedee..."
-    cd $ZEBEDEE_DIR
+    cd "$ZEBEDEE_DIR"
     git checkout develop
     git reset --hard; git pull
     # mvn clean install
@@ -147,7 +147,7 @@ setupServices () {
     logSuccess "Build zebedee...  Done."
 
     logSuccess "Clean zebedee_root folder..."
-    cd $DP_CANTABULAR_IMPORT_DIR
+    cd "$DP_CANTABULAR_IMPORT_DIR"
     make full-clean
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to clean zebedee_root folder"
@@ -156,7 +156,7 @@ setupServices () {
     logSuccess "Clean zebedee_root folder... Done."
 
     logSuccess "Make Assets for dp-frontend-router..."
-    cd $DP_FRONTEND_ROUTER_DIR
+    cd "$DP_FRONTEND_ROUTER_DIR"
     make assets
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to build dp-frontend-router assets"
@@ -165,7 +165,7 @@ setupServices () {
     logSuccess "Make Assets for dp-frontend-router... Done."
 
     logSuccess "Generate prod for $DP_FRONTEND_DATASET_CONTROLLER_DIR..."
-    cd $DP_FRONTEND_DATASET_CONTROLLER_DIR
+    cd "$DP_FRONTEND_DATASET_CONTROLLER_DIR"
     make generate-prod
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to generate-prod for 'dp-frontend-dataset-controler'"
@@ -174,7 +174,7 @@ setupServices () {
     logSuccess "Generate prod for $DP_FRONTEND_DATASET_CONTROLLER_DIR... Done."
 
     logSuccess "Generate prod for $DP_FRONTEND_FILTER_FLEX_DATASET_DIR..."
-    cd $DP_FRONTEND_FILTER_FLEX_DATASET_DIR
+    cd "$DP_FRONTEND_FILTER_FLEX_DATASET_DIR"
     make generate-prod
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to generate-prod for 'dp-frontend-filter-flex-dataset'"
@@ -183,7 +183,7 @@ setupServices () {
     logSuccess "Generate prod for $DP_FRONTEND_FILTER_FLEX_DATASET_DIR... Done."
 
     logSuccess "Setup metadata service..."
-    cd $DP_CANTABULAR_METADATA_SERVICE_DIR
+    cd "$DP_CANTABULAR_METADATA_SERVICE_DIR"
     make setup
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to setup 'dp-cantabular-metadata-service'"
@@ -192,7 +192,7 @@ setupServices () {
     logSuccess "Setup metadata service... Done."
 
     logSuccess "Build florence..."
-    cd $DP_FLORENCE_DIR
+    cd "$DP_FLORENCE_DIR"
     make node-modules && make generate-go-prod
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to build 'florence'"
@@ -201,7 +201,7 @@ setupServices () {
     logSuccess "Build florence...  Done."
 
     logSuccess "Build the-train..."
-    cd $DP_THE_TRAIN_DIR
+    cd "$DP_THE_TRAIN_DIR"
     make build
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to build 'the-train'"
@@ -210,7 +210,7 @@ setupServices () {
     logSuccess "Build the-train... Done."
 
     logSuccess "Preparing dp-cantabular-server..."
-    cd $DP_CANTABULAR_SERVER_DIR
+    cd "$DP_CANTABULAR_SERVER_DIR"
     make setup
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to build 'dp-cantabular-server'"
@@ -219,7 +219,7 @@ setupServices () {
     logSuccess "Preparing dp-cantabular-server... Done."
 
     logSuccess "Preparing dp-cantabular-api-ext..."
-    cd $DP_CANTABULAR_API_EXT_DIR
+    cd "$DP_CANTABULAR_API_EXT_DIR"
     make setup
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to build 'dp-cantabular-api-ext'"
@@ -252,7 +252,7 @@ chown() {
 
 upServices () {
     echo "Starting dp cantabular import..."
-    cd $DP_CANTABULAR_IMPORT_DIR
+    cd "$DP_CANTABULAR_IMPORT_DIR"
     make start-detached
     # make start
     echo "Starting dp cantabular import... Done."
@@ -262,12 +262,12 @@ upServices () {
 
 downServices () {
     echo "Stopping base services..."
-    cd $DP_COMPOSE_DIR
+    cd "$DP_COMPOSE_DIR"
     docker-compose down
     logSuccess "Stopping base services... Done."
 
     echo "Stopping dp cantabular import..."
-    cd $DP_CANTABULAR_IMPORT_DIR
+    cd "$DP_CANTABULAR_IMPORT_DIR"
     make stop
     logSuccess "Stopping dp cantabular import... Done."
 }
