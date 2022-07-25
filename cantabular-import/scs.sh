@@ -11,7 +11,7 @@ RESET="\e[0m"
 
 # services
 SERVICES="babbage florence The-Train zebedee dp-api-router 
-dp-cantabular-api-ext dp-cantabular-csv-exporter dp-cantabular-dimension-api 
+dp-cantabular-api-ext dp-cantabular-csv-exporter dp-population-types-api
 dp-cantabular-filter-flex-api dp-cantabular-metadata-exporter dp-cantabular-server
 dp-cantabular-xlsx-exporter dp-download-service dp-dataset-api dp-filter-api dp-frontend-router 
 dp-import-api dp-import-cantabular-dataset dp-import-cantabular-dimension-options dp-recipe-api 
