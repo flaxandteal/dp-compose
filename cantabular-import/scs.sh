@@ -100,7 +100,7 @@ initDB() {
     make init-db
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to import MongoDB initial datasets"
-        exit -1
+        exit 129
     fi
     logSuccess "Importing Recipes & Dataset documents... Done."
 }
@@ -111,12 +111,14 @@ florenceLoginInfo () {
 }
 
 setupServices () {
+#    checkEnvironmentVariables
+
     logSuccess "Remove zebedee docker image and container..."
     docker rm -f $(docker ps --filter=name='zebedee' --format="{{.Names}}")
     docker rmi -f $(docker images --format '{{.ID}}' --filter=reference="*zebedee*:*")
     if [ $? -ne 0 ]; then
         logError "ERROR - Docker failed to remove containers and images"
-        exit -1
+        exit 129
     fi
     logSuccess "Remove zebedee docker image and container... Done."
 
@@ -128,7 +130,7 @@ setupServices () {
     make build build-reader
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to build zebedee"
-        exit -1
+        exit 129
     fi
     logSuccess "Build zebedee...  Done."
 
@@ -137,7 +139,7 @@ setupServices () {
     make full-clean
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to clean zebedee_root folder"
-        exit -1
+        exit 129
     fi
     logSuccess "Clean zebedee_root folder... Done."
 
@@ -146,7 +148,7 @@ setupServices () {
     make assets
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to build dp-frontend-router assets"
-        exit -1
+        exit 129
     fi
     logSuccess "Make Assets for dp-frontend-router... Done."
 
@@ -155,7 +157,7 @@ setupServices () {
     make generate-prod
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to generate-prod for 'dp-frontend-dataset-controler'"
-        exit -1
+        exit 129
     fi
     logSuccess "Generate prod for $DP_FRONTEND_DATASET_CONTROLLER_DIR... Done."
 
@@ -164,7 +166,7 @@ setupServices () {
     make generate-prod
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to generate-prod for 'dp-frontend-filter-flex-dataset'"
-        exit -1
+        exit 129
     fi
     logSuccess "Generate prod for $DP_FRONTEND_FILTER_FLEX_DATASET_DIR... Done."
 
@@ -173,7 +175,7 @@ setupServices () {
     make setup
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to setup 'dp-cantabular-metadata-service'"
-        exit -1
+        exit 129
     fi
     logSuccess "Setup metadata service... Done."
 
@@ -182,7 +184,7 @@ setupServices () {
     make node-modules && make generate-go-prod
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to build 'florence'"
-        exit -1
+        exit 129
     fi
     logSuccess "Build florence...  Done."
 
@@ -191,7 +193,7 @@ setupServices () {
     make build
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to build 'the-train'"
-        exit -1
+        exit 129
     fi
     logSuccess "Build the-train... Done."
 
@@ -200,7 +202,7 @@ setupServices () {
     make setup
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to build 'dp-cantabular-server'"
-        exit -1
+        exit 129
     fi
     logSuccess "Preparing dp-cantabular-server... Done."
 
@@ -209,7 +211,7 @@ setupServices () {
     make setup
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to build 'dp-cantabular-api-ext'"
-        exit -1
+        exit 129
     fi
     logSuccess "Preparing dp-cantabular-api-ext... Done."
     
