@@ -110,8 +110,20 @@ florenceLoginInfo () {
     logSuccess "         if 1st time accessing it, the credentials are: florence@magicroundabout.ons.gov.uk / Doug4l"
 }
 
+checkEnvironmentVariables() {
+  if [ -z $(echo $DP_CLI_CONFIG) ]; then
+    logError "Error - Environment variable [DP_CLI_CONFIG] is not defined"
+    exit 129
+  fi
+
+  if [ -z $(echo $zebedee_root) ]; then
+    logError "Error - Environment variable [zebedee_root] is not defined"
+    exit 129
+  fi
+}
+
 setupServices () {
-#    checkEnvironmentVariables
+    checkEnvironmentVariables
 
     logSuccess "Remove zebedee docker image and container..."
     docker rm -f $(docker ps --filter=name='zebedee' --format="{{.Names}}")
