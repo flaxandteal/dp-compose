@@ -16,9 +16,10 @@ dp-cantabular-api-ext dp-cantabular-csv-exporter dp-population-types-api
 dp-cantabular-filter-flex-api dp-cantabular-metadata-exporter dp-cantabular-server
 dp-cantabular-xlsx-exporter dp-download-service dp-dataset-api dp-filter-api dp-frontend-router 
 dp-import-api dp-import-cantabular-dataset dp-import-cantabular-dimension-options dp-recipe-api 
-dp-frontend-filter-flex-dataset dp-zebedee-utils dp-cantabular-metadata-service"
+dp-frontend-filter-flex-dataset dp-cantabular-metadata-service dp-api-clients-go dp-topic-api"
 
-EXTRA_SERVICES="dp-cantabular-ui dp-cantabular-server dp-kafka dp-setup dp-cantabular-uat"
+EXTRA_SERVICES="dp-cantabular-ui dp-cantabular-server dp-kafka dp-setup dp-configs dp-ci dp-cli dp-operations
+                dp-cantabular-uat sixteens dp-zebedee-utils"
 
 # current directory
 DIR="$( cd "$( dirname "$0" )/../.." && pwd )"
