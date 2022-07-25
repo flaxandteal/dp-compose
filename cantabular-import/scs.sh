@@ -35,8 +35,6 @@ DP_FRONTEND_ROUTER_DIR="$DIR/dp-frontend-router"
 DP_CANTABULAR_METADATA_SERVICE_DIR="$DIR/dp-cantabular-metadata-service"
 DP_FRONTEND_FILTER_FLEX_DATASET_DIR="$DIR/dp-frontend-filter-flex-dataset"
 DP_FRONTEND_DATASET_CONTROLLER_DIR="$DIR/dp-frontend-dataset-controller"
-DP_RECIPE_API_IMPORT_RECIPES_DIR="$DIR/dp-recipe-api/import-recipes"
-DP_DATASET_API_IMPORT_SCRIPT_DIR="$DIR/dp-dataset-api/import-script"
 ZEBEDEE_DIR="$DIR/zebedee"
 ZEBEDEE_GENERATED_CONTENT_DIR=${zebedee_root}
 
