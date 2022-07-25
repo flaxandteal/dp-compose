@@ -124,11 +124,14 @@ setupServices () {
     checkEnvironmentVariables
 
     logSuccess "Remove zebedee docker image and container..."
-    docker rm -f $(docker ps --filter=name='zebedee' --format="{{.Names}}")
-    docker rmi -f $(docker images --format '{{.ID}}' --filter=reference="*zebedee*:*")
-    if [ $? -ne 0 ]; then
-        logError "ERROR - Docker failed to remove containers and images"
-        exit 129
+    zebedeeContainer=$(docker ps --filter=name='zebedee' --format="{{.Names}}")
+    if [ $zebedeeContainer ]; then
+      docker rm -f $zebedeeContainer
+    fi
+
+    zebedeeImage=$(docker images --format '{{.ID}}' --filter=reference="*zebedee*:*")
+    if [ $zebedeeImage ]; then
+      docker rmi -f $zebedeeImage
     fi
     logSuccess "Remove zebedee docker image and container... Done."
 
@@ -148,7 +151,7 @@ setupServices () {
     cd "$DP_CANTABULAR_IMPORT_DIR"
     make full-clean
     if [ $? -ne 0 ]; then
-        logError "ERROR - Failed to clean zebedee_root folder"
+        logError "ERROR - Failed to clean zebedee_root folder and download the CMS content"
         exit 129
     fi
     logSuccess "Clean zebedee_root folder... Done."
