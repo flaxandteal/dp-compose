@@ -80,8 +80,10 @@ pull() {
     cd $DIR
     for repo in $(ls -d $DIR/*/); do
         cd ${repo}
-        git pull
-        logSuccess "'$repo' updated"
+        if [ -d ".git" ]; then
+          git pull
+          logSuccess "'$repo' updated"
+        fi
     done
 }
 
