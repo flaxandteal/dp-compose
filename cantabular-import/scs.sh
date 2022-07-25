@@ -7,6 +7,7 @@
 
 # prompt colours
 GREEN="\e[32m"
+RED="\e[31m"
 RESET="\e[0m"
 
 # services
@@ -43,6 +44,10 @@ ACTION=$1
 ##################### FUNCTIONS ##########################
 logSuccess() {
     echo -e "$GREEN ${1} $RESET"
+}
+
+logError() {
+    echo -e "$RED ${1} $RESET"
 }
 
 splash() {
@@ -92,6 +97,10 @@ initDB() {
     echo "Importing Recipes & Dataset documents..."
     cd $DP_CANTABULAR_IMPORT_DIR
     make init-db
+    if [ $? -ne 0 ]; then
+        logError "ERROR - Failed to import MongoDB initial datasets"
+        exit -1
+    fi
     logSuccess "Importing Recipes & Dataset documents... Done."
 }
 
@@ -101,10 +110,13 @@ florenceLoginInfo () {
 }
 
 setupServices () {
-
     logSuccess "Remove zebedee docker image and container..."
     docker rm -f $(docker ps --filter=name='zebedee' --format="{{.Names}}")
     docker rmi -f $(docker images --format '{{.ID}}' --filter=reference="*zebedee*:*")
+    if [ $? -ne 0 ]; then
+        logError "ERROR - Docker failed to remove containers and images"
+        exit -1
+    fi
     logSuccess "Remove zebedee docker image and container... Done."
 
     logSuccess "Build zebedee..."
@@ -113,60 +125,91 @@ setupServices () {
     git reset --hard; git pull
     # mvn clean install
     make build build-reader
+    if [ $? -ne 0 ]; then
+        logError "ERROR - Failed to build zebedee"
+        exit -1
+    fi
     logSuccess "Build zebedee...  Done."
 
     logSuccess "Clean zebedee_root folder..."
     cd $DP_CANTABULAR_IMPORT_DIR
     make full-clean
+    if [ $? -ne 0 ]; then
+        logError "ERROR - Failed to clean zebedee_root folder"
+        exit -1
+    fi
     logSuccess "Clean zebedee_root folder... Done."
 
     logSuccess "Make Assets for dp-frontend-router..."
     cd $DP_FRONTEND_ROUTER_DIR
     make assets
+    if [ $? -ne 0 ]; then
+        logError "ERROR - Failed to build dp-frontend-router assets"
+        exit -1
+    fi
     logSuccess "Make Assets for dp-frontend-router... Done."
 
     logSuccess "Generate prod for $DP_FRONTEND_DATASET_CONTROLLER_DIR..."
     cd $DP_FRONTEND_DATASET_CONTROLLER_DIR
     make generate-prod
+    if [ $? -ne 0 ]; then
+        logError "ERROR - Failed to generate-prod for 'dp-frontend-dataset-controler'"
+        exit -1
+    fi
     logSuccess "Generate prod for $DP_FRONTEND_DATASET_CONTROLLER_DIR... Done."
 
     logSuccess "Generate prod for $DP_FRONTEND_FILTER_FLEX_DATASET_DIR..."
     cd $DP_FRONTEND_FILTER_FLEX_DATASET_DIR
     make generate-prod
+    if [ $? -ne 0 ]; then
+        logError "ERROR - Failed to generate-prod for 'dp-frontend-filter-flex-dataset'"
+        exit -1
+    fi
     logSuccess "Generate prod for $DP_FRONTEND_FILTER_FLEX_DATASET_DIR... Done."
 
     logSuccess "Setup metadata service..."
     cd $DP_CANTABULAR_METADATA_SERVICE_DIR
     make setup
+    if [ $? -ne 0 ]; then
+        logError "ERROR - Failed to setup 'dp-cantabular-metadata-service'"
+        exit -1
+    fi
     logSuccess "Setup metadata service... Done."
 
     logSuccess "Build florence..."
     cd $DP_FLORENCE_DIR
-    git checkout develop
-    git reset --hard; git pull
-    make node-modules
-    make generate-go-prod
+    make node-modules && make generate-go-prod
+    if [ $? -ne 0 ]; then
+        logError "ERROR - Failed to build 'florence'"
+        exit -1
+    fi
     logSuccess "Build florence...  Done."
 
     logSuccess "Build the-train..."
     cd $DP_THE_TRAIN_DIR
-    git checkout develop
-    git pull
     make build
+    if [ $? -ne 0 ]; then
+        logError "ERROR - Failed to build 'the-train'"
+        exit -1
+    fi
     logSuccess "Build the-train... Done."
 
     logSuccess "Preparing dp-cantabular-server..."
     cd $DP_CANTABULAR_SERVER_DIR
-    git checkout develop
-    git pull
     make setup
+    if [ $? -ne 0 ]; then
+        logError "ERROR - Failed to build 'dp-cantabular-server'"
+        exit -1
+    fi
     logSuccess "Preparing dp-cantabular-server... Done."
 
     logSuccess "Preparing dp-cantabular-api-ext..."
     cd $DP_CANTABULAR_API_EXT_DIR
-    git checkout develop
-    git pull 
     make setup
+    if [ $? -ne 0 ]; then
+        logError "ERROR - Failed to build 'dp-cantabular-api-ext'"
+        exit -1
+    fi
     logSuccess "Preparing dp-cantabular-api-ext... Done."
     
     chown
