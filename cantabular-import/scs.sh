@@ -4,6 +4,7 @@
 # set -x
 
 ##################### VARIABLES ##########################
+export AWS_PROFILE=default
 
 # prompt colours
 GREEN="\e[32m"
