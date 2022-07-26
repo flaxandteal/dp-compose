@@ -159,6 +159,7 @@ setupServices () {
 
     logSuccess "Make Assets for dp-frontend-router..."
     cd "$DP_FRONTEND_ROUTER_DIR"
+    git checkout develop && git pull
     make assets
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to build dp-frontend-router assets"
@@ -168,6 +169,7 @@ setupServices () {
 
     logSuccess "Generate prod for $DP_FRONTEND_DATASET_CONTROLLER_DIR..."
     cd "$DP_FRONTEND_DATASET_CONTROLLER_DIR"
+    git checkout develop && git pull
     make generate-prod
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to generate-prod for 'dp-frontend-dataset-controler'"
@@ -177,6 +179,7 @@ setupServices () {
 
     logSuccess "Generate prod for $DP_FRONTEND_FILTER_FLEX_DATASET_DIR..."
     cd "$DP_FRONTEND_FILTER_FLEX_DATASET_DIR"
+    git checkout develop && git pull
     make generate-prod
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to generate-prod for 'dp-frontend-filter-flex-dataset'"
@@ -186,6 +189,7 @@ setupServices () {
 
     logSuccess "Setup metadata service..."
     cd "$DP_CANTABULAR_METADATA_SERVICE_DIR"
+    git checkout develop && git pull
     make setup
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to setup 'dp-cantabular-metadata-service'"
@@ -195,6 +199,7 @@ setupServices () {
 
     logSuccess "Build florence..."
     cd "$DP_FLORENCE_DIR"
+    git checkout develop && git reset --hard && git pull
     make node-modules && make generate-go-prod
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to build 'florence'"
@@ -204,6 +209,7 @@ setupServices () {
 
     logSuccess "Build the-train..."
     cd "$DP_THE_TRAIN_DIR"
+    git checkout develop && git pull
     make build
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to build 'the-train'"
@@ -213,6 +219,7 @@ setupServices () {
 
     logSuccess "Preparing dp-cantabular-server..."
     cd "$DP_CANTABULAR_SERVER_DIR"
+    git checkout develop && git pull
     make setup
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to build 'dp-cantabular-server'"
@@ -222,6 +229,7 @@ setupServices () {
 
     logSuccess "Preparing dp-cantabular-api-ext..."
     cd "$DP_CANTABULAR_API_EXT_DIR"
+    git checkout develop && git pull
     make setup
     if [ $? -ne 0 ]; then
         logError "ERROR - Failed to build 'dp-cantabular-api-ext'"
