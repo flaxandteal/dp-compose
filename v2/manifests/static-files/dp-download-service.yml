@@ -1,0 +1,75 @@
+version: '3'
+services:  
+  dp-download-service:
+    build:
+      context: ../../../../dp-download-service
+      dockerfile: Dockerfile-local
+    ports:
+      - 23600:23600
+    environment:
+      HEALTHCHECK_INTERVAL: $HEALTHCHECK_INTERVAL
+      BIND_ADDR: ':23600'
+      AWS_REGION: 'eu-west-1'
+      LOCALSTACK_HOST: 'http://localstack:4566'
+      BUCKET_NAME: 'testing'
+      PUBLIC_BUCKET_URL: 'http://localhost:4566/testing-public/'
+      ENCRYPTION_DISABLED: 'false'
+      GRACEFUL_SHUTDOWN_TIMEOUT: '5s'
+      HEALTHCHECK_CRITICAL_TIMEOUT: '5s'
+      VAULT_TOKEN: '0000-0000-0000-0000'
+      VAULT_ADDR: 'http://vault:8200'
+      VAULT_PATH: 'secret/shared/psk'
+      FILES_API_URL: $FILES_API_URL
+      MINIO_ACCESS_KEY: 'test'
+      MINIO_SECRET_KEY: 'test'
+      LOCAL_OBJECT_STORE: 'http://localstack:4566'
+      IMAGE_API_URL: $IMAGE_API_URL
+      FILTER_API_URL: $FILTER_API_URL
+      DATASET_API_URL: $DATASET_API_URL
+      ZEBEDEE_URL: $ZEBEDEE_URL
+      IS_PUBLISHING: 'true'
+    volumes:
+      - ../../../../dp-download-service:/service
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:23600/health" ]
+      interval: $HEALTHCHECK_INTERVAL
+      timeout: 10s
+      retries: 5
+    entrypoint: make debug-run
+
+  dp-download-service-web:
+    build:
+      context: ../../../../dp-download-service
+      dockerfile: Dockerfile-local
+    ports:
+      - 23601:23600
+    environment:
+      HEALTHCHECK_INTERVAL: $HEALTHCHECK_INTERVAL
+      BIND_ADDR: ':23600'
+      AWS_REGION: 'eu-west-1'
+      LOCALSTACK_HOST: 'http://localstack:4566'
+      BUCKET_NAME: 'testing'
+      PUBLIC_BUCKET_URL: 'http://localhost:4566/testing-public/'
+      ENCRYPTION_DISABLED: 'false'
+      GRACEFUL_SHUTDOWN_TIMEOUT: '5s'
+      HEALTHCHECK_CRITICAL_TIMEOUT: '5s'
+      VAULT_TOKEN: '0000-0000-0000-0000'
+      VAULT_ADDR: 'http://vault:8200'
+      VAULT_PATH: 'secret/shared/psk'
+      FILES_API_URL: $FILES_API_URL
+      MINIO_ACCESS_KEY: 'test'
+      MINIO_SECRET_KEY: 'test'
+      LOCAL_OBJECT_STORE: 'http://localstack:4566'
+      IMAGE_API_URL: $IMAGE_API_URL
+      FILTER_API_URL: $FILTER_API_URL
+      DATASET_API_URL: $DATASET_API_URL
+      ZEBEDEE_URL: $ZEBEDEE_URL
+      IS_PUBLISHING: 'false'
+    volumes:
+      - ../../../../dp-download-service:/service
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:23600/health" ]
+      interval: $HEALTHCHECK_INTERVAL
+      timeout: 10s
+      retries: 5
+    entrypoint: make debug-run
