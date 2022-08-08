@@ -1,8 +1,8 @@
 services:
-  zebedee:
+  prometheus:
     extends:
-      file: manifests/core-ons/zebedee.yml
-      service: zebedee
+      file: manifests/deps/prometheus.yml
+      service: prometheus
   postgis:
     extends:
       file: manifests/deps/postgis.yml
@@ -27,11 +27,3 @@ services:
     extends:
       file: manifests/deps/http-echo.yml
       service: http-echo
-  dp-files-api:
-    extends:
-      file: manifests/static-files/dp-files-api.yml
-      service: dp-files-api
-  dp-upload-service:
-    extends:
-      file: manifests/static-files/dp-upload-service.yml
-      service: dp-upload-service

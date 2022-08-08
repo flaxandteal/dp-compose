@@ -1,0 +1,15 @@
+version: "3"
+services:
+  dp-frontend-renderer:
+    build:
+      context: ../../../../dp-frontend-renderer
+      dockerfile: Dockerfile.dp-compose
+    volumes:
+      - ../../../../dp-frontend-renderer:/dp-frontend-renderer
+    ports:
+      - 20010:20010
+    restart: "no"
+    environment:
+      HEALTHCHECK_INTERVAL: $HEALTHCHECK_INTERVAL
+      BIND_ADDR: ":20010"
+      PATTERN_LIBRARY_ASSETS_PATH: $SIXTEENS_URL

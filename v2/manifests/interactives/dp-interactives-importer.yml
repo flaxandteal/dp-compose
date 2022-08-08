@@ -1,0 +1,28 @@
+version: "3.3"
+services:
+  dp-interactives-importer:
+    build:
+      context: ../../provisioning/go
+      dockerfile: Dockerfile
+    volumes:
+      - ../../../../dp-interactives-importer:/app
+    ports:
+      - 27400:27400
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:27400/health"]
+      interval: 300s
+      timeout: 30s
+      retries: 15
+    environment:
+      HEALTHCHECK_INTERVAL: $HEALTHCHECK_INTERVAL
+      BIND_ADDR: ":27400"
+      API_ROUTER_URL: ${API_ROUTER_URL}/v1
+      UPLOAD_API_URL: $UPLOAD_API_URL
+      INTERACTIVES_API_URL: $INTERACTIVES_API_URL
+      AWS_ENDPOINT: "http://localstack:4566"
+      KAFKA_ADDR: "kafka:9092"
+      SERVICE_AUTH_TOKEN: $SERVICE_AUTH_TOKEN
+      DOWNLOAD_BUCKET_NAME: dp-interactives-file-uploads
+      BATCH_SIZE: "100"
+    entrypoint: make debug

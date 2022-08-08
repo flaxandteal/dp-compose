@@ -1,0 +1,20 @@
+version: '3'
+services:
+  florence:
+    build:
+      context: ../../../../florence
+      dockerfile: Dockerfile.local
+    volumes:
+      - ../../../../florence:/florence
+    ports:
+      - 8081:8081
+    restart: "no"
+    environment:
+      ENABLE_NEW_INTERACTIVES: "true"
+      ENCRYPTION_DISABLED: "true"
+      ENABLE_DATASET_IMPORT: "true"
+      ENABLE_HOMEPAGE_PUBLISHING: "true"
+      API_ROUTER_URL: $API_ROUTER_URL
+      ROUTER_URL: $FRONTEND_ROUTER_URL
+      DATASET_CONTROLLER_URL: $DATASET_CONTROLLER_URL
+    entrypoint: make docker-compose-run

@@ -1,0 +1,13 @@
+services:
+  dp-files-api:
+    extends:
+      file: manifests/static-files/dp-files-api.yml
+      service: dp-files-api
+  dp-upload-service:
+    extends:
+      file: manifests/static-files/dp-upload-service.yml
+      service: dp-upload-service
+  dp-download-service:
+    extends:
+      file: manifests/static-files/dp-download-service.yml
+      service: dp-download-service
