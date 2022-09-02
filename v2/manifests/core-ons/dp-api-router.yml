@@ -1,42 +1,44 @@
-version: '3'
+version: "3"
 services:
-    dp-api-router:
-        build:
-            context: ../../../../dp-api-router
-            dockerfile: Dockerfile.local
-        command:
-            - reflex
-            - -d
-            - none
-            - -c
-            - ./reflex
-        volumes:
-            - ../../../../dp-api-router:/dp-api-router
-        ports:
-            - 23200:23200
-        restart: unless-stopped
-        environment:
-            HEALTHCHECK_INTERVAL:     $HEALTHCHECK_INTERVAL
-            ENV_HOST:                 $API_ROUTER_URL
-            ENABLE_AUDIT:             "true"
-            ALLOWED_ORIGINS:          "*"
-            MONGODB_BIND_ADDR:        "mongodb:27017"
-            KAFKA_ADDR:               "kafka:9092"
-            KAFKA_PRODUCER_MIN_BROKERS_HEALTHY: "1"
-            KAFKA_MIN_HEALTHY_BROKERS: "1"
-            KAFKA_VERSION: "3.1.0"
-            KAFKA_MAX_BYTES: "2000000"
-            ENABLE_PRIVATE_ENDPOINTS: "true"
-            ENABLE_INTERACTIVES_API:  "true"
-            INTERACTIVES_API_URL:     $INTERACTIVES_API_URL
-            ZEBEDEE_URL:              $ZEBEDEE_URL
-            RECIPE_API_URL:           $RECIPE_API_URL
-            IMPORT_API_URL:           $IMPORT_API_URL
-            DATASET_API_URL:          $DATASET_API_URL
-            SERVICE_AUTH_TOKEN:       $SERVICE_AUTH_TOKEN
-            TOPIC_API_URL:            $TOPIC_API_URL
-            UPLOAD_SERVICE_API_URL:   $UPLOAD_API_URL
-            ENABLE_TOPIC_API:         "true"
-            ENABLE_RELEASE_CALENDAR_API: "true"
-            RELEASE_CALENDAR_API_URL: $RELEASE_CALENDAR_API_URL
-            SEARCH_API_URL:           $SEARCH_API_URL
+  dp-api-router:
+    build:
+      context: ../../../../dp-api-router
+      dockerfile: Dockerfile.local
+    command:
+      - reflex
+      - -d
+      - none
+      - -c
+      - ./reflex
+    volumes:
+      - ../../../../dp-api-router:/dp-api-router
+    ports:
+      - 23200:23200
+    restart: unless-stopped
+    environment:
+      HEALTHCHECK_INTERVAL: $HEALTHCHECK_INTERVAL
+      ENV_HOST: $API_ROUTER_URL
+      ALLOWED_ORIGINS: "*"
+      MONGODB_BIND_ADDR: "mongodb:27017"
+      KAFKA_ADDR: "kafka:9092"
+      KAFKA_PRODUCER_MIN_BROKERS_HEALTHY: "1"
+      KAFKA_MIN_HEALTHY_BROKERS: "1"
+      KAFKA_VERSION: "3.1.0"
+      KAFKA_MAX_BYTES: "2000000"
+      SERVICE_AUTH_TOKEN: $SERVICE_AUTH_TOKEN
+      ENABLE_AUDIT: "true"
+      ENABLE_PRIVATE_ENDPOINTS: "true"
+      ENABLE_INTERACTIVES_API: "true"
+      ENABLE_TOPIC_API: "true"
+      ENABLE_FILES_API: "true"
+      ENABLE_RELEASE_CALENDAR_API: "true"
+      INTERACTIVES_API_URL: $INTERACTIVES_API_URL
+      ZEBEDEE_URL: $ZEBEDEE_URL
+      RECIPE_API_URL: $RECIPE_API_URL
+      IMPORT_API_URL: $IMPORT_API_URL
+      DATASET_API_URL: $DATASET_API_URL
+      TOPIC_API_URL: $TOPIC_API_URL
+      UPLOAD_SERVICE_API_URL: $UPLOAD_API_URL
+      RELEASE_CALENDAR_API_URL: $RELEASE_CALENDAR_API_URL
+      SEARCH_API_URL: $SEARCH_API_URL
+      FILES_API_URL: $FILES_API_URL

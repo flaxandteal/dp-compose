@@ -22,16 +22,16 @@ Completely optional but it might be a good idea to clean the Docker environment 
 For everything to work as expected make sure of the following:
 
 - `git clone` in same dir and level all relevant ONS repos in [manifests](manifests) dir (you will see errors if this is not as expected)
-- optional: add an alias - something like `alias dpc='docker-compose -f docker-compose.static-files.yml'` this makes life a bit easier
+- optional: add an alias - something like `alias dpc='docker-compose --project-dir . -f profiles/static-files.yml'` this makes life a bit easier
 
 ## Usage
 
 Edit `.env` for your development requirements - you might need to point to local services running in an IDE for example.
 
 Then just standard Docker compose commands: e.g.:
-- to start detached: `docker-compose -f docker-compose.static-files.yml up -d`
+- to start detached: `docker-compose --project-dir . -f profiles/static-files.yml up -d`
 - or with the alias: `dpc up -d`
-- to get logs for a service: `docker-compose -f docker-compose.static-files.yml logs dp-files-api`
+- to get logs for a service: `docker-compose --project-dir . -f profiles/static-files.yml logs dp-files-api` or `dpc logs dp-files-api`
 
 ## Kafka
 

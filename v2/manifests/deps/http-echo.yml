@@ -1,7 +1,8 @@
 version: '3'
 services:  
   http-echo:
-    image: hashicorp/http-echo
+    platform: linux/amd64
+    image: hashicorp/http-echo:alpine
     command: ['-text', 'http-echo']
     ports:
     - 15678:5678

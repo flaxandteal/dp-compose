@@ -3,7 +3,7 @@ services:
   florence:
     build:
       context: ../../../../florence
-      dockerfile: Dockerfile.local
+      dockerfile: Dockerfile.dp-compose
     volumes:
       - ../../../../florence:/florence
     ports:
