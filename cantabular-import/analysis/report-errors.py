@@ -56,7 +56,7 @@ my_file = Path(filename)
 if my_file.is_file():
     # file exists
 
-    with open(filename) as file:
+    with open(filename, encoding="utf8") as file:
         for line in file:
             line_number += 1
             if "DATA RACE" in line:

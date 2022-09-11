@@ -27,22 +27,27 @@ var requiredServices = []string{
 	"dp-cantabular-dimension-api",
 	"dp-cantabular-filter-flex-api",
 	"dp-cantabular-metadata-exporter",
+	"dp-cantabular-metadata-service",
 	"dp-cantabular-server",
 	"dp-cantabular-xlsx-exporter",
 	"dp-dataset-api",
 	"dp-download-service",
 	"dp-filter-api",
 	"dp-frontend-dataset-controller",
+	"dp-frontend-filter-flex-dataset",
 	"dp-frontend-router",
 	"dp-import-api",
 	"dp-import-cantabular-dataset",
 	"dp-import-cantabular-dimension-options",
+	"dp-population-types-api",
 	"dp-publishing-dataset-controller",
 	"dp-recipe-api",
 	"florence",
 	"kafka-1",
 	"kafka-2",
 	"kafka-3",
+	"kowl",
+	"kouncil",
 	"minio",
 	"mongodb",
 	"postgres",
@@ -183,6 +188,8 @@ func createLogFileForAllDockerContainers() error {
 			line := scanner.Text()
 
 			if len(line) > 8 {
+				// Find and remove any character sequences that break later python code
+
 				// skip first 8 bytes as these are Docker's info about the line and are not printable characters
 				strLine := string(line[8:])
 
@@ -193,6 +200,23 @@ func createLogFileForAllDockerContainers() error {
 				strLine = strings.ReplaceAll(strLine, "\x1B[33;1m", "")
 				strLine = strings.ReplaceAll(strLine, "\x1B[30;1m", "")
 				strLine = strings.ReplaceAll(strLine, "\x1B[0m", "")
+				strLine = strings.ReplaceAll(strLine, "\x1B[", "")
+
+				// Dashy container logs do fancy chars that must be removed
+				strLine = strings.ReplaceAll(strLine, "\xF0\x9F\x9A\x80", "")
+				strLine = strings.ReplaceAll(strLine, "\xE2\x9C\x85", "")
+				strLine = strings.ReplaceAll(strLine, "\xE2\x96\x88", "")
+				strLine = strings.ReplaceAll(strLine, "\xE2\x95\x97", "")
+				strLine = strings.ReplaceAll(strLine, "\xE2\x95\x94", "")
+				strLine = strings.ReplaceAll(strLine, "\xE2\x95\x90", "")
+				strLine = strings.ReplaceAll(strLine, "\xE2\x95\x9D", "")
+				strLine = strings.ReplaceAll(strLine, "\xE2\x95", "")
+				strLine = strings.ReplaceAll(strLine, "\x9A", "")
+
+				// remove 0x91 that is appearing in babbage:
+				strLine = strings.ReplaceAll(strLine, "\x91", "")
+				// it looks like a new line char is lost and we end up getting the Docker info embedded in the string, so remove;
+				strLine = strings.ReplaceAll(strLine, "\x01\x00\x00\x00\x00\x00\x00\xef\xbf", "")
 
 				// prefix container's name
 				strLine = container.Names[0] + " " + strLine + "\n"
