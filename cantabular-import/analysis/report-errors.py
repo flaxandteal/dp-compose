@@ -7,6 +7,7 @@ line_number = 0
 error_found = 0
 download_error_count = 0
 kafka_timeout_count = 0
+kafka_sending_error_count = 0
 put_version_count = 0
 
 my_file = Path(filename)
@@ -25,6 +26,8 @@ if my_file.is_file():
                 if "Request exceeded the user-specified time limit in the request" in line:
                     kafka_timeout_count += 1
                     continue
+                if "consumer-group error sending error to the error channel" in line:
+                    kafka_sending_error_count += 1
                 if "putVersion endpoint: failed to update version document" in line:
                     put_version_count += 1
                     continue
@@ -38,6 +41,9 @@ if download_error_count > 0:
 
 if kafka_timeout_count > 0:
     print("    Had a kafka timeout error count of: ", kafka_timeout_count, " -> ignore these ! (but this needs fixing in sarama lib)")
+
+if kafka_sending_error_count > 0:
+    print("    Had a 'consumer-group error sending error to the error channel': ", kafka_sending_error_count, " -> ignore these ! (but this needs fixing in sarama lib)")
 
 if put_version_count > 0:
     print("    Had a put version error count of: ", put_version_count)
@@ -56,7 +62,7 @@ my_file = Path(filename)
 if my_file.is_file():
     # file exists
 
-    with open(filename) as file:
+    with open(filename, encoding="utf8") as file:
         for line in file:
             line_number += 1
             if "DATA RACE" in line:
