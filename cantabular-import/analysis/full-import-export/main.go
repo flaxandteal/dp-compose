@@ -59,8 +59,8 @@ var (
 const (
 	idDir             = "../tmp"
 	idFileName        = "../tmp/id.txt"
-	MaxAttempts       = 200 // number of 100ms delays
-	StateVerifyPeriod = 100 // number of milliseconds per period
+	MaxAttempts       = 200  // number of 'period' delays
+	StateVerifyPeriod = 1000 // number of milliseconds per 'period'
 )
 
 var (
@@ -442,7 +442,7 @@ func main() {
 		attempts--
 	}
 	if attempts == 0 {
-		fmt.Printf("failed to see all 4 private files after 20 seconds\nOnly got:\n")
+		fmt.Printf("failed to see all 4 private files after %d seconds\nOnly got:\n", MaxAttempts*StateVerifyPeriod/1000)
 		spew.Dump(instanceFromAPI.Version.Downloads["csv"].Private)
 		spew.Dump(instanceFromAPI.Version.Downloads["csvw"].Private)
 		spew.Dump(instanceFromAPI.Version.Downloads["txt"].Private)
@@ -502,7 +502,7 @@ func main() {
 
 	// then read the instance document again, looking for desired encrypted (private) file creation
 
-	fmt.Printf("\nWaiting for 4 Public files to be created (for upto to 20 seconds):\n")
+	fmt.Printf("\nWaiting for 4 Public files to be created (for upto to %d seconds):\n", MaxAttempts*StateVerifyPeriod/1000)
 	attempts = MaxAttempts
 
 	for attempts > 0 {

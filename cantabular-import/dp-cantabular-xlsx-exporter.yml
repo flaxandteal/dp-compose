@@ -19,6 +19,7 @@ services:
             - minio
         ports:
             - 26800:26800
+            - "6060:6060/tcp"
         restart: unless-stopped
         environment:
             BIND_ADDR:                  ":26800"
