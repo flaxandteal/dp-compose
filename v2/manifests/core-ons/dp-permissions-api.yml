@@ -1,0 +1,22 @@
+version: "3"
+services:
+  dp-permissions-api:
+    build:
+      context: ../../../../dp-permissions-api
+      dockerfile: Dockerfile-local
+    ports:
+      - "25400:25400"
+    restart: "no"
+    environment:
+      BIND_ADDR: ":25400"
+      HEALTHCHECK_INTERVAL: $HEALTHCHECK_INTERVAL
+      GRACEFUL_SHUTDOWN_TIMEOUT: "30s"
+      HEALTHCHECK_CRITICAL_TIMEOUT: "30s"
+      MONGODB_DATABASE: "permissions"
+      MONGODB_BIND_ADDR: "mongodb:27017"
+      MONGODB_COLLECTIONS: "RolesCollection:roles,PoliciesCollection:policies"
+      IS_PUBLISHING: "true"
+      IDENTITY_WEB_KEY_SET_URL: $IDENTITY_API_URL
+    volumes:
+      - ../../../../dp-permissions-api:/service
+    entrypoint: make debug

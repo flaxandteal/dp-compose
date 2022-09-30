@@ -45,7 +45,11 @@ var databases = [
 	{
 		name: "files",
 		collections: [{"name":"metadata"}]
-	}
+	},
+	{
+        name: "permissions",
+        collections: ["roles", "policies"]
+    },
 ];
 
 for (database of databases) {

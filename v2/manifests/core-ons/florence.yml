@@ -11,6 +11,8 @@ services:
     restart: "no"
     environment:
       ENABLE_NEW_INTERACTIVES: "true"
+      ENABLE_PERMISSION_API: "true"
+      ENABLE_NEW_SIGN_IN: "true" 
       ENCRYPTION_DISABLED: "true"
       ENABLE_DATASET_IMPORT: "true"
       ENABLE_HOMEPAGE_PUBLISHING: "true"

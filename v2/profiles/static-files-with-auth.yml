@@ -1,0 +1,58 @@
+version: "3"
+services:
+  # deps
+  postgis:
+    extends:
+      file: manifests/deps/postgis.yml
+      service: postgis
+  vault:
+    extends:
+      file: manifests/deps/vault.yml
+      service: vault
+  kafka:
+    extends:
+      file: manifests/deps/kafka.yml
+      service: kafka
+  mongodb:
+    extends:
+      file: manifests/deps/mongo.yml
+      service: mongodb
+  localstack:
+    extends:
+      file: manifests/deps/localstack.yml
+      service: localstack
+  http-echo:
+    extends:
+      file: manifests/deps/http-echo.yml
+      service: http-echo
+  zebedee:
+    extends:
+      file: manifests/core-ons/zebedee.yml
+      service: zebedee
+  # core-ons
+  dp-api-router:
+    extends:
+      file: manifests/core-ons/dp-api-router.yml
+      service: dp-api-router
+  # static files
+  dp-files-api:
+    extends:
+      file: manifests/static-files/dp-files-api.yml
+      service: dp-files-api
+  dp-upload-service:
+    extends:
+      file: manifests/static-files/dp-upload-service.yml
+      service: dp-upload-service
+  dp-download-service:
+    extends:
+      file: manifests/static-files/dp-download-service.yml
+      service: dp-download-service
+  # new auth
+  dp-permissions-api:
+    extends:
+      file: manifests/core-ons/dp-permissions-api.yml
+      service: dp-permissions-api
+  dp-identity-api:
+    extends:
+      file: manifests/core-ons/dp-identity-api.yml
+      service: dp-identity-api
