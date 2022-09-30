@@ -46,7 +46,7 @@ with new auth enabled i see, as expected an auth error: `{"errors":[{"code":"Int
 
 ## Investigation
 
-1. Understand how perms are setup - locally we need load the perms: https://github.com/ONSdigital/dp-permissions-api/blob/develop/import-script/README.md - imho this should be a Docker container with these scripts baked in and part of the env setup (possibly using profiles: https://docs.docker.com/compose/profiles/#auto-enabling-profiles-and-dependency-resolution)
+1. Understand how perms are setup - locally we need to load the perms: https://github.com/ONSdigital/dp-permissions-api/blob/develop/import-script/README.md - imho this should be a Docker container with these scripts baked in and part of the env setup (possibly using profiles: https://docs.docker.com/compose/profiles/#auto-enabling-profiles-and-dependency-resolution) - we also prob need to attach the static-files perms to our Cognito user (i didnt get this far)
 2. Get that request passing - it should work once above done as error locally is:
     ```
     dp-compose-dp-files-api-1  | {
