@@ -1,5 +1,17 @@
 # SecAuth
 
+## Updated instructions to use cognito authenticated user (connect local env with cloud-cognito)
+
+- Make sure you are a cognito recognised user (in group sandbox-florence-users)
+- Make sure you are part of a suitable group role-admin / role-publisher.
+- Populate the .env with correct aws details.
+- Bring up the stack locally (see command below).
+- Populate the permissions database (go run import.go  [in dp-permissions/import-script])
+- The AWS group (role-admin/publisher) maps to certain permissions (see dp-permissions).
+- Login and get a bearer token (see curl command below)
+    For sandbox, you should be able to port forward dp-identity-api and run the above curl command.
+- Add the token to any request (sent to dp-files etc), dp-auth will correctly check permissions.
+
 ## PreReq
 
 - Add another target to dp-intentity-api Makefile:
@@ -20,7 +32,7 @@
 - Start env - `docker-compose --project-dir . -f profiles/static-files-with-auth.yml up -d`
 - Test a login: 
     ```
-    curl --location --request POST 'http://localhost:25600/v1/tokens' \
+    curl -v --location --request POST 'http://localhost:25600/v1/tokens' \
     --header 'Content-Type: application/json' \
     --header 'Accept: text/plain' \
     --data-raw '{

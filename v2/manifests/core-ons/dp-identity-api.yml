@@ -8,6 +8,9 @@ services:
       - "25600:25600"
     restart: "no"
     environment:
+      AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+      AWS_SESSION_TOKEN: $AWS_SESSION_TOKEN
       BIND_ADDR: ":25600"
       GRACEFUL_SHUTDOWN_TIMEOUT: "30s"
       HEALTHCHECK_INTERVAL: $HEALTHCHECK_INTERVAL
@@ -22,5 +25,5 @@ services:
       AWS_AUTH_FLOW": "USER_PASSWORD_AUTH"
     volumes:
       - ../../../../dp-identity-api:/app
-      - ~/.aws/:/root/.aws/
+      - ~/.aws/:$HOME/.aws/
     entrypoint: make run

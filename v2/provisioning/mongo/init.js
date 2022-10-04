@@ -48,8 +48,8 @@ var databases = [
 	},
 	{
         name: "permissions",
-        collections: ["roles", "policies"]
-    },
+        collections: [{"name":"roles"}, {"name":"policies"}]
+	}
 ];
 
 for (database of databases) {
