@@ -1,10 +1,6 @@
 version: "3"
 services:
   # deps
-  zookeeper:
-    extends:
-      file: manifests/deps/zookeeper.yml
-      service: zookeeper  
   postgis:
     extends:
       file: manifests/deps/postgis.yml
@@ -13,6 +9,10 @@ services:
     extends:
       file: manifests/deps/vault.yml
       service: vault
+  kafka:
+    extends:
+      file: manifests/deps/kafka.yml
+      service: kafka
   mongodb:
     extends:
       file: manifests/deps/mongo.yml
@@ -29,10 +29,6 @@ services:
     extends:
       file: manifests/core-ons/zebedee.yml
       service: zebedee
-  kafka:
-    extends:
-      file: manifests/deps/kafka.yml
-      service: kafka      
   # core-ons
   dp-api-router:
     extends:
