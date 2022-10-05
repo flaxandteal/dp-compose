@@ -1,0 +1,29 @@
+version: "3"
+services:
+  dp-identity-api:
+    build:
+      context: ../../provisioning/go
+      dockerfile: Dockerfile
+    ports:
+      - "25600:25600"
+    restart: "no"
+    environment:
+      AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+      AWS_SESSION_TOKEN: $AWS_SESSION_TOKEN
+      BIND_ADDR: ":25600"
+      GRACEFUL_SHUTDOWN_TIMEOUT: "30s"
+      HEALTHCHECK_INTERVAL: $HEALTHCHECK_INTERVAL
+      HEALTHCHECK_CRITICAL_TIMEOUT: "30s"
+      PERMISSIONS_API_URL: $PERMISSIONS_API_URL
+      ZEBEDEE_URL: $ZEBEDEE_URL
+      AWS_REGION: "eu-west-2"
+      AWS_PROFILE: "dp-sandbox"
+      AWS_COGNITO_USER_POOL_ID: $AWS_COGNITO_USER_POOL_ID
+      AWS_COGNITO_CLIENT_ID: $AWS_COGNITO_CLIENT_ID
+      AWS_COGNITO_CLIENT_SECRET: $AWS_COGNITO_CLIENT_SECRET
+      AWS_AUTH_FLOW": "USER_PASSWORD_AUTH"
+    volumes:
+      - ../../../../dp-identity-api:/app
+      - ~/.aws/:$HOME/.aws/
+    entrypoint: make run

@@ -1,0 +1,8 @@
+version: "3"
+services:
+  sixteens:
+    build:
+      context: ../../../../sixteens
+      dockerfile: Dockerfile.dp-compose
+    ports:
+      - 9000:9000

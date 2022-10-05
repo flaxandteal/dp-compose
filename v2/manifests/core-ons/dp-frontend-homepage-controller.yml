@@ -1,0 +1,18 @@
+version: "3"
+services:
+  dp-frontend-homepage-controller:
+    build:
+      context: ../../../../dp-frontend-homepage-controller
+      dockerfile: Dockerfile.dp-compose
+    volumes:
+      - ../../../../dp-frontend-homepage-controller:/dp-frontend-homepage-controller
+    ports:
+      - 24400:24400
+    restart: "no"
+    environment:
+      HEALTHCHECK_INTERVAL: $HEALTHCHECK_INTERVAL
+      BIND_ADDR: ":24400"
+      API_ROUTER_URL: ${API_ROUTER_URL}/v1
+      BABBAGE_URL: $BABBAGE_URL
+      RENDERER_URL: $RENDERER_URL
+      IS_PUBLISHING_MODE: "true"

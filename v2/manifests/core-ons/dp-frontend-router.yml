@@ -1,0 +1,22 @@
+version: "3"
+services:
+  dp-frontend-router:
+    build:
+      context: ../../../../dp-frontend-router
+      dockerfile: Dockerfile.dp-compose
+    volumes:
+      - ../../../../dp-frontend-router:/dp-frontend-router
+    ports:
+      - 20000:20000
+    restart: "no"
+    environment:
+      HEALTHCHECK_INTERVAL: $HEALTHCHECK_INTERVAL
+      INTERACTIVES_ROUTES_ENABLED: "true"
+      INTERACTIVES_CONTROLLER_URL: $INTERACTIVES_CONTROLLER_URL
+      RENDERER_URL: $RENDERER_URL
+      HOMEPAGE_CONTROLLER_URL: $HOMEPAGE_CONTROLLER_URL
+      BABBAGE_URL: $BABBAGE_URL
+      DATASET_CONTROLLER_URL: $DATASET_CONTROLLER_URL
+      API_ROUTER_URL: ${API_ROUTER_URL}/v1
+      DATASET_ROUTES_ENABLED: "true"
+      ASSETS_DIRECTORY: "/dp-frontend-router/assets"
