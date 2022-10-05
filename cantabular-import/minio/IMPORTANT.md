@@ -8,7 +8,7 @@ recreate it, make sure to change ownership to user 1001:1001
     sudo chown -R 1001:1001 data
 
 Note that these permissions settings mean you will need to use super-user
-privileges to directly edit files in this directoryo
+privileges to directly edit files in this directory
 
 ### macOS Note
 
