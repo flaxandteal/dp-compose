@@ -8,6 +8,7 @@ export AWS_PROFILE=default
 
 # prompt colours
 GREEN="\e[32m"
+YELLOW="\e[33m"
 RED="\e[31m"
 RESET="\e[0m"
 
@@ -39,32 +40,57 @@ DP_FRONTEND_DATASET_CONTROLLER_DIR="$DIR/dp-frontend-dataset-controller"
 ZEBEDEE_DIR="$DIR/zebedee"
 ZEBEDEE_GENERATED_CONTENT_DIR=${zebedee_root}
 
+EXPECTED_RUNNING_SERVICES=35
+NUMBER_OF_RETRIES=3
+
 ACTION=$1
 
 ##################### FUNCTIONS ##########################
 logSuccess() {
-    echo -e "$GREEN ${1} $RESET"
+    echo -e "$GREEN${1}$RESET"
+}
+
+logWarning() {
+    echo -e "$YELLOW${1}$RESET"
 }
 
 logError() {
-    echo -e "$RED ${1} $RESET"
+    echo -e "$RED${1}$RESET"
+}
+
+isGumInstalled() {
+   command -v gum &> /dev/null
 }
 
 splash() {
-    echo "Start Cantabular Services (SCS)"
-    echo ""
-    echo "Simple script to run cantabular import service locally and all the dependencies"
-    echo ""
-    echo "List of commands: "
-    echo "   chown     - change the service '.go' folder permissions from root to the user and group."
-    echo "               Useful for linux users."
-    echo "   clone     - git clone all the required GitHub repos"
-    echo "   down      - stop running the containers via docker-compose"
-    echo "   init-db   - preparing db services. Run this once"
-    echo "   help      - splash screen with all these options"
-    echo "   pull      - git pull the latest from your remote repos"
-    echo "   setup     - preparing services. Run this once, before 'up'"
-    echo "   up        - run the containers via docker-compose"
+    if isGumInstalled
+    then
+        cd "$DP_CANTABULAR_IMPORT_DIR"
+        gum style \
+        	--foreground 212 --border-foreground 57 --border double \
+            --align center --width 50 --margin "1 2" --padding "2 4" \
+        	'Start Cantabular Services (SCS)' \
+        	'' \
+        	'Simple script to run cantabular import service locally and all the dependencies'
+
+        cat scs-helper.txt | gum choose --no-limit | gumOptions $(awk '{print $1}')
+
+    else
+        echo "Start Cantabular Services (SCS)"
+        echo ""
+        echo "Simple script to run cantabular import service locally and all the dependencies"
+        echo ""
+        echo "List of commands: "
+        echo "   chown     - change the service '.go' folder permissions from root to the user and group."
+        echo "               Useful for linux users."
+        echo "   clone     - git clone all the required GitHub repos"
+        echo "   down      - stop running the containers via docker-compose"
+        echo "   init-db   - preparing db services. Run this once"
+        echo "   help      - splash screen with all these options"
+        echo "   pull      - git pull the latest from your remote repos"
+        echo "   setup     - preparing services. Run this once, before 'up'"
+        echo "   up        - run the containers via docker-compose"
+    fi
 }
 
 cloneServices() {
@@ -239,7 +265,7 @@ setupServices () {
     
     chown
 
-    upServices
+    startServices
 
     initDB
 
@@ -260,39 +286,71 @@ chown() {
     sudo chmod 755 -R ${ZEBEDEE_GENERATED_CONTENT_DIR}
 }
 
-upServices () {
-    echo "Starting dp cantabular import..."
+startDetachedServices () {
     cd "$DP_CANTABULAR_IMPORT_DIR"
+    logSuccess "Starting dp cantabular import..."
     make start-detached
-    # make start
-    echo "Starting dp cantabular import... Done."
+
+    numStartedSrv=$(docker ps | grep -v CONTAINER | wc -l)
+    attempt=0
+
+    while [ $numStartedSrv -ne $EXPECTED_RUNNING_SERVICES ] && [ $attempt -lt $NUMBER_OF_RETRIES ];  do
+        attempt=$(( $attempt+1 ))
+        logWarning "Attempting to start missing services. Expecting $EXPECTED_RUNNING_SERVICES running services."
+        logWarning "Number of services running: $numStartedSrv"
+        logWarning "Attempt $attempt of 3"
+        sleep $(( 2*$attempt ))
+        make start-detached
+        numStartedSrv=$(docker ps | grep -v CONTAINER | wc -l)
+    done
+
+    if [ $numStartedSrv -lt $EXPECTED_RUNNING_SERVICES ]; then
+         logWarning "Not all services started successfully. Expecting $EXPECTED_RUNNING_SERVICES running services."
+         logWarning "Number of services started/running: $numStartedSrv"
+    else
+         logSuccess "Starting dp cantabular import... Done."
+    fi
     florenceLoginInfo
+}
+
+startServices () {
+    logSuccess "Starting dp cantabular import..."
+    florenceLoginInfo
+    logWarning "Expecting $EXPECTED_RUNNING_SERVICES running services."
+    logWarning "Please ensure those are running in a separate terminal."
+    sleep 3
+    cd "$DP_CANTABULAR_IMPORT_DIR"
+    make start
 }
 
 
 downServices () {
-    echo "Stopping base services..."
-    cd "$DP_COMPOSE_DIR"
-    docker-compose down
-    logSuccess "Stopping base services... Done."
-
-    echo "Stopping dp cantabular import..."
+    logSuccess "Stopping dp cantabular import..."
     cd "$DP_CANTABULAR_IMPORT_DIR"
     make stop
     logSuccess "Stopping dp cantabular import... Done."
 }
+gumOptions() {
+    if ! [ -z $1 ]; then
+        options $1
+    fi
 
+}
+options() {
+    case "$1" in
+    "chown") chown;;
+    "clone") cloneServices;;
+    "help") splash;;
+    "down") downServices;;
+    "start-detached") startDetachedServices;;
+    "start") startServices;;
+    "pull") pull;;
+    "setup") setupServices;;
+    "init-db") initDB;;
+    *) splash;;
+    esac
+}
 
 #####################    MAIN    #########################
 
-case $ACTION in 
-"chown") chown;;
-"clone") cloneServices;;
-"help") splash;;
-"down") downServices;;
-"up") upServices;; 
-"pull") pull;;
-"setup") setupServices;;
-"init-db") initDB;;
-*) echo "invalid action - [${ACTION}]"; splash;;
-esac
+options "$ACTION"

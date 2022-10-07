@@ -2,7 +2,7 @@ version: '3.3'
 services:
     the-train:
         build:
-            context: ../../The-Train
+            context: ../../the-train
             dockerfile: Dockerfile
         depends_on:
             - kafka-1
