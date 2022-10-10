@@ -12,6 +12,12 @@
     For sandbox, you should be able to port forward dp-identity-api and run the above curl command.
 - Add the token to any request (sent to dp-files etc), dp-auth will correctly check permissions.
 
+### For service access (service auth token)
+- Every zebedee service auth token has the service name encoded in the token.
+- You can test the above by: curl -i -X GET http://localhost:10050/identity -H "Authorization: Bearer <token>"
+- The dp-auth api uses this identity to check for access/permissions.
+- Configure this identity in the dp-permissions api [https://github.com/ONSdigital/dp-permissions-api/blob/develop/import-script/README.md].
+
 ## PreReq
 
 - Add another target to dp-intentity-api Makefile:
