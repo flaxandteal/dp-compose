@@ -49,8 +49,6 @@ ZEBEDEE_GENERATED_CONTENT_DIR=${zebedee_root}
 EXPECTED_RUNNING_SERVICES=35
 NUMBER_OF_RETRIES=3
 
-ACTION=$1
-
 ##################### FUNCTIONS ##########################
 logSuccess() {
     echo -e "$GREEN${1}$RESET"
@@ -91,7 +89,7 @@ splash() {
         echo "   clone           - git clone all the required GitHub repos"
         echo "   fe-assets       - generate Cantabular FE assets"
         echo "   init-db         - preparing db services. Run this once"
-        echo "   pull            - git pull the latest from your remote repos"
+        echo "   pull [branch]   - by default it will pull the latest from the current branch. Optionally, provide a branch to pull from, e.g., 'scs pull develop'"
         echo "   setup           - preparing services. Run this once"
         echo "   start           - run the containers via docker-compose with logs attached to terminal"
         echo "   start-detached  - run the containers via docker-compose with detached logs (default option)"
@@ -122,8 +120,27 @@ pull() {
     for repo in $(ls -d $DIR/*/); do
         cd "${repo}"
         if [ -d ".git" ]; then
-          git pull
-          logSuccess "'$repo' updated"
+            if ! [ -z ${1} ]; then
+                git fetch -a --quiet 2> /dev/null
+                git checkout ${1} --quiet 2> /dev/null
+                if  [ $? -ne 0 ]; then
+                    git checkout develop --quiet 2> /dev/null
+                    if  [ $? -ne 0 ]; then
+                        git checkout main --quiet 2> /dev/null
+                        if  [ $? -ne 0 ]; then
+                            git checkout master --quiet 2> /dev/null
+                            if  [ $? -ne 0 ]; then
+                                logError "ERROR - Could not checkout $1, develop, main or master branches for $repo."
+                                logWarning "Please investigate it manually."
+                                exit -1
+                            fi
+                        fi
+                    fi
+                fi
+            fi
+            CURRENT_BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+            printf "${GREEN} ${repo} ${RESET}on branch [$YELLOW $CURRENT_BRANCH_NAME $RESET]... "
+            git pull
         fi
     done
 }
@@ -357,7 +374,7 @@ options() {
     "help") splash;;
     "fe-assets") setupFEAssets;;
     "init-db") initDB;;
-    "pull") pull;;
+    "pull") pull "$2";;
     "setup") setupServices;;
     "start-detached") startDetachedServices;;
     "start") startServices;;
@@ -368,4 +385,4 @@ options() {
 
 #####################    MAIN    #########################
 
-options "$ACTION"
+options "$@"

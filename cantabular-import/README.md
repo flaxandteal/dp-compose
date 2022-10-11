@@ -26,14 +26,15 @@ Start Cantabular Services (SCS)
 Simple script to run cantabular import service locally and all the dependencies
 
 List of commands: 
-   [•] chown           change the service '.go' folder permissions from root to the user and group. Useful for linux users.
-   [ ] clone           git clone all the required GitHub repos
-   [ ] down            stop running the containers via docker-compose
-   [ ] init-db         preparing db services. Run this once
-   [ ] pull            git pull the latest from your remote repos
-   [ ] setup           preparing services. Run this once, before 'up'
-   [ ] start           run the containers via docker-compose with logs attached to terminal
-   [ ] start-detached  run the containers via docker-compose with detached logs (default option)
+> [•] chown           change the service '.go' folder permissions from root to the user and group. Useful for linux users.
+  [ ] clone           git clone all the required GitHub repos
+  [ ] fe-assets       generate Cantabular FE assets
+  [ ] init-db         preparing db services. Run this once
+  [ ] pull [branch]   by default it will pull the latest from the current branch. Optionally, provide a branch to pull from, e.g., 'scs pull develop'
+  [ ] setup           preparing services. Run this once
+  [ ] start           run the containers via docker-compose with logs attached to terminal
+  [ ] start-detached  run the containers via docker-compose with detached logs (default option)
+  [ ] stop            stop running the containers via docker-compose
 ```
 
 5. Clone all the required GitHub repositories: `scs clone`
