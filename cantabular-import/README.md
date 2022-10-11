@@ -1,151 +1,8 @@
 ### Cantabular Import Journey ###
 
-## Requirements ##
+## Setup environment and start services
 
-Make sure you have the following repositories cloned to the same root directory
-as `dp-compose` (this repository):
-
-`babbage`
-
-`florence`
-
-`the-train`
-
-`zebedee`
-
-`dp-api-router`
-
-`dp-cantabular-api-ext`
-
-`dp-cantabular-csv-exporter`
-
-`dp-cantabular-dimension-api`
-
-`dp-cantabular-filter-flex-api`
-
-`dp-cantabular-metadata-exporter`
-
-`dp-cantabular-server`
-
-`dp-cantabular-xlsx-exporter`
-
-`dp-download-service`
-
-`dp-dataset-api`
-
-`dp-filter-api`
-
-`dp-frontend-router`
-
-`dp-frontend-dataset-controller`
-
-`dp-frontend-filter-flex-dataset`
-
-`dp-import-api`
-
-`dp-import-cantabular-dataset`
-
-`dp-import-cantabular-dimension-options`
-
-`dp-recipe-api`
-
-# Bring Up Cantabular Import Services #
-
-Expects you to have environment variables `zebedee_root` and
-`SERVICE_AUTH_TOKEN` set in your local environment
-
-Note that you will need the Mongo shell
-(see https://github.com/ONSdigital/dp-recipe-api/tree/develop/import-recipes#prerequisites)
-and Mongo tools
-(see https://github.com/ONSdigital/dp-dataset-api/tree/develop/import-script#prerequisites)
-to run the scripts below
-
-You will need to run the `import-recipes` script in `dp-recipe-api` when
-first building the containers before running an import. See the README here:
-https://github.com/ONSdigital/dp-recipe-api/tree/develop/import-recipes
-
-:bulb: **Note:** *As an alternative to running the `import-recipes` script on its own, there is
-an `init-db.sh` script in this repository's `helpers` directory that runs both the recipes
-and datasets import scripts (which you will need later).*
-
-```
-import-recipes % ./import-recipes.sh mongodb://localhost:27017
-. . .
-BulkWriteResult({
-	"writeErrors" : [ ],
-	"writeConcernErrors" : [ ],
-	"nInserted" : 58,
-	"nUpserted" : 0,
-	"nMatched" : 0,
-	"nModified" : 0,
-	"nRemoved" : 0,
-	"upserted" : [ ]
-})
-bye
-```
-
-Also make sure you have setup the `dp-cantabular-server` and
-`dp-cantabular-api-ext` services by running `make setup` in each of their
-root directories.
-
-- dp-cantabular-server: https://github.com/ONSdigital/dp-cantabular-server
-- dp-cantabular-api-ext: https://github.com/ONSdigital/dp-cantabular-api-ext
-
-For the full-stack journey:
-
-You will need to run `make assets` in dp-frontend-router. Assets generated using the  `-debug` flag won't work.
-
-You will also need to run `make generate-prod` in the `dp-frontend-dataset-controller` and `dp-frontend-filter-flex-dataset` to generate the asset files.
-
-You will also need to make sure you have some datasets into your Mongo collections.
-To do this there is an import script: `dp-dataset-api/import-script/import-script.sh`.
-
-:bulb: **Note:** *Alternatively there is an `init-db.sh` script in this repositories
-`helpers` directory that runs both the recipes and datasets import scripts.*
-
-```
-import-script % ./import-script.sh
-2022-01-24T15:38:36.576+0000	connected to: localhost
-2022-01-24T15:38:36.597+0000	imported 1 document
-2022-01-24T15:38:36.613+0000	connected to: localhost
-2022-01-24T15:38:36.628+0000	imported 1 document
-2022-01-24T15:38:36.643+0000	connected to: localhost
-2022-01-24T15:38:36.657+0000	imported 1 document
-2022-01-24T15:38:36.674+0000	connected to: localhost
-2022-01-24T15:38:36.724+0000	imported 533 documents
-```
-For Florence to work you will need to have built npm modules and production assets.
-You can do this by running `make node-modules` followed by `make generate-go-prod`.
-This only needs to be done once (or until you generate debug assets).
-
-:bulb: `make node-modules` may take a long time to run (e.g. 7 minutes) and may appear to
-stop responding but may still complete successfully. `make generate-go-prod` completes
-very quickly.
-
-## Frontend note
-
-There is a CORS error when loading the `dp-design-system` JavaScript (JS) files resulting in JS interactivity to fail.
-
-To test JS interactions, you can set/add the `debug` environment variable to `true` in `dp-frontend-filter-flex-dataset` and `dp-frontend-dataset-controller` then run the [dp-design-system](https://github.com/ONSdigital/dp-design-system#readme).
-
-## Start the Cantabular Import Services
-
-This assumes that all your setup has been done and all you need to do 
-is to start the docker network. 
-In order to setup the service and start the docker network, please read [this section](#Setup environment and start the Cantabular Import Services). 
-
-* **Start all Services**: `make start`
-* **Start services in the background**: `make start-detached`
-* **Stop Services**: `make stop`
-* **Stop Services And Remove Containers**: `make down`
-* **Stop Services And Remove All Containers, Volumes and Networks**: `make clean`
-* **Restart Services**: `make restart`
-* **Recall Logs**: `make logs` or `./logs`
-* **Recall Logs For Specific Service**: `make logs t=<service-name>` or `./logs <service-name>`
-
-## Setup environment and start the Cantabular Import Services
-
-1. Ensure you have the following environment variable set up on your `~/.zshrc` or `~/.bashrc` profile:led **zebedee_root**
+1. Ensure you have the following environment variable set up on your `~/.zshrc` or `~/.bashrc` profile
 ```shell
  DP_CLI_CONFIG
  zebedee_root
@@ -159,38 +16,96 @@ alias scs='PATH_TO_ONS_WORKSPACE/dp-compose/cantabular-import/scs.sh'
 source ~/.zshrc
 ```
 4. Check if the `scs.sh` is now available on your command line, by simply typing `scs`
+
+   If interested in having an [interactive menu](https://github.com/charmbracelet/gum) please install [**gum**](https://github.com/charmbracelet/gum#installation).
 ```shell
-> scs help
+> scs
 
 Start Cantabular Services (SCS)
 
 Simple script to run cantabular import service locally and all the dependencies
 
 List of commands: 
-   chown     - change the service '.go' folder permissions from root to the user and group.
-               Useful for linux users.
-   clone     - git clone all the required GitHub repos
-   down      - stop running the containers via docker-compose
-   init-db   - preparing db services. Run this once
-   help      - splash screen with all these options
-   pull      - git pull the latest from your remote repos
-   setup     - preparing services. Run this once, before 'up'
-   up        - run the containers via docker-compose
+   [•] chown           change the service '.go' folder permissions from root to the user and group. Useful for linux users.
+   [ ] clone           git clone all the required GitHub repos
+   [ ] down            stop running the containers via docker-compose
+   [ ] init-db         preparing db services. Run this once
+   [ ] pull            git pull the latest from your remote repos
+   [ ] setup           preparing services. Run this once, before 'up'
+   [ ] start           run the containers via docker-compose with logs attached to terminal
+   [ ] start-detached  run the containers via docker-compose with detached logs (default option)
 ```
 
-5. Setup your environment and start the service
-```shell
-scs setup
-```
+5. Clone all the required GitHub repositories: `scs clone`
+
+6. **Setup your environment and start the servic**e: `scs setup`
+
+   This is intended for when setting up the service for the first time or when a clean setup is required.
+
+   This will:
+     * remove `zebedee` container and image and clean `zebedee_root` folder
+     * get the latest from `zebedee`, build image
+     * get the latest from `dp-frontend-router` and create the static assets
+     * generate-prod static assets for `dp-frontend-dataset-controler`
+     * generate-prod static assets for `dp-frontend-filter-flex-dataset`
+     * setup `dp-cantabular-metadata-service`, `dp-cantabular-server` and `dp-cantabular-api-ext`
+     * build `florence` and `the-train`
+     * start the docker microservices via [docker-compose](https://docs.docker.com/engine/reference/commandline/compose/)
+     * seed the MongoDB collections. If this fails please run `scs init-db`
+     * provide florence login details for first-time user
 
 
-# Making Changes #
+7. To Start the local environment: `scs start-detached`
+8. To stop the local environment: `scs down`
 
-Go services will automatically rebuild upon detecting source file changes.
 
-If you need to make adjustments to compose files etc, you can just
-run `make start-detached` and docker-compose will automatically detect
-which services need rebuilding (no need to bring everything down first).
+## Debugging 
+
+* Go services will automatically rebuild upon detecting source file changes
+* If you need to make adjustments to compose files etc, you can just run `scs start-detached` and docker-compose will
+  automatically detect which services need rebuilding (no need to bring everything down first).
+* On Mac/Darwin the memory resources allocated to docker desktop may not be sufficient
+  If microservices stop working unexpectedly, please provide more resources to it
+* `scs start-detached` will try 3x to bring up all the required services. If after that, not all cantabular services are up an running it will print a warning message to the console.
+* Sometimes seeding the DB may occur before the MongoDB is ready to accept new operations. Please run `scs init-db` if no recipes have been imported
+* Rebuild `dp-cantabular-server` and `dp-cantabular-api-ext` docker images whenever there are new code updates
+* To allow [SSH remote port forwarding](https://github.com/ONSdigital/dp-cli#ssh-commands) you can use ``dp ssh [environment] [subnet] [host] [port]``.
+
+  _For example, to allow port forwarding to sandbox's publishing subnet host **1** on port 14500:_ ``dp ssh sandbox publishing 1 -p 10450:10450`` 
+
+## Frontend Setup of FE Developers
+
+There is a CORS error when loading the `dp-design-system` JavaScript (JS) files resulting in JS interactivity to fail.
+
+To test JS interactions, you can set/add the `debug` environment variable to `true` in `dp-frontend-filter-flex-dataset` 
+and `dp-frontend-dataset-controller` then run the [dp-design-system](https://github.com/ONSdigital/dp-design-system#readme).
+
+### Local FE Setup
+* In `dp-compose/cantabular-import/dep.yml` - remove line 92 (-`'9002:9001'`) := prevents port binding conflict with dp-design-system
+* All repos on head of develop branch
+* `dp-compose/cantabular-import docker compose --env-file .env.backend up -d`
+* For **dp-api-router**: `make debug ENABLE_PRIVATE_ENDPOINTS=true ENABLE_POPULATION_TYPES_API=true`
+* For **dp-frontend-router**: `make debug FILTER_FLEX_ROUTES_ENABLED=true`
+* For **dp-frontend-dataset-controller**:  `make debug ENABLE_CENSUS_PAGES=true`
+* For **dp-frontend-filter-flex-dataset**: `make debug`
+* For **dp-design-system**: `npm run dev`
+* For **florence** _(only if actively developing within)_: `make node-modules && make debug`
+* Use **postman** to get the `X-Florence-Token` and insert value into browser cookie `access_token`
+
+## Alternative to start the Cantabular Import Services
+
+This assumes that all your setup has been done and all you need to do 
+is to start the docker network, but may not want to use the `scs` utility script.
+Ensure you are in the `dp-compose/cantabular-import` folder.
+
+* **Start all Services**: `make start`
+* **Start services in the background**: `make start-detached`
+* **Stop Services**: `make stop`
+* **Stop Services And Remove Containers**: `make down`
+* **Stop Services And Remove All Containers, Volumes and Networks**: `make clean`
+* **Restart Services**: `make restart`
+* **Recall Logs**: `make logs` or `./logs`
+* **Recall Logs For Specific Service**: `make logs t=<service-name>` or `./logs <service-name>`
 
 ------------------
 Files:
