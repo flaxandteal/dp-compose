@@ -1,9 +1,10 @@
 
 chown           change the service '.go' folder permissions from root to the user and group. Useful for linux users.
 clone           git clone all the required GitHub repos
-down            stop running the containers via docker-compose
+fe-assets       generate Cantabular FE assets
 init-db         preparing db services. Run this once
 pull            git pull the latest from your remote repos
-setup           preparing services. Run this once, before 'up'
+setup           preparing services. Run this once
 start           run the containers via docker-compose with logs attached to terminal
 start-detached  run the containers via docker-compose with detached logs (default option)
+stop            stop running the containers via docker-compose

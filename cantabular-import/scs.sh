@@ -13,15 +13,21 @@ RED="\e[31m"
 RESET="\e[0m"
 
 # services
-SERVICES="babbage florence The-Train zebedee dp-api-router 
-dp-cantabular-api-ext dp-cantabular-csv-exporter dp-population-types-api
-dp-cantabular-filter-flex-api dp-cantabular-metadata-exporter dp-cantabular-server
-dp-cantabular-xlsx-exporter dp-download-service dp-dataset-api dp-filter-api dp-frontend-router 
-dp-import-api dp-import-cantabular-dataset dp-import-cantabular-dimension-options dp-recipe-api 
-dp-frontend-filter-flex-dataset dp-cantabular-metadata-service dp-api-clients-go dp-topic-api"
+SERVICES="babbage dp-api-clients-go dp-api-router dp-cantabular-api-ext dp-cantabular-csv-exporter dp-cantabular-dimension-api
+          dp-cantabular-filter-flex-api dp-cantabular-metadata-exporter dp-cantabular-metadata-service dp-cantabular-server
+          dp-cantabular-ui dp-cantabular-xlsx-exporter dp-code-list-api dp-dataset-api dp-dataset-exporter dp-dataset-exporter-xlsx
+          dp-dimension-extractor  dp-dimension-importer dp-dimension-search-api dp-dimension-search-builder dp-download-service
+          dp-filter-api dp-hierarchy-api dp-hierarchy-builder dp-image-api dp-image-importer dp-import dp-import-api
+          dp-import-cantabular-dataset dp-import-cantabular-dimension-options dp-import-tracker dp-publishing-dataset-controller
+          dp-recipe-api dp-topic-api dp-zebedee-content dp-zebedee-utils zebedee"
 
-EXTRA_SERVICES="dp-cantabular-ui dp-cantabular-server dp-kafka dp-setup dp-configs dp-ci dp-cli dp-operations
-                dp-cantabular-uat sixteens dp-zebedee-utils"
+FRONTEND_SERVICES="dp-frontend-filter-dataset-controller dp-frontend-filter-flex-dataset dp-frontend-geography-controller
+                   dp-frontend-homepage-controller dp-frontend-renderer dp-frontend-router dp-frontend-cookie-controller
+                   dp-frontend-dataset-controller dp-frontend-feedback-controller"
+
+EXTRA_SERVICES="dp dp-cantabular-ui dp-cantabular-uat dp-code-list-scripts dp-component-test dp-compose dp-design-system dp-kafka dp-net
+                dp-mongodb-in-memory dp-setup dp-configs dp-ci dp-cli dp-operations dp-cantabular-uat sixteens dp-zebedee-utils
+                dp-vault the-train"
 
 # current directory
 DIR="$( cd "$( dirname "$0" )/../.." && pwd )"
@@ -81,15 +87,15 @@ splash() {
         echo "Simple script to run cantabular import service locally and all the dependencies"
         echo ""
         echo "List of commands: "
-        echo "   chown     - change the service '.go' folder permissions from root to the user and group."
-        echo "               Useful for linux users."
-        echo "   clone     - git clone all the required GitHub repos"
-        echo "   down      - stop running the containers via docker-compose"
-        echo "   init-db   - preparing db services. Run this once"
-        echo "   help      - splash screen with all these options"
-        echo "   pull      - git pull the latest from your remote repos"
-        echo "   setup     - preparing services. Run this once, before 'up'"
-        echo "   up        - run the containers via docker-compose"
+        echo "   chown           - change the service '.go' folder permissions from root to the user and group. Useful for linux users."
+        echo "   clone           - git clone all the required GitHub repos"
+        echo "   fe-assets       - generate Cantabular FE assets"
+        echo "   init-db         - preparing db services. Run this once"
+        echo "   pull            - git pull the latest from your remote repos"
+        echo "   setup           - preparing services. Run this once"
+        echo "   start           - run the containers via docker-compose with logs attached to terminal"
+        echo "   start-detached  - run the containers via docker-compose with detached logs (default option)"
+        echo "   stop            - stop running the containers via docker-compose"
     fi
 }
 
@@ -97,6 +103,10 @@ cloneServices() {
     cd "$DIR"
     allServices="${SERVICES} ${EXTRA_SERVICES}"
     for service in $allServices; do
+        git clone git@github.com:ONSdigital/${service}.git 2> /dev/null
+        logSuccess "Cloned $service"
+    done
+    for service in $FRONTEND_SERVICES; do
         git clone git@github.com:ONSdigital/${service}.git 2> /dev/null
         logSuccess "Cloned $service"
     done
@@ -147,6 +157,38 @@ checkEnvironmentVariables() {
   fi
 }
 
+setupFEAssets () {
+    logSuccess "Make Assets for dp-frontend-router..."
+    cd "$DP_FRONTEND_ROUTER_DIR"
+    git checkout develop && git pull
+    make assets
+    if [ $? -ne 0 ]; then
+        logError "ERROR - Failed to build dp-frontend-router assets"
+        exit 129
+    fi
+    logSuccess "Make Assets for dp-frontend-router... Done."
+
+    logSuccess "Generate prod for $DP_FRONTEND_DATASET_CONTROLLER_DIR..."
+    cd "$DP_FRONTEND_DATASET_CONTROLLER_DIR"
+    git checkout develop && git pull
+    make generate-prod
+    if [ $? -ne 0 ]; then
+        logError "ERROR - Failed to generate-prod for 'dp-frontend-dataset-controler'"
+        exit 129
+    fi
+    logSuccess "Generate prod for $DP_FRONTEND_DATASET_CONTROLLER_DIR... Done."
+
+    logSuccess "Generate prod for $DP_FRONTEND_FILTER_FLEX_DATASET_DIR..."
+    cd "$DP_FRONTEND_FILTER_FLEX_DATASET_DIR"
+    git checkout develop && git pull
+    make generate-prod
+    if [ $? -ne 0 ]; then
+        logError "ERROR - Failed to generate-prod for 'dp-frontend-filter-flex-dataset'"
+        exit 129
+    fi
+    logSuccess "Generate prod for $DP_FRONTEND_FILTER_FLEX_DATASET_DIR... Done."
+}
+
 setupServices () {
     checkEnvironmentVariables
 
@@ -182,36 +224,6 @@ setupServices () {
         exit 129
     fi
     logSuccess "Clean zebedee_root folder... Done."
-
-    logSuccess "Make Assets for dp-frontend-router..."
-    cd "$DP_FRONTEND_ROUTER_DIR"
-    git checkout develop && git pull
-    make assets
-    if [ $? -ne 0 ]; then
-        logError "ERROR - Failed to build dp-frontend-router assets"
-        exit 129
-    fi
-    logSuccess "Make Assets for dp-frontend-router... Done."
-
-    logSuccess "Generate prod for $DP_FRONTEND_DATASET_CONTROLLER_DIR..."
-    cd "$DP_FRONTEND_DATASET_CONTROLLER_DIR"
-    git checkout develop && git pull
-    make generate-prod
-    if [ $? -ne 0 ]; then
-        logError "ERROR - Failed to generate-prod for 'dp-frontend-dataset-controler'"
-        exit 129
-    fi
-    logSuccess "Generate prod for $DP_FRONTEND_DATASET_CONTROLLER_DIR... Done."
-
-    logSuccess "Generate prod for $DP_FRONTEND_FILTER_FLEX_DATASET_DIR..."
-    cd "$DP_FRONTEND_FILTER_FLEX_DATASET_DIR"
-    git checkout develop && git pull
-    make generate-prod
-    if [ $? -ne 0 ]; then
-        logError "ERROR - Failed to generate-prod for 'dp-frontend-filter-flex-dataset'"
-        exit 129
-    fi
-    logSuccess "Generate prod for $DP_FRONTEND_FILTER_FLEX_DATASET_DIR... Done."
 
     logSuccess "Setup metadata service..."
     cd "$DP_CANTABULAR_METADATA_SERVICE_DIR"
@@ -262,6 +274,8 @@ setupServices () {
         exit 129
     fi
     logSuccess "Preparing dp-cantabular-api-ext... Done."
+
+    setupFEAssets
     
     chown
 
@@ -341,12 +355,13 @@ options() {
     "chown") chown;;
     "clone") cloneServices;;
     "help") splash;;
-    "down") downServices;;
-    "start-detached") startDetachedServices;;
-    "start") startServices;;
+    "fe-assets") setupFEAssets;;
+    "init-db") initDB;;
     "pull") pull;;
     "setup") setupServices;;
-    "init-db") initDB;;
+    "start-detached") startDetachedServices;;
+    "start") startServices;;
+    "stop") downServices;;
     *) splash;;
     esac
 }
