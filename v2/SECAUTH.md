@@ -4,7 +4,7 @@
 
 - Make sure you are a cognito recognised user (in group sandbox-florence-users)
 - Make sure you are part of a suitable group role-admin / role-publisher.
-- Populate the .env with correct aws details.
+- Populate the .env with correct aws details [if testing with auth, set AUTHORISATION_ENABLED=true].
 - Bring up the stack locally (see command below).
 - Populate the permissions database (go run import.go  [in dp-permissions/import-script])
 - The AWS group (role-admin/publisher) maps to certain permissions (see dp-permissions).

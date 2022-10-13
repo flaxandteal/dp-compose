@@ -8,7 +8,7 @@ services:
       - ../../../../dp-interactives-importer:/app
     ports:
       - 27400:27400
-    restart: unless-stopped
+    restart: 'no'
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:27400/health"]
       interval: 300s
@@ -16,13 +16,17 @@ services:
       retries: 15
     environment:
       HEALTHCHECK_INTERVAL: $HEALTHCHECK_INTERVAL
-      BIND_ADDR: ":27400"
+      BIND_ADDR: ':27400'
       API_ROUTER_URL: ${API_ROUTER_URL}/v1
       UPLOAD_API_URL: $UPLOAD_API_URL
       INTERACTIVES_API_URL: $INTERACTIVES_API_URL
-      AWS_ENDPOINT: "http://localstack:4566"
-      KAFKA_ADDR: "kafka:9092"
+      AWS_ENDPOINT: 'http://localstack:4566'
+      KAFKA_ADDR: 'kafka:9092'
+      KAFKA_PRODUCER_MIN_BROKERS_HEALTHY: '1'
+      KAFKA_VERSION: '3.1.0'
+      KAFKA_MAX_BYTES: '2000000'
+      KAFKA_MIN_HEALTHY_BROKERS: '1'
       SERVICE_AUTH_TOKEN: $SERVICE_AUTH_TOKEN
       DOWNLOAD_BUCKET_NAME: dp-interactives-file-uploads
-      BATCH_SIZE: "100"
+      BATCH_SIZE: '100'
     entrypoint: make debug

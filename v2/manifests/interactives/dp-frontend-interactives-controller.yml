@@ -8,7 +8,7 @@ services:
       - ../../../../dp-frontend-interactives-controller:/app
     ports:
       - 27300:27300
-    restart: unless-stopped
+    restart: "no"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:27300/health"]
       interval: 300s
@@ -17,7 +17,7 @@ services:
     environment:
       SERVICE_AUTH_TOKEN: $SERVICE_AUTH_TOKEN
       HEALTHCHECK_INTERVAL: $HEALTHCHECK_INTERVAL
-      BIND_ADDR: ":27300"
+      BIND_ADDR: ':27300'
       API_ROUTER_URL: $API_ROUTER_URL
       DOWNLOAD_API_URL: $DOWNLOAD_SERVICE_URL
     entrypoint: make debug

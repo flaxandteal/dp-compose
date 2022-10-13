@@ -3,7 +3,7 @@ services:
   dp-frontend-router:
     build:
       context: ../../../../dp-frontend-router
-      dockerfile: Dockerfile.dp-compose
+      dockerfile: ../dp-compose/v2/dockerfiles/dp-frontend-router/Dockerfile.dp-compose
     volumes:
       - ../../../../dp-frontend-router:/dp-frontend-router
     ports:

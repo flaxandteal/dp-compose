@@ -3,6 +3,6 @@ services:
   sixteens:
     build:
       context: ../../../../sixteens
-      dockerfile: Dockerfile.dp-compose
+      dockerfile: ../dp-compose/v2/dockerfiles/sixteens/Dockerfile.dp-compose
     ports:
       - 9000:9000

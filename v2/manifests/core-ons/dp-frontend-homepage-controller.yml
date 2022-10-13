@@ -3,7 +3,7 @@ services:
   dp-frontend-homepage-controller:
     build:
       context: ../../../../dp-frontend-homepage-controller
-      dockerfile: Dockerfile.dp-compose
+      dockerfile: ../dp-compose/v2/dockerfiles/dp-frontend-homepage-controller/Dockerfile.dp-compose
     volumes:
       - ../../../../dp-frontend-homepage-controller:/dp-frontend-homepage-controller
     ports:

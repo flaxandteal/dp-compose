@@ -3,7 +3,7 @@ services:
   dp-frontend-renderer:
     build:
       context: ../../../../dp-frontend-renderer
-      dockerfile: Dockerfile.dp-compose
+      dockerfile: ../dp-compose/v2/dockerfiles/dp-frontend-renderer/Dockerfile.dp-compose
     volumes:
       - ../../../../dp-frontend-renderer:/dp-frontend-renderer
     ports:
