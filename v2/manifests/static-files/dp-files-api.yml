@@ -29,7 +29,7 @@ services:
       ZEBEDEE_URL: $ZEBEDEE_URL
       AUTHORISATION_ENABLED: $AUTHORISATION_ENABLED
       S3_PRIVATE_BUCKET_NAME: 'testing'
-	    LOCALSTACK_HOST: 'http://localstack:4566'
+      LOCALSTACK_HOST: 'http://localstack:4566'
     volumes:
       - ../../../../dp-files-api:/service
     healthcheck:
