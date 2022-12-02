@@ -18,3 +18,4 @@ services:
         environment:
             BIND_ADDR:                ":20100"
             API_ROUTER_URL:           "http://dp-api-router:23200/v1"
+            ENABLE_MULTIVARIATE:      "true"
