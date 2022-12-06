@@ -21,3 +21,4 @@ services:
             API_ROUTER_URL:           "http://dp-api-router:23200/v1"
             DOWNLOADER_URL:           "http://dp-download-service:23400"
             ENABLE_CENSUS_PAGES:      "true"
+            ENABLE_MULTIVARIATE:      "true"
