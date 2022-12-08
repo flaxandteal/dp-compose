@@ -36,3 +36,8 @@ Then just standard Docker compose commands: e.g.:
 ## Kafka
 
 This uses KRaft'mode but this is early release: https://github.com/apache/kafka/blob/6d1d68617ecd023b787f54aafc24a4232663428d/config/kraft/README.md - have followed this issue but am documenting in case things start to fail: https://github.com/bitnami/bitnami-docker-kafka/issues/159
+
+
+## Profiles
+
+TODO link readme of profiles
