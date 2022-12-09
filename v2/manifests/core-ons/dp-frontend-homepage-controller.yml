@@ -3,16 +3,27 @@ services:
   dp-frontend-homepage-controller:
     build:
       context: ../../../../dp-frontend-homepage-controller
-      dockerfile: ../dp-compose/v2/dockerfiles/dp-frontend-homepage-controller/Dockerfile.dp-compose
+      dockerfile: Dockerfile.local
+    command:
+      - reflex
+      - -d
+      - none
+      - -c
+      - ./reflex
     volumes:
       - ../../../../dp-frontend-homepage-controller:/dp-frontend-homepage-controller
+    expose:
+      - "24400"
     ports:
       - 24400:24400
-    restart: "no"
+    restart: unless-stopped
     environment:
-      HEALTHCHECK_INTERVAL: $HEALTHCHECK_INTERVAL
-      BIND_ADDR: ":24400"
-      API_ROUTER_URL: ${API_ROUTER_URL}/v1
-      BABBAGE_URL: $BABBAGE_URL
-      RENDERER_URL: $RENDERER_URL
-      IS_PUBLISHING_MODE: "true"
+      BIND_ADDR:                      ":24400"
+      API_ROUTER_URL:                 ${API_ROUTER_URL:-http://dp-api-router:23200}/v1
+      CENSUS_TOPIC_ID:                ${CENSUS_TOPIC_ID:-4445}
+      DEBUG:                          ${DEBUG:-false}
+      ENABLE_CENSUS_TOPIC_SUBSECTION: ${ENABLE_CENSUS_TOPIC_SUBSECTION:-false}
+      ENABLE_NEW_NAVBAR:              ${ENABLE_NEW_NAVBAR:-false}
+      IS_PUBLISHING_MODE:             ${IS_PUBLISHING_MODE:-false}
+      SERVICE_AUTH_TOKEN:             $SERVICE_AUTH_TOKEN
+      SITE_DOMAIN:                    ${SITE_DOMAIN:-localhost}

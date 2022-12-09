@@ -1,1 +1,31 @@
-TODO symlink to homepage-web.yml
+version: "3"
+services:
+  # deps
+  mongodb:
+    extends:
+      file: ${PATH_MANIFESTS}/deps/mongo.yml
+      service: mongodb
+  # core-ons
+  # dp-design-system:
+  #   file: ${PATH_MANIFESTS}/core-ons/dp-design-system.yml
+  #   service: dp-design-system
+  dp-frontend-homepage-controller:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-frontend-homepage-controller.yml
+      service: dp-frontend-homepage-controller
+  dp-frontend-router:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-frontend-router.yml
+      service: dp-frontend-router
+  dp-api-router:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-api-router.yml
+      service: dp-api-router
+  dp-topic-api:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-topic-api.yml
+      service: dp-topic-api
+  zebedee:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/zebedee.yml
+      service: zebedee
