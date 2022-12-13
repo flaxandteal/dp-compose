@@ -3,6 +3,11 @@ services:
   sixteens:
     build:
       context: ../../../../sixteens
-      dockerfile: ../dp-compose/v2/dockerfiles/sixteens/Dockerfile.dp-compose
+      dockerfile: Dockerfile.local
+    expose:
+      - "9000"
     ports:
       - 9000:9000
+    volumes:
+      - ../../../../sixteens:/sixteens
+    restart: unless-stopped

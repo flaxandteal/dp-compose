@@ -6,13 +6,18 @@ services:
       file: ${PATH_MANIFESTS}/deps/mongo.yml
       service: mongodb
   # core-ons
-  # dp-design-system:
-  #   file: ${PATH_MANIFESTS}/core-ons/dp-design-system.yml
-  #   service: dp-design-system
+  dp-design-system:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-design-system.yml
+      service: dp-design-system
   dp-frontend-homepage-controller:
     extends:
       file: ${PATH_MANIFESTS}/core-ons/dp-frontend-homepage-controller.yml
       service: dp-frontend-homepage-controller
+  sixteens:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/sixteens.yml
+      service: sixteens
   dp-frontend-router:
     extends:
       file: ${PATH_MANIFESTS}/core-ons/dp-frontend-router.yml
@@ -27,5 +32,5 @@ services:
       service: dp-topic-api
   zebedee:
     extends:
-      file: ${PATH_MANIFESTS}/core-ons/zebedee.yml
+      file: ${PATH_MANIFESTS}/core-ons/zebedee-reader.yml
       service: zebedee
