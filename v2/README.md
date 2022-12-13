@@ -9,11 +9,44 @@ Giving an end-to-end development environment for working with ONS services in a 
 
 Eventually move this v2 directory as root - remove all other directories/files. So a single source of truth.
 
-## docker-compose
+## code structure
 
-This is basically a docker-compose stack run via:
-- an env-file: https://docs.docker.com/compose/environment-variables/#using-the---env-file--option also https://docs.docker.com/compose/reference/envvars/
-- an extended docker-compose file: https://docs.docker.com/compose/extends/
+The required configs and scripts have been structured as follows:
+
+### dockerfiles
+
+Contains `Dockerfile.dp-compose` files for services that do not have a `Dockerfile.local` yet. Each repository should have its own `Dockerfile.local`, so this `dockerfiles` folder can be removed when this is the case.
+
+### manifests
+
+Contains docker compose config `yml` files for each service that is required by any of the stacks. These configurations are stack agnostic and define all the necessary env vars to run the services in any possible configuration that might be required by any stack. Each env var has a sensible default value, which will be used if not provided by the stack, and usually corresponds to the default value in the service config.
+
+The files are organised in subfolders according to their type:
+- core-ons: Core services implemented by ONS
+- deps: Dependencies, not implemented by ONS, used by ONS services
+- elasticsearch: Elasticsearch service definition -- TODO we might want to move this under /deps
+- interactives: Interactives services -- TODO we might want to move this under /core-ons
+- static-file: Static file services -- TODO we might want to move this under /core-ons
+
+### profiles
+
+Contains the definitions for each stack or profile, including config overrides and docker compose extension files.
+Each subfolder corresponds to a particular stack and contains at least:
+- stack.yml: Extended docker-compose file which uses the manifests for required services.
+  - More information [here](https://docs.docker.com/compose/extends/)
+- .env: With the environmental variables required to override the default config for the services in the stack
+  - More information [here](https://docs.docker.com/compose/environment-variables/#using-the---env-file--option) and [also here](https://docs.docker.com/compose/environment-variables/#using-the---env-file--option)
+
+Some profiles are defined with a single yml file -- TODO we might want ot migrate these to follow the structure described above.
+
+The following profiles are available:
+
+- [Homepage Web mode](./profiles/homepage-web/README.md): This is also the Census Hub stack
+- [Homepage Publishing mode](./profiles/homepage-publishing/README.md)
+
+### provisioning
+
+Contains scripts and files to set the initial state required for stacks to work. This include things like database collections, content, etc.
 
 ## Setup
 
@@ -26,6 +59,12 @@ For everything to work as expected make sure of the following:
 
 ## Usage
 
+### Stacks (profiles with multiple files under a folder)
+
+Please follow the instructions in the [profiles README](./profiles/README.md)
+
+### Profiles with a single file
+
 Edit `.env` for your development requirements - you might need to point to local services running in an IDE for example.
 
 Then just standard Docker compose commands: e.g.:
@@ -36,8 +75,3 @@ Then just standard Docker compose commands: e.g.:
 ## Kafka
 
 This uses KRaft'mode but this is early release: https://github.com/apache/kafka/blob/6d1d68617ecd023b787f54aafc24a4232663428d/config/kraft/README.md - have followed this issue but am documenting in case things start to fail: https://github.com/bitnami/bitnami-docker-kafka/issues/159
-
-
-## Profiles
-
-TODO link readme of profiles
