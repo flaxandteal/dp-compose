@@ -1,7 +1,0 @@
-- [dp-design-system](https://github.com/ONSdigital/dp-design-system)
-- [dp-frontend-homepage-controller](https://github.com/ONSdigital/dp-frontend-homepage-controller)
-- [dp-frontend-router](https://github.com/ONSdigital/dp-frontend-router)
-- [dp-api-router](https://github.com/ONSdigital/dp-api-router)
-- [dp-topic-api](https://github.com/ONSdigital/dp-topic-api)
-- mongo db - already part of dp-compose general stack so can reuse ==> populate with data 
-- [Zebedee?](https://github.com/ONSdigital/Zebedee) <- Is this needed? Nathan thinks it is only needed for homepage but as it is a dependency for the application it may prevent the application for successfully starting up or outputting successful healthcheck

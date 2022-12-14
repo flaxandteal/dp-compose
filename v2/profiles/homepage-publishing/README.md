@@ -1,1 +1,0 @@
-Explain how the stack works and why
