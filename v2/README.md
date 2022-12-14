@@ -38,21 +38,14 @@ The files are organised in subfolders according to their type:
 - core-ons: Core services implemented by ONS
 - deps: Dependencies, not implemented by ONS, used by ONS services
 
-### profiles
+### stacks
 
-Contains the definitions for each stack or profile, including config overrides and docker compose extension files.
+Contains the definitions for each stack, including config overrides and docker compose extension files.
 Each subfolder corresponds to a particular stack and contains at least:
 - stack.yml: Extended docker-compose file which uses the manifests for required services.
   - More information [here](https://docs.docker.com/compose/extends/)
 - .env: With the environmental variables required to override the default config for the services in the stack
   - More information [here](https://docs.docker.com/compose/environment-variables/#using-the---env-file--option) and [also here](https://docs.docker.com/compose/environment-variables/#using-the---env-file--option)
-
-Some profiles are defined with a single yml file -- TODO we might want ot migrate these to follow the structure described above.
-
-The following profiles are available:
-
-- [Homepage Web mode](./profiles/homepage-web/README.md): This is also the Census Hub stack
-- [Homepage Publishing mode](./profiles/homepage-publishing/README.md)
 
 ### provisioning
 
