@@ -1,0 +1,6 @@
+version: "3.3"
+services:
+  dp-api-router:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-api-router.yml
+      service: dp-api-router

@@ -9,6 +9,19 @@ Giving an end-to-end development environment for working with ONS services in a 
 
 Eventually move this v2 directory as root - remove all other directories/files. So a single source of truth.
 
+## Setup
+
+Completely optional but it might be a good idea to clean the Docker environment - purge all containers/volumes/images and start fresh. Any issues then definitely give this a go first.
+
+For everything to work as expected make sure of the following:
+
+- `git clone` in same dir and level all relevant ONS repos in [manifests](manifests) dir (you will see errors if this is not as expected)
+- optional: add an alias - something like `alias dpc='docker-compose --project-dir . -f profiles/static-files.yml'` this makes life a bit easier
+
+## Usage
+
+Please follow the instructions in [stacks README](./stacks/README.md) to run each stack
+
 ## code structure
 
 The required configs and scripts have been structured as follows:
@@ -24,9 +37,6 @@ Contains docker compose config `yml` files for each service that is required by 
 The files are organised in subfolders according to their type:
 - core-ons: Core services implemented by ONS
 - deps: Dependencies, not implemented by ONS, used by ONS services
-- elasticsearch: Elasticsearch service definition -- TODO we might want to move this under /deps
-- interactives: Interactives services -- TODO we might want to move this under /core-ons
-- static-file: Static file services -- TODO we might want to move this under /core-ons
 
 ### profiles
 
@@ -47,30 +57,6 @@ The following profiles are available:
 ### provisioning
 
 Contains scripts and files to set the initial state required for stacks to work. This include things like database collections, content, etc.
-
-## Setup
-
-Completely optional but it might be a good idea to clean the Docker environment - purge all containers/volumes/images and start fresh. Any issues then definitely give this a go first.
-
-For everything to work as expected make sure of the following:
-
-- `git clone` in same dir and level all relevant ONS repos in [manifests](manifests) dir (you will see errors if this is not as expected)
-- optional: add an alias - something like `alias dpc='docker-compose --project-dir . -f profiles/static-files.yml'` this makes life a bit easier
-
-## Usage
-
-### Stacks (profiles with multiple files under a folder)
-
-Please follow the instructions in the [profiles README](./profiles/README.md)
-
-### Profiles with a single file
-
-Edit `.env` for your development requirements - you might need to point to local services running in an IDE for example.
-
-Then just standard Docker compose commands: e.g.:
-- to start detached: `docker-compose --project-dir . -f profiles/static-files.yml up -d`
-- or with the alias: `dpc up -d`
-- to get logs for a service: `docker-compose --project-dir . -f profiles/static-files.yml logs dp-files-api` or `dpc logs dp-files-api`
 
 ## Kafka
 

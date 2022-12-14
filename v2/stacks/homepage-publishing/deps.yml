@@ -1,0 +1,28 @@
+version: "3.3"
+services:
+  mongodb:
+    extends:
+      file: ${PATH_MANIFESTS}/deps/mongo.yml
+      service: mongodb
+    volumes:
+      - ${PATH_PROVISIONING}/mongo/init.js:/docker-entrypoint-initdb.d/init.js:ro
+  zookeeper-1:
+    extends:
+      file: ${PATH_MANIFESTS}/deps/kafka-confluentinc.yml
+      service: zookeeper-1
+  kafka-1:
+    extends:
+      file: ${PATH_MANIFESTS}/deps/kafka-confluentinc.yml
+      service: kafka-1
+  kafka-2:
+    extends:
+      file: ${PATH_MANIFESTS}/deps/kafka-confluentinc.yml
+      service: kafka-2
+  kafka-3:
+    extends:
+      file: ${PATH_MANIFESTS}/deps/kafka-confluentinc.yml
+      service: kafka-3
+  kowl:
+    extends:
+      file: ${PATH_MANIFESTS}/deps/kafka-tools.yml
+      service: kowl

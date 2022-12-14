@@ -24,6 +24,6 @@ services:
       DEBUG:                          ${DEBUG:-false}
       ENABLE_CENSUS_TOPIC_SUBSECTION: ${ENABLE_CENSUS_TOPIC_SUBSECTION:-false}
       ENABLE_NEW_NAVBAR:              ${ENABLE_NEW_NAVBAR:-false}
-      IS_PUBLISHING_MODE:             ${IS_PUBLISHING_MODE:-false}
+      IS_PUBLISHING_MODE:             ${IS_PUBLISHING:-false}
       SERVICE_AUTH_TOKEN:             $SERVICE_AUTH_TOKEN
       SITE_DOMAIN:                    ${SITE_DOMAIN:-localhost}

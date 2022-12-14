@@ -1,0 +1,23 @@
+version: "3.3"
+services:
+  dp-interactives-importer:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-interactives-importer.yml
+      service: dp-interactives-importer
+  dp-interactives-api:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-interactives-api.yml
+      service: dp-interactives-api
+  dp-frontend-interactives-controller:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-frontend-interactives-controller.yml
+      service: dp-frontend-interactives-controller
+  # new auth
+  dp-permissions-api:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-permissions-api.yml
+      service: dp-permissions-api
+  dp-identity-api:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-identity-api.yml
+      service: dp-identity-api

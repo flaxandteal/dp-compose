@@ -1,0 +1,29 @@
+version: "3.3"
+services:
+  dp-interactives-api:
+    build:
+      context: ../../provisioning/go
+      dockerfile: Dockerfile
+    volumes:
+      - ../../../../dp-interactives-api:/app
+    ports:
+      - 27500:27500
+    restart: 'no'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:27500/health"]
+      interval: 300s
+      timeout: 30s
+      retries: 15
+    environment:
+      HEALTHCHECK_INTERVAL:               ${HEALTHCHECK_INTERVAL:-30s}
+      BIND_ADDR:                          ':27500'
+      AWS_ENDPOINT:                       'http://localstack:4566'
+      MONGODB_BIND_ADDR:                  'mongodb:27017'
+      KAFKA_ADDR:                         'kafka:9092'
+      KAFKA_PRODUCER_MIN_BROKERS_HEALTHY: '1'
+      KAFKA_VERSION:                      '3.1.0'
+      KAFKA_MAX_BYTES:                    '2000000'
+      KAFKA_MIN_HEALTHY_BROKERS:          '1'
+      FILES_API_URL:                      ${FILES_API_URL:-http://dp-files-api:26900}
+      SERVICE_AUTH_TOKEN:                 $SERVICE_AUTH_TOKEN
+    entrypoint: make debug

@@ -10,6 +10,7 @@ services:
       - 20010:20010
     restart: unless-stopped
     environment:
-      HEALTHCHECK_INTERVAL: $HEALTHCHECK_INTERVAL
-      BIND_ADDR: ":20010"
-      PATTERN_LIBRARY_ASSETS_PATH: $SIXTEENS_URL
+      HEALTHCHECK_INTERVAL:        ${HEALTHCHECK_INTERVAL:-30s}
+      BIND_ADDR:                   ":20010"
+      PATTERN_LIBRARY_ASSETS_PATH: ${SIXTEENS_URL:-http://sixteens:9000/dist}
+

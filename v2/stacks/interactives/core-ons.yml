@@ -1,0 +1,30 @@
+version: "3.3"
+services:
+  zebedee:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/zebedee.yml
+      service: zebedee
+  dp-api-router:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-api-router.yml
+      service: dp-api-router
+  florence: # note: this might not build :( manually delete florence/dist florence/src/node_modules florence/assets/data.go 
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/florence.yml
+      service: florence
+  dp-frontend-router:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-frontend-router.yml
+      service: dp-frontend-router
+  dp-frontend-homepage-controller:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-frontend-homepage-controller.yml
+      service: dp-frontend-homepage-controller
+  dp-frontend-renderer:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-frontend-renderer.yml
+      service: dp-frontend-renderer
+  sixteens:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/sixteens.yml
+      service: sixteens

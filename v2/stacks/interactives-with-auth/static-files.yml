@@ -1,0 +1,14 @@
+version: "3.3"
+services:
+  dp-files-api:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-files-api.yml
+      service: dp-files-api
+  dp-upload-service:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-upload-service.yml
+      service: dp-upload-service
+  dp-download-service:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-download-service.yml
+      service: dp-download-service
