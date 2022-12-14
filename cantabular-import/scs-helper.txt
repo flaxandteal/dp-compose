@@ -1,0 +1,10 @@
+
+chown           change the service '.go' folder permissions from root to the user and group. Useful for linux users.
+clone           git clone all the required GitHub repos
+fe-assets       generate Cantabular FE assets
+init-db         preparing db services. Run this once
+pull [branch]   by default it will pull the latest from the current branch. Optionally, provide a branch to pull from, e.g., 'scs pull develop'
+setup           preparing services. Run this once
+start           run the containers via docker-compose with logs attached to terminal
+start-detached  run the containers via docker-compose with detached logs (default option)
+stop            stop running the containers via docker-compose
