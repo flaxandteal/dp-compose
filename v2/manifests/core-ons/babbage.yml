@@ -20,3 +20,8 @@ services:
       RELOAD_TEMPLATES: "Y"
       TEMPLATES_DIR: "src/main/web/templates/handlebars"
       ENABLE_COVID19_FEATURE: "false"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 5

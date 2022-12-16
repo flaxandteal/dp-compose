@@ -6,18 +6,20 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ${ROOT_INTERACTIVES_CONTROLLER:-../../../../dp-frontend-interactives-controller}:/app
+    expose:
+      - "27300"
     ports:
       - 27300:27300
     restart: "no"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:27300/health"]
-      interval: 300s
-      timeout: 30s
-      retries: 15
     environment:
       SERVICE_AUTH_TOKEN:   $SERVICE_AUTH_TOKEN
       HEALTHCHECK_INTERVAL: ${HEALTHCHECK_INTERVAL:-30s}
       BIND_ADDR:            ':27300'
       API_ROUTER_URL:       ${API_ROUTER_URL:-http://dp-api-router:23200}
       DOWNLOAD_API_URL:     ${DOWNLOAD_SERVICE_URL:-http://dp-download-service:23600}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:27300/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 5
     entrypoint: make debug

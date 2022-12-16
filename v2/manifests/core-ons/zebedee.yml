@@ -45,3 +45,8 @@ services:
       scheduled_publishing_enabled:   "false"
       ENABLE_INTERACTIVES_PUBLISHING: "true"
       INTERACTIVES_API_URL:           ${INTERACTIVES_API_URL:-http://dp-interactives-api:27500}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8082/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 5

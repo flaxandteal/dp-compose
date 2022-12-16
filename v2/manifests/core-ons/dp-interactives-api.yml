@@ -6,18 +6,15 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ${ROOT_INTERACTIVES_API:-../../../../dp-interactives-api}:/app
+    expose:
+      - "27500"
     ports:
       - 27500:27500
     restart: 'no'
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:27500/health"]
-      interval: 300s
-      timeout: 30s
-      retries: 15
     environment:
       HEALTHCHECK_INTERVAL:               ${HEALTHCHECK_INTERVAL:-30s}
       BIND_ADDR:                          ':27500'
-      AWS_ENDPOINT:                       'http://localstack:4566'
+      AWS_ENDPOINT:                       ${LOCALSTACK_URL:-http://localstack:4566}
       MONGODB_BIND_ADDR:                  'mongodb:27017'
       KAFKA_ADDR:                         'kafka:9092'
       KAFKA_PRODUCER_MIN_BROKERS_HEALTHY: '1'
@@ -26,4 +23,9 @@ services:
       KAFKA_MIN_HEALTHY_BROKERS:          '1'
       FILES_API_URL:                      ${FILES_API_URL:-http://dp-files-api:26900}
       SERVICE_AUTH_TOKEN:                 $SERVICE_AUTH_TOKEN
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:27500/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 5
     entrypoint: make debug

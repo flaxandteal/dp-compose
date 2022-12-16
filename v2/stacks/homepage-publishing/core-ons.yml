@@ -36,4 +36,15 @@ services:
     extends:
       file: ${PATH_MANIFESTS}/core-ons/dp-image-api.yml
       service: dp-image-api
-# TODO: add image api, minio / s3 buckets, vault? (or change config)
+  dp-image-importer:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-image-importer.yml
+      service: dp-image-importer
+  # dp-upload-service:
+  #   extends:
+  #     file: ${PATH_MANIFESTS}/core-ons/dp-upload-service.yml
+  #     service: dp-upload-service
+  # dp-download-service:
+  #   extends:
+  #     file: ${PATH_MANIFESTS}/core-ons/dp-download-service.yml
+  #     service: dp-download-service

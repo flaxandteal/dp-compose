@@ -6,21 +6,18 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ${ROOT_FRONTEND_IMPORTER:=../../../../dp-interactives-importer}:/app
+    expose:
+      - "27400"
     ports:
       - 27400:27400
     restart: 'no'
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:27400/health"]
-      interval: 300s
-      timeout: 30s
-      retries: 15
     environment:
       HEALTHCHECK_INTERVAL:               ${HEALTHCHECK_INTERVAL:-30s}
       BIND_ADDR:                          ':27400'
       API_ROUTER_URL:                     ${API_ROUTER_URL:-http://dp-api-router:23200}/v1
       UPLOAD_API_URL:                     ${UPLOAD_API_URL:-http://dp-upload-service:25100}
       INTERACTIVES_API_URL:               ${INTERACTIVES_API_URL:-http://dp-interactives-api:27500}
-      AWS_ENDPOINT:                       'http://localstack:4566'
+      AWS_ENDPOINT:                       ${LOCALSTACK_URL:-http://localstack:4566}
       KAFKA_ADDR:                         'kafka:9092'
       KAFKA_PRODUCER_MIN_BROKERS_HEALTHY: '1'
       KAFKA_VERSION:                      '3.1.0'
@@ -29,4 +26,9 @@ services:
       SERVICE_AUTH_TOKEN:                 $SERVICE_AUTH_TOKEN
       DOWNLOAD_BUCKET_NAME:               dp-interactives-file-uploads
       BATCH_SIZE:                         '100'
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:27400/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 5
     entrypoint: make debug

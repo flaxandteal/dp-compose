@@ -28,3 +28,8 @@ services:
       API_ROUTER_URL:                  ${API_ROUTER_URL:-http://dp-api-router:23200}/v1
       FILTER_FLEX_ROUTES_ENABLED:      ${FILTER_FLEX_ROUTES_ENABLED:-false}
       FILTER_FLEX_DATASET_SERVICE_URL: ${FILTER_FLEX_DATASET_SERVICE_URL:-http://dp-frontend-filter-flex-dataset:20100}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:20000/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 5

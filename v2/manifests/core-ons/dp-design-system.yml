@@ -11,3 +11,8 @@ services:
     volumes:
       - ${ROOT_DESIGN_SYSTEM:-../../../../dp-design-system}:/dp-design-system
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9002" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 5

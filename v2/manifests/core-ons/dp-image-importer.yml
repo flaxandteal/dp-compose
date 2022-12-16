@@ -1,0 +1,38 @@
+version: "3.3"
+services:
+  dp-image-importer:
+    build:
+      context: ${ROOT_IMAGE_IMPORTER:-../../../../dp-image-importer}
+      dockerfile: Dockerfile.local
+    command:
+      - reflex
+      - -d
+      - none
+      - -c
+      - ./reflex
+    volumes:
+      - ${ROOT_IMAGE_IMPORTER:-../../../../dp-image-importer}:/dp-image-importer
+    expose:
+      - "24800"
+    ports:
+      - 24800:24800
+    restart: unless-stopped
+    environment:
+      BIND_ADDR:               ":24800"
+      SERVICE_AUTH_TOKEN:      $SERVICE_AUTH_TOKEN
+      ENCRYPTION_DISABLED:     ${ENCRYPTION_DISABLED:-false}
+      IMAGE_API_URL:           ${IMAGE_API_URL:-http://dp-image-api:24700}
+      KAFKA_ADDR:              ${KAFKA_ADDR:-kafka-1:19092,kafka-2:19092,kafka-3:19092}
+      KAFKA_VERSION:           ${KAFKA_VERSION:-3.1.0}
+      IMAGE_UPLOADED_TOPIC:    ${IMAGE_UPLOADED_TOPIC:-image-uploaded}
+      S3_PRIVATE_BUCKET_NAME:  "testing"
+      S3_UPLOADED_BUCKET_NAME: "uploaded"
+      VAULT_TOKEN:             "0000-0000-0000-0000"
+      VAULT_ADDR:              ${VAULT_ADDR:-http://vault:8200}
+      VAULT_PATH:              "secret/shared/psk"
+      DOWNLOAD_SERVICE_URL:    ${DOWNLOAD_SERVICE_URL:-http://dp-download-service:23600}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:24800/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 5

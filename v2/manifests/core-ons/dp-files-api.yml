@@ -4,6 +4,8 @@ services:
     build:
       context: ${ROOT_FILES_API:-../../../../dp-files-api}
       dockerfile: Dockerfile-local
+    expose:
+      - "26900"
     ports:
       - 26900:26900
     environment:
@@ -29,7 +31,7 @@ services:
       ZEBEDEE_URL:                        ${ZEBEDEE_URL:-http://zebedee:8082}
       AUTHORISATION_ENABLED:              ${AUTHORISATION_ENABLED:-true}
       S3_PRIVATE_BUCKET_NAME:             'testing'
-      LOCALSTACK_HOST:                    'http://localstack:4566'
+      LOCALSTACK_HOST:                    ${LOCALSTACK_URL:-http://localstack:4566}
     volumes:
       - ${ROOT_FILES_API:-../../../../dp-files-api}:/service
     healthcheck:

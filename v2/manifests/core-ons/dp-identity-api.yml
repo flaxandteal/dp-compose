@@ -4,6 +4,8 @@ services:
     build:
       context: ../../provisioning/go
       dockerfile: Dockerfile
+    expose:
+    - "25600"
     ports:
       - "25600:25600"
     restart: "no"
@@ -26,4 +28,9 @@ services:
     volumes:
       - ${ROOT_IDENTITY_API:-../../../../dp-identity-api}:/app
       - ~/.aws/:$HOME/.aws/
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:25600/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 5
     entrypoint: make run

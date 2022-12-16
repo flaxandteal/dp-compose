@@ -26,9 +26,9 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME:       PLAINTEXT
     healthcheck:
       test: ["CMD-SHELL", "nc -z localhost 9092 || exit -1"]
-      interval: 2s
-      timeout: 2s
-      retries: 15
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 5
 
   kafka-2:
     image: confluentinc/cp-kafka:6.0.0
@@ -47,9 +47,9 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME:       PLAINTEXT
     healthcheck:
       test: ["CMD-SHELL", "nc -z localhost 9093 || exit -1"]
-      interval: 2s
-      timeout: 2s
-      retries: 15
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 5
 
   kafka-3:
     image: confluentinc/cp-kafka:6.0.0
@@ -68,6 +68,6 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME:       PLAINTEXT
     healthcheck:
       test: ["CMD-SHELL", "nc -z localhost 9094 || exit -1"]
-      interval: 2s
-      timeout: 2s
-      retries: 15
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 5

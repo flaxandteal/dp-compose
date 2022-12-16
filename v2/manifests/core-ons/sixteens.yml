@@ -11,3 +11,8 @@ services:
     volumes:
       - ${ROOT_SIXTEENS:-../../../../sixteens}:/sixteens
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 5

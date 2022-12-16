@@ -40,7 +40,7 @@ var databases = [
 	},
 	{
 		name: "images",
-		collections: [{"name":"images_locks"}]
+		collections: [{"name":"images"}, {"name":"images_locks"}]
 	},
 	{
 		name: "files",

@@ -4,6 +4,7 @@ services:
     image: quay.io/cloudhut/kowl:master
     ports:
       - '9888:8080'
+    restart: unless-stopped
     environment:
       KAFKA_BROKERS: kafka-1:19092,kafka-2:19093,kafka-3:19094
 
@@ -14,6 +15,7 @@ services:
     environment:
       bootstrapServers:
         kafka-1:19092
+    restart: unless-stopped
     depends_on:
       - kafka-1
       - kafka-2

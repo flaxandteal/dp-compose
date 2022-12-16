@@ -19,3 +19,8 @@ services:
       CONTENT_DIR:       "content"
       PACKAGE_PREFIX:    "com.github.onsdigital.zebedee.reader.api"
       zebedee_root:      "/zebedee_root"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8082/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 5

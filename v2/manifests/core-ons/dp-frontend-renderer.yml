@@ -6,6 +6,8 @@ services:
       dockerfile: ../dp-compose/v2/dockerfiles/dp-frontend-renderer/Dockerfile.dp-compose
     volumes:
       - ${ROOT_FRONTEND_RENDERER:-../../../../dp-frontend-renderer}:/dp-frontend-renderer
+    expose:
+      - "20010"
     ports:
       - 20010:20010
     restart: unless-stopped
@@ -13,4 +15,8 @@ services:
       HEALTHCHECK_INTERVAL:        ${HEALTHCHECK_INTERVAL:-30s}
       BIND_ADDR:                   ":20010"
       PATTERN_LIBRARY_ASSETS_PATH: ${SIXTEENS_URL:-http://sixteens:9000/dist}
-
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:20010/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 5
