@@ -5,6 +5,8 @@ Motivation is to consolidate:
 - https://github.com/ONSdigital/dp-static-files-compose
 - https://github.com/ONSdigital/dp-interactives-compose
 
+And to create a structure that allows stacks to be easily modified or created.
+
 Giving an end-to-end development environment for working with ONS services in a stable, reliable and repeatable way.
 
 Eventually move this v2 directory as root - remove all other directories/files. So a single source of truth.
@@ -22,7 +24,7 @@ For everything to work as expected make sure of the following:
 
 Please follow the instructions in [stacks README](./stacks/README.md) to run each stack
 
-## code structure
+## Code structure
 
 The required configs and scripts have been structured as follows:
 
@@ -40,9 +42,9 @@ The files are organised in subfolders according to their type:
 
 ### stacks
 
-Contains the definitions for each stack, including config overrides and docker compose extension files.
+Contains definitions for each stack, including config overrides and docker compose extension files.
 Each subfolder corresponds to a particular stack and contains at least:
-- stack.yml: Extended docker-compose file which uses the manifests for required services.
+- {stack}.yml: Extended docker-compose file which uses the manifests for required services.
   - More information [here](https://docs.docker.com/compose/extends/)
 - .env: With the environmental variables required to override the default config for the services in the stack
   - More information [here](https://docs.docker.com/compose/environment-variables/#using-the---env-file--option) and [also here](https://docs.docker.com/compose/environment-variables/#using-the---env-file--option)

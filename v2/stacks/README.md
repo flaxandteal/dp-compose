@@ -8,7 +8,7 @@ cd stacks/<stack_name>
 
 ### Initialisation:
 
-Please make sure you have cloned the required repositories as siblings of dp-compose.
+Please make sure you have cloned the required repositories as siblings of dp-compose (or you override the corresponding `ROOT_{service}` env var).
 
 Some stacks require an initialisation step, please check the corresponding stack instructions in that case.
 
@@ -37,7 +37,7 @@ docker compose logs -f dp-files-api` or `dpc logs dp-files-api
 Alternatevily, if a Makefile is provided for the stack, you can run the corresponding `make` command. For example:
 
 ```sh
-make start
+make start-detached
 ```
 
 ```sh
