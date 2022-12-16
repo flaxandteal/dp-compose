@@ -2,7 +2,7 @@ version: '3.3'
 services:
   dp-static-file-publisher:
     build:
-      context: ../../../../dp-static-file-publisher
+      context: ${ROOT_STATIC_FILE_PUBLISHER:-../../../../dp-static-file-publisher}
       dockerfile: Dockerfile-local
     ports:
       - 24900:24900
@@ -31,7 +31,7 @@ services:
       S3_LOCAL_SECRET:                    'test'
       IMAGE_API_URL:                      ${IMAGE_API_URL:-http://dp-image-api:24700}
     volumes:
-      - ../../../../dp-static-file-publisher:/service
+      - ${ROOT_STATIC_FILE_PUBLISHER:-../../../../dp-static-file-publisher}:/service
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:24900/health" ]
       interval: 30s

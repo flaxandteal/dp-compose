@@ -2,7 +2,7 @@ version: "3.3"
 services:
   dp-frontend-homepage-controller:
     build:
-      context: ../../../../dp-frontend-homepage-controller
+      context: ${ROOT_HOMEPAGE_CONTROLLER:-../../../../dp-frontend-homepage-controller}
       dockerfile: Dockerfile.local
     command:
       - reflex
@@ -11,7 +11,7 @@ services:
       - -c
       - ./reflex
     volumes:
-      - ../../../../dp-frontend-homepage-controller:/dp-frontend-homepage-controller
+      - ${ROOT_HOMEPAGE_CONTROLLER:-../../../../dp-frontend-homepage-controller}:/dp-frontend-homepage-controller
     expose:
       - "24400"
     ports:

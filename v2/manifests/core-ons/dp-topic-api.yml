@@ -2,7 +2,7 @@ version: "3.3"
 services:
   dp-topic-api:
     build:
-      context: ../../../../dp-topic-api
+      context: ${ROOT_TOPIC_API:-../../../../dp-topic-api}
       dockerfile: Dockerfile.local
     command:
       - reflex
@@ -11,7 +11,7 @@ services:
       - -c
       - ./reflex
     volumes:
-      - ../../../../dp-topic-api:/dp-topic-api
+      - ${ROOT_TOPIC_API:-../../../../dp-topic-api}:/dp-topic-api
     expose:
       - "25300"
     ports:

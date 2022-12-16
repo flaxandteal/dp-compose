@@ -2,7 +2,7 @@ version: '3.3'
 services:  
   dp-download-service:
     build:
-      context: ../../../../dp-download-service
+      context: ${ROOT_DOWNLOAD_SERVICE:-../../../../dp-download-service}
       dockerfile: Dockerfile-local
     ports:
       - 23600:23600
@@ -29,7 +29,7 @@ services:
       ZEBEDEE_URL:                  ${ZEBEDEE_URL:-http://zebedee:8082}
       IS_PUBLISHING:                'true'
     volumes:
-      - ../../../../dp-download-service:/service
+      - ${ROOT_DOWNLOAD_SERVICE:-../../../../dp-download-service}:/service
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:23600/health" ]
       interval: 30s

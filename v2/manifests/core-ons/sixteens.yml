@@ -2,12 +2,12 @@ version: "3.3"
 services:
   sixteens:
     build:
-      context: ../../../../sixteens
+      context: ${ROOT_SIXTEENS:-../../../../sixteens}
       dockerfile: Dockerfile.local
     expose:
       - "9000"
     ports:
       - 9000:9000
     volumes:
-      - ../../../../sixteens:/sixteens
+      - ${ROOT_SIXTEENS:-../../../../sixteens}:/sixteens
     restart: unless-stopped

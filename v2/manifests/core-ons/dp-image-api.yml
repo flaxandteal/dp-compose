@@ -2,7 +2,7 @@ version: "3.3"
 services:
   dp-image-api:
     build:
-      context: ../../../../dp-image-api
+      context: ${ROOT_IMAGE_API:-../../../../dp-image-api}
       dockerfile: Dockerfile.local
     command:
       - reflex
@@ -11,7 +11,7 @@ services:
       - -c
       - ./reflex
     volumes:
-      - ../../../../dp-image-api:/dp-image-api
+      - ${ROOT_IMAGE_API:-../../../../dp-image-api}:/dp-image-api
     expose:
       - "24700"
     ports:

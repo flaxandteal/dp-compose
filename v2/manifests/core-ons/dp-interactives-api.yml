@@ -5,7 +5,7 @@ services:
       context: ../../provisioning/go
       dockerfile: Dockerfile
     volumes:
-      - ../../../../dp-interactives-api:/app
+      - ${ROOT_INTERACTIVES_API:-../../../../dp-interactives-api}:/app
     ports:
       - 27500:27500
     restart: 'no'

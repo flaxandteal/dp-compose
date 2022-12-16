@@ -2,7 +2,7 @@ version: '3.3'
 services:
   dp-upload-service:
     build:
-      context: ../../../../dp-upload-service
+      context: ${ROOT_UPLOAD_SERVICE:-../../../../dp-upload-service}
       dockerfile: Dockerfile-local
     ports:
       - 25100:25100
@@ -22,7 +22,7 @@ services:
       FILES_API_URL:                      ${FILES_API_URL:-http://dp-files-api:26900}
       SERVICE_AUTH_TOKEN:                 $SERVICE_AUTH_TOKEN
     volumes:
-      - ../../../../dp-upload-service:/service
+      - ${ROOT_UPLOAD_SERVICE:-../../../../dp-upload-service}:/service
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:25100/health" ]
       interval: 30s

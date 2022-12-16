@@ -2,7 +2,7 @@ version: '3.3'
 services:
   dp-files-api:
     build:
-      context: ../../../../dp-files-api
+      context: ${ROOT_FILES_API:-../../../../dp-files-api}
       dockerfile: Dockerfile-local
     ports:
       - 26900:26900
@@ -31,7 +31,7 @@ services:
       S3_PRIVATE_BUCKET_NAME:             'testing'
       LOCALSTACK_HOST:                    'http://localstack:4566'
     volumes:
-      - ../../../../dp-files-api:/service
+      - ${ROOT_FILES_API:-../../../../dp-files-api}:/service
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:26900/health" ]
       interval: 30s

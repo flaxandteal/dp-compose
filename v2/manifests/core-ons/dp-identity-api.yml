@@ -24,6 +24,6 @@ services:
       AWS_COGNITO_CLIENT_SECRET:    $AWS_COGNITO_CLIENT_SECRET
       AWS_AUTH_FLOW":               "USER_PASSWORD_AUTH"
     volumes:
-      - ../../../../dp-identity-api:/app
+      - ${ROOT_IDENTITY_API:-../../../../dp-identity-api}:/app
       - ~/.aws/:$HOME/.aws/
     entrypoint: make run

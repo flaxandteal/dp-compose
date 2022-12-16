@@ -2,7 +2,7 @@ version: "3.3"
 services:
   dp-permissions-api:
     build:
-      context: ../../../../dp-permissions-api
+      context: ${ROOT_PERMISSIONS_API:-../../../../dp-permissions-api}
       dockerfile: Dockerfile-local
     ports:
       - "25400:25400"
@@ -18,5 +18,5 @@ services:
       IS_PUBLISHING:                ${IS_PUBLISHING:-true}
       IDENTITY_WEB_KEY_SET_URL:     ${IDENTITY_API_URL:-http://dp-identity-api:25600}
     volumes:
-      - ../../../../dp-permissions-api:/service
+      - ${ROOT_PERMISSIONS_API:-../../../../dp-permissions-api}:/service
     entrypoint: make debug

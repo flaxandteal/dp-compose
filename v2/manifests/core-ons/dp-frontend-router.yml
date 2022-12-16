@@ -2,7 +2,7 @@ version: "3.3"
 services:
   dp-frontend-router:
     build:
-      context: ../../../../dp-frontend-router
+      context: ${ROOT_FRONTEND_ROUTER:-../../../../dp-frontend-router}
       dockerfile: Dockerfile.local
     command:
       - reflex
@@ -11,7 +11,7 @@ services:
       - -c
       - ./reflex
     volumes:
-      - ../../../../dp-frontend-router:/dp-frontend-router
+      - ${ROOT_FRONTEND_ROUTER:-../../../../dp-frontend-router}:/dp-frontend-router
     expose:
       - "20000"
     ports:

@@ -140,6 +140,15 @@ HOMEPAGE_CONTROLLER_URL
 DATASET_CONTROLLER_URL
 ```
 
+- Service roots:
+
+```sh
+# each manifest service points to the root of the corresponding repostitory, with a default value of (../../../../<repo>
+
+# Example:
+ROOT_API_ROUTER
+(default is ../../../../dp-api-router)
+```
 
 ## Homepage web
 

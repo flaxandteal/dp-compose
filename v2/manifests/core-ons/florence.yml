@@ -2,7 +2,7 @@ version: '3.3'
 services:
   florence:
     build:
-      context: ../../../../florence
+      context: ${ROOT_FLORENCE:-../../../../florence}
       dockerfile: Dockerfile.local
     command:
       - reflex
@@ -11,7 +11,7 @@ services:
       - -c
       - ./reflex
     volumes:
-      - ../../../../florence:/florence
+      - ${ROOT_FLORENCE:-../../../../florence}:/florence
     expose:
       - "8081"
     ports:

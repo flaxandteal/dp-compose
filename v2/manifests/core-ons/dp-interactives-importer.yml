@@ -5,7 +5,7 @@ services:
       context: ../../provisioning/go
       dockerfile: Dockerfile
     volumes:
-      - ../../../../dp-interactives-importer:/app
+      - ${ROOT_FRONTEND_IMPORTER:=../../../../dp-interactives-importer}:/app
     ports:
       - 27400:27400
     restart: 'no'

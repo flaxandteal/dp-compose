@@ -2,7 +2,7 @@ version: "3.3"
 services:
   zebedee:
     build:
-      context: ../../../../zebedee
+      context: ${ROOT_ZEBEDEE:-../../../../zebedee}
       dockerfile: Dockerfile
     expose:
       - "8082"

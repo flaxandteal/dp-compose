@@ -2,7 +2,7 @@ version: "3.3"
 services:
   dp-api-router:
     build:
-      context: ../../../../dp-api-router
+      context: ${ROOT_API_ROUTER:-../../../../dp-api-router}
       dockerfile: Dockerfile.local
     command:
       - reflex
@@ -11,7 +11,7 @@ services:
       - -c
       - ./reflex
     volumes:
-      - ../../../../dp-api-router:/dp-api-router
+      - ${ROOT_API_ROUTER:-../../../../dp-api-router}:/dp-api-router
     expose:
       - "23200"
     ports:
