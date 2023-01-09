@@ -17,20 +17,9 @@ Some stacks require an initialisation step, please check the corresponding stack
 
 Then just standard Docker compose commands: e.g.:
 
-- to start detached:
-```sh
-docker compose up -d
-```
+- to start detached: `docker compose up -d`, or with the alias: `dpc up -d`
 
-- or with the alias:
-```sh
-dpc up -d
-```
-
-- to get logs for a service:
-```sh
-docker compose logs -f dp-files-api` or `dpc logs dp-files-api
-```
+- to get logs for a service: `docker compose logs -f dp-files-api`, or: `dpc logs dp-files-api`
 
 ### Run with default docker compose commands:
 
@@ -154,7 +143,7 @@ ROOT_API_ROUTER
 
 Deploys a stack for the home page and census hub in web mode.
 
-1) The first time that you run it, you will need to generate the assets and have the zebedee content. It also assumes htat you have defined `zebedee_root` env var in your system.
+1) The first time that you run it, you will need to generate the assets and have the zebedee content. It also assumes that you have defined `zebedee_root` env var in your system.
 
 2) Go to the stack root folder
 
@@ -197,7 +186,7 @@ cd homepage-publishing
 make start-detached
 ```
 
-3) Open your browser and check you can florence website: `http://localhost:8081/florence`
+3) Open your browser and check you can see the florence website: `http://localhost:8081/florence`
 
 4) Log in to florence and perform a publish journey
 
