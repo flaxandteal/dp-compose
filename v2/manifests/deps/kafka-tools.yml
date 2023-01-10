@@ -7,6 +7,11 @@ services:
     restart: unless-stopped
     environment:
       KAFKA_BROKERS: kafka-1:19092,kafka-2:19093,kafka-3:19094
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9888" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 5
 
   kouncil:
     image: consdata/kouncil:latest
