@@ -15,8 +15,6 @@ services:
       - 19092 # exposed port to docker network so that the broker is reachable by other brokers, value needs to match PLAINTEXT port
     ports:
       - 9092:9092 # map localhost port so that broker is reachable from the host, values needs to match PLAINTEXT_HOST port
-    depends_on:
-      - zookeeper-1
     environment:
       KAFKA_ZOOKEEPER_CONNECT:                zookeeper-1:2181
       KAFKA_BROKER_ID:                        1
@@ -36,8 +34,6 @@ services:
       - 19092 # exposed port to docker network so that the broker is reachable by other brokers, value needs to match PLAINTEXT port
     ports:
       - 9093:9093 # map localhost port so that broker is reachable from the host, values needs to match PLAINTEXT_HOST port
-    depends_on:
-      - zookeeper-1
     environment:
       KAFKA_ZOOKEEPER_CONNECT:                zookeeper-1:2181
       KAFKA_BROKER_ID:                        2
@@ -57,8 +53,6 @@ services:
       - 19092 # exposed port to docker network so that the broker is reachable by other brokers, value needs to match PLAINTEXT port
     ports:
       - 9094:9094 # map localhost port so that broker is reachable from the host, values needs to match PLAINTEXT_HOST port
-    depends_on:
-      - zookeeper-1
     environment:
       KAFKA_ZOOKEEPER_CONNECT:                zookeeper-1:2181
       KAFKA_BROKER_ID:                        3
