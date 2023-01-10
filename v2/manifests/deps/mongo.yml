@@ -12,5 +12,5 @@ services:
       test: echo 'db.runCommand("ping").ok' | mongo mongodb:27017/test --quiet
       interval: 10s
       timeout: 10s
-      retries: 5
+      retries: 10
       start_period: 40s

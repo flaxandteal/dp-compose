@@ -30,5 +30,5 @@ services:
       test: [ "CMD", "curl", "-f", "http://localhost:27400/health" ]
       interval: ${HEALTHCHECK_INTERVAL:-30s}
       timeout: 10s
-      retries: 5
+      retries: 10
     entrypoint: make debug

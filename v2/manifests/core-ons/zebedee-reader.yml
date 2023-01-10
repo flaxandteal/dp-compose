@@ -23,4 +23,4 @@ services:
       test: [ "CMD", "curl", "-f", "http://localhost:8082/health" ]
       interval: ${HEALTHCHECK_INTERVAL:-30s}
       timeout: 10s
-      retries: 5
+      retries: 10
