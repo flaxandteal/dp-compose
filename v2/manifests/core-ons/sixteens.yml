@@ -1,8 +1,18 @@
-version: "3"
+version: "3.3"
 services:
   sixteens:
     build:
-      context: ../../../../sixteens
-      dockerfile: ../dp-compose/v2/dockerfiles/sixteens/Dockerfile.dp-compose
+      context: ${ROOT_SIXTEENS:-../../../../sixteens}
+      dockerfile: Dockerfile.local
+    expose:
+      - "9000"
     ports:
       - 9000:9000
+    volumes:
+      - ${ROOT_SIXTEENS:-../../../../sixteens}:/sixteens
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 10

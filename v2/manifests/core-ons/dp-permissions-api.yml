@@ -1,22 +1,29 @@
-version: "3"
+version: "3.3"
 services:
   dp-permissions-api:
     build:
-      context: ../../../../dp-permissions-api
+      context: ${ROOT_PERMISSIONS_API:-../../../../dp-permissions-api}
       dockerfile: Dockerfile-local
+    expose:
+      - "25400"
     ports:
       - "25400:25400"
     restart: "no"
     environment:
-      BIND_ADDR: ":25400"
-      HEALTHCHECK_INTERVAL: $HEALTHCHECK_INTERVAL
-      GRACEFUL_SHUTDOWN_TIMEOUT: "30s"
+      BIND_ADDR:                    ":25400"
+      HEALTHCHECK_INTERVAL:         ${HEALTHCHECK_INTERVAL:-30s}
+      GRACEFUL_SHUTDOWN_TIMEOUT:    "30s"
       HEALTHCHECK_CRITICAL_TIMEOUT: "30s"
-      MONGODB_DATABASE: "permissions"
-      MONGODB_BIND_ADDR: "mongodb:27017"
-      MONGODB_COLLECTIONS: "RolesCollection:roles,PoliciesCollection:policies"
-      IS_PUBLISHING: "true"
-      IDENTITY_WEB_KEY_SET_URL: $IDENTITY_API_URL
+      MONGODB_DATABASE:             "permissions"
+      MONGODB_BIND_ADDR:            "mongodb:27017"
+      MONGODB_COLLECTIONS:          "RolesCollection:roles,PoliciesCollection:policies"
+      IS_PUBLISHING:                ${IS_PUBLISHING:-true}
+      IDENTITY_WEB_KEY_SET_URL:     ${IDENTITY_API_URL:-http://dp-identity-api:25600}
     volumes:
-      - ../../../../dp-permissions-api:/service
+      - ${ROOT_PERMISSIONS_API:-../../../../dp-permissions-api}:/service
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:25400/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 10
     entrypoint: make debug

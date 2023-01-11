@@ -1,0 +1,27 @@
+version: '3.3'
+services:
+  babbage:
+    build:
+      context: ${ROOT_BABBAGE:-../../../../babbage}
+      dockerfile: Dockerfile
+    expose:
+    - "8080"
+    ports:
+      - 8080:8080
+    restart: unless-stopped
+    environment:
+      RESTOLINO_STATIC: "src/main/web"
+      RESTOLINO_CLASSES: "target/classes"
+      PACKAGE_PREFIX: "com.github.onsdigital"
+      DP_COLOURED_LOGGING: "true"
+      DP_LOGGING_FORMAT: "pretty_json"
+      DEV_ENVIRONMENT: "Y"
+      IS_PUBLISHING: "Y"
+      RELOAD_TEMPLATES: "Y"
+      TEMPLATES_DIR: "src/main/web/templates/handlebars"
+      ENABLE_COVID19_FEATURE: "false"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 10

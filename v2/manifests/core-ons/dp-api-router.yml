@@ -1,8 +1,8 @@
-version: "3"
+version: "3.3"
 services:
   dp-api-router:
     build:
-      context: ../../../../dp-api-router
+      context: ${ROOT_API_ROUTER:-../../../../dp-api-router}
       dockerfile: Dockerfile.local
     command:
       - reflex
@@ -11,34 +11,40 @@ services:
       - -c
       - ./reflex
     volumes:
-      - ../../../../dp-api-router:/dp-api-router
+      - ${ROOT_API_ROUTER:-../../../../dp-api-router}:/dp-api-router
+    expose:
+      - "23200"
     ports:
       - 23200:23200
     restart: unless-stopped
     environment:
-      HEALTHCHECK_INTERVAL: $HEALTHCHECK_INTERVAL
-      ENV_HOST: $API_ROUTER_URL
-      ALLOWED_ORIGINS: "*"
-      MONGODB_BIND_ADDR: "mongodb:27017"
-      KAFKA_ADDR: "kafka:9092"
-      KAFKA_PRODUCER_MIN_BROKERS_HEALTHY: "1"
-      KAFKA_MIN_HEALTHY_BROKERS: "1"
-      KAFKA_VERSION: "3.1.0"
-      KAFKA_MAX_BYTES: "2000000"
-      SERVICE_AUTH_TOKEN: $SERVICE_AUTH_TOKEN
-      ENABLE_AUDIT: "true"
-      ENABLE_PRIVATE_ENDPOINTS: "true"
-      ENABLE_INTERACTIVES_API: "true"
-      ENABLE_TOPIC_API: "true"
-      ENABLE_FILES_API: "true"
-      ENABLE_RELEASE_CALENDAR_API: "true"
-      INTERACTIVES_API_URL: $INTERACTIVES_API_URL
-      ZEBEDEE_URL: $ZEBEDEE_URL
-      RECIPE_API_URL: $RECIPE_API_URL
-      IMPORT_API_URL: $IMPORT_API_URL
-      DATASET_API_URL: $DATASET_API_URL
-      TOPIC_API_URL: $TOPIC_API_URL
-      UPLOAD_SERVICE_API_URL: $UPLOAD_API_URL
-      RELEASE_CALENDAR_API_URL: $RELEASE_CALENDAR_API_URL
-      SEARCH_API_URL: $SEARCH_API_URL
-      FILES_API_URL: $FILES_API_URL
+      HEALTHCHECK_INTERVAL:        ${HEALTHCHECK_INTERVAL:-30s}
+      ENV_HOST:                    ${API_ROUTER_URL:-http://dp-api-router:23200}
+      ALLOWED_ORIGINS:             ${ALLOWED_ORIGINS:-*}
+      MONGODB_BIND_ADDR:           ${MONGODB_BIND_ADDR:-mongodb:27017}
+      KAFKA_ADDR:                  ${KAFKA_ADDR:-kafka-1:19092,kafka-2:19092,kafka-3:19092}
+      KAFKA_VERSION:               ${KAFKA_VERSION:-3.1.0}
+      KAFKA_MAX_BYTES:             ${KAFKA_MAX_BYTES:-2000000}
+      SERVICE_AUTH_TOKEN:          $SERVICE_AUTH_TOKEN
+      ENABLE_AUDIT:                ${ENABLE_AUDIT:-false}
+      ENABLE_PRIVATE_ENDPOINTS:    ${ENABLE_PRIVATE_ENDPOINTS:-true}
+      ENABLE_INTERACTIVES_API:     ${ENABLE_INTERACTIVES_API:-true}
+      ENABLE_TOPIC_API:            ${ENABLE_TOPIC_API:-true}
+      ENABLE_FILES_API:            ${ENABLE_FILES_API:-true}
+      ENABLE_RELEASE_CALENDAR_API: ${ENABLE_RELEASE_CALENDAR_API:-true}
+      INTERACTIVES_API_URL:        ${INTERACTIVES_API_URL:-http://dp-interactives-api:27500}
+      ZEBEDEE_URL:                 ${ZEBEDEE_URL:-http://zebedee:8082}
+      RECIPE_API_URL:              ${RECIPE_API_URL:-http://dp-recipe-api:22300}
+      IMPORT_API_URL:              ${IMPORT_API_URL:-http://dp-import-api:21800}
+      DATASET_API_URL:             ${DATASET_API_URL:-http://dp-dataset-api:22000}
+      FILTER_API_URL:              ${FILTER_API_URL:-http://dp-filter-api:22100}
+      TOPIC_API_URL:               ${TOPIC_API_URL:-http://http-echo:5678}
+      UPLOAD_SERVICE_API_URL:      ${UPLOAD_API_URL:-http://dp-upload-service:25100}
+      RELEASE_CALENDAR_API_URL:    ${RELEASE_CALENDAR_API_URL:-http://http-echo:5678}
+      SEARCH_API_URL:              ${SEARCH_API_URL:-http://http-echo:5678}
+      FILES_API_URL:               ${FILES_API_URL:-http://dp-files-api:26900}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:23200/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 10

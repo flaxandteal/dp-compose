@@ -1,22 +1,35 @@
-version: "3"
+version: "3.3"
 services:
   dp-frontend-router:
     build:
-      context: ../../../../dp-frontend-router
-      dockerfile: ../dp-compose/v2/dockerfiles/dp-frontend-router/Dockerfile.dp-compose
+      context: ${ROOT_FRONTEND_ROUTER:-../../../../dp-frontend-router}
+      dockerfile: Dockerfile.local
+    command:
+      - reflex
+      - -d
+      - none
+      - -c
+      - ./reflex
     volumes:
-      - ../../../../dp-frontend-router:/dp-frontend-router
+      - ${ROOT_FRONTEND_ROUTER:-../../../../dp-frontend-router}:/dp-frontend-router
+    expose:
+      - "20000"
     ports:
       - 20000:20000
-    restart: "no"
+    restart: unless-stopped
     environment:
-      HEALTHCHECK_INTERVAL: $HEALTHCHECK_INTERVAL
-      INTERACTIVES_ROUTES_ENABLED: "true"
-      INTERACTIVES_CONTROLLER_URL: $INTERACTIVES_CONTROLLER_URL
-      RENDERER_URL: $RENDERER_URL
-      HOMEPAGE_CONTROLLER_URL: $HOMEPAGE_CONTROLLER_URL
-      BABBAGE_URL: $BABBAGE_URL
-      DATASET_CONTROLLER_URL: $DATASET_CONTROLLER_URL
-      API_ROUTER_URL: ${API_ROUTER_URL}/v1
-      DATASET_ROUTES_ENABLED: "true"
-      ASSETS_DIRECTORY: "/dp-frontend-router/assets"
+      HEALTHCHECK_INTERVAL:            ${HEALTHCHECK_INTERVAL:-30s}
+      INTERACTIVES_ROUTES_ENABLED:     ${INTERACTIVES_ROUTES_ENABLED:-false}
+      INTERACTIVES_CONTROLLER_URL:     ${INTERACTIVES_CONTROLLER_URL:-http://dp-interactives-controller:27300}
+      RENDERER_URL:                    ${RENDERER_URL:-http://dp-renderer:20010}
+      HOMEPAGE_CONTROLLER_URL:         ${HOMEPAGE_CONTROLLER_URL:-http://dp-frontend-homepage-controller:24400}
+      BABBAGE_URL:                     ${BABBAGE_URL:-http://babbage:8080}
+      DATASET_CONTROLLER_URL:          ${DATASET_CONTROLLER_URL:-http://dp-publishing-dataset-controller:24000}
+      API_ROUTER_URL:                  ${API_ROUTER_URL:-http://dp-api-router:23200}/v1
+      FILTER_FLEX_ROUTES_ENABLED:      ${FILTER_FLEX_ROUTES_ENABLED:-false}
+      FILTER_FLEX_DATASET_SERVICE_URL: ${FILTER_FLEX_DATASET_SERVICE_URL:-http://dp-frontend-filter-flex-dataset:20100}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:20000/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 10

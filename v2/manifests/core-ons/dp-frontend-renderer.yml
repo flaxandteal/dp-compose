@@ -1,15 +1,22 @@
-version: "3"
+version: "3.3"
 services:
   dp-frontend-renderer:
     build:
-      context: ../../../../dp-frontend-renderer
+      context: ${ROOT_FRONTEND_RENDERER:-../../../../dp-frontend-renderer}
       dockerfile: ../dp-compose/v2/dockerfiles/dp-frontend-renderer/Dockerfile.dp-compose
     volumes:
-      - ../../../../dp-frontend-renderer:/dp-frontend-renderer
+      - ${ROOT_FRONTEND_RENDERER:-../../../../dp-frontend-renderer}:/dp-frontend-renderer
+    expose:
+      - "20010"
     ports:
       - 20010:20010
-    restart: "no"
+    restart: unless-stopped
     environment:
-      HEALTHCHECK_INTERVAL: $HEALTHCHECK_INTERVAL
-      BIND_ADDR: ":20010"
-      PATTERN_LIBRARY_ASSETS_PATH: $SIXTEENS_URL
+      HEALTHCHECK_INTERVAL:        ${HEALTHCHECK_INTERVAL:-30s}
+      BIND_ADDR:                   ":20010"
+      PATTERN_LIBRARY_ASSETS_PATH: ${SIXTEENS_URL:-http://sixteens:9000/dist}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:20010/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 10
