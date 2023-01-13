@@ -3,7 +3,7 @@ services:
   vault:
     image: hashicorp/vault:latest
     ports:
-     - 8200:8200
+      - 8200:8200
     restart: always
     entrypoint: vault server -dev -dev-kv-v1 -dev-root-token-id="0000-0000-0000-0000"
     environment:

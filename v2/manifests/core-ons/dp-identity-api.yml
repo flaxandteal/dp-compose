@@ -5,7 +5,7 @@ services:
       context: ../../provisioning/go
       dockerfile: Dockerfile
     expose:
-    - "25600"
+      - "25600"
     ports:
       - "25600:25600"
     restart: "no"

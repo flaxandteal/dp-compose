@@ -5,7 +5,7 @@ services:
       context: ${ROOT_DESIGN_SYSTEM:-../../../../dp-design-system}
       dockerfile: Dockerfile.local
     expose:
-    - "9002"
+      - "9002"
     ports:
       - 9002:9002
     volumes:

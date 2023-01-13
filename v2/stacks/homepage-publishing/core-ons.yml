@@ -12,6 +12,16 @@ services:
     extends:
       file: ${PATH_MANIFESTS}/core-ons/sixteens.yml
       service: sixteens
+  babbage:
+    extends: 
+      file: ${PATH_MANIFESTS}/core-ons/babbage.yml
+      service: babbage
+    environment:
+      IS_PUBLISHING: "Y"
+  the-train:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/the-train.yml
+      service: the-train
   dp-frontend-router:
     extends:
       file: ${PATH_MANIFESTS}/core-ons/dp-frontend-router.yml

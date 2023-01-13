@@ -3,10 +3,10 @@ services:
   elasticsearch:
     image: elasticsearch:2.4.2
     ports:
-     - 9300:9300
-     - 9200:9200
+      - 9300:9300
+      - 9200:9200
     environment:
-     - "discovery.type=single-node"
+      - "discovery.type=single-node"
   sitewideelasticsearch:
     profiles: 
       - "elasticsearch"

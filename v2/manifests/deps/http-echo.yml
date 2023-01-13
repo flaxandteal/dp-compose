@@ -5,4 +5,4 @@ services:
     image: hashicorp/http-echo:alpine
     command: ['-text', 'http-echo']
     ports:
-    - 15678:5678
+      - 15678:5678
