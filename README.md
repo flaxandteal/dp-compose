@@ -9,6 +9,12 @@ https://www.docker.com/products/docker#/mac
 
 More information about the kafka cluster [here](./kafka-cluster.md)
 
+### V2
+
+There is a version 2 folder, which contains different docker compose definitions for each stack.
+
+Please, have a look to [version 2 README](./v2/README.md) for more information
+
 ### Run
 
 You may run containers for all required backing services by doing one of the following:

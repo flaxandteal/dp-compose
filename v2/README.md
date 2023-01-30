@@ -22,11 +22,19 @@ For everything to work as expected make sure of the following:
 
 ## Usage
 
-Please follow the instructions in [stacks README](./stacks/README.md) to run each stack
+Each stack is independent from the other, and `make` or `docker` commands should be run from the root of the stack you want to use.
 
-## Code structure
+Please follow the instructions in [stacks README](./stacks/README.md) to run each stack.
+
+Note that you should have the source code for all the ons dependencies of a stack cloned before the stack can be executed successfully.
+
+Note that before starting a stack you should stop any other stack running.
+
+## Structure
 
 The required configs and scripts have been structured as follows:
+
+![structure](structure.png)
 
 ### dockerfiles
 
@@ -43,13 +51,44 @@ The files are organised in subfolders according to their type:
 
 ### stacks
 
-Contains definitions for each stack, including config overrides and docker compose extension files.
+Contains definitions for each stack, including config overrides and docker compose extension files. Each stack should be independent form the other stacks, but they shoudl extends the required manifests, overwriting any env var required by the stack to work as expected.
+
 Each subfolder corresponds to a particular stack and contains at least:
 
 - {stack}.yml: Extended docker-compose file which uses the manifests for required services.
   - More information [here](https://docs.docker.com/compose/extends/)
 - .env: With the environmental variables required to override the default config for the services in the stack
   - More information [here](https://docs.docker.com/compose/environment-variables/#using-the---env-file--option)
+
+#### stack .env
+
+Note that each `.env` file should be used only to override required env vars for that particular stack, and check that any compulsory env var for the stack is set (for example, most stacks will require your system to have `SERVICE_AUTH_TOKEN` and `zebedee_root`).
+
+For example, the following .env file:
+- checks for compulsory env vars
+- defines relative paths to manifests and provisioning scripts
+- overwrites default values used by the stack and/or extended manifests
+- configures docker compose for the stack:
+
+```sh
+# -- Compulsory env vars validation --
+zebedee_root=${zebedee_root:?please define a valid zebedee_root in your local system}
+SERVICE_AUTH_TOKEN=${SERVICE_AUTH_TOKEN:?please define a valid SERVICE_AUTH_TOKEN in your local system}
+
+# -- Paths --
+PATH_MANIFESTS="../../manifests"
+PATH_PROVISIONING="../../provisioning"
+
+# -- Stack config env vars that override manifest defaults --
+IS_PUBLISHING="false"
+
+# -- Docker compose vars -- 
+COMPOSE_FILE=deps.yml:core-ons.yml
+COMPOSE_PATH_SEPARATOR=:
+COMPOSE_PROJECT_NAME=home-web
+COMPOSE_HTTP_TIMEOUT=120
+
+```
 
 ### provisioning
 
