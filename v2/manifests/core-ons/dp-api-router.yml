@@ -43,6 +43,8 @@ services:
       RELEASE_CALENDAR_API_URL:    ${RELEASE_CALENDAR_API_URL:-http://http-echo:5678}
       SEARCH_API_URL:              ${SEARCH_API_URL:-http://http-echo:5678}
       FILES_API_URL:               ${FILES_API_URL:-http://dp-files-api:26900}
+      IDENTITY_API_URL:            ${IDENTITY_API_URL:-http://dp-identity-api:25600}
+      IDENTITY_API_VERSIONS:       ${IDENTITY_API_VERSIONS:-"v1"}
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:23200/health" ]
       interval: ${HEALTHCHECK_INTERVAL:-30s}
