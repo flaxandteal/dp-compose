@@ -1,0 +1,30 @@
+version: "3.3"
+services:
+  dp-search-api:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-search-api.yml
+      service: dp-search-api
+  zebedee:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/zebedee.yml
+      service: zebedee
+  # dp-api-router:
+  #   extends:
+  #     file: ${PATH_MANIFESTS}/core-ons/dp-api-router.yml
+  #     service: dp-api-router
+  # dp-search-data-extractor:
+  #   extends:
+  #     file: ${PATH_MANIFESTS}/core-ons/dp-search-data-extractor.yml
+  #     service: dp-search-data-extractor
+  dp-search-data-importer:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-search-data-importer.yml
+      service: dp-search-data-importer
+  # dp-population-types-api:
+  #   extends:
+  #     file: ${PATH_MANIFESTS}/core-ons/dp-population-types-api.yml
+  #     service: dp-population-types-api
+  # dp-dataset-api:
+  #   extends:
+  #     file: ${PATH_MANIFESTS}/core-ons/dp-dataset-api.yml
+  #     service: dp-dataset-api

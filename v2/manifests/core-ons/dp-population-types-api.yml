@@ -1,0 +1,34 @@
+version: "3.3"
+services:
+  dp-population-types-api:
+    build:
+      context: ${ROOT_POPULATION_TYPES_API:-../../../../dp-population-types-api}
+      dockerfile: Dockerfile.local
+    command:
+      - reflex
+      - -d
+      - none
+      - -c
+      - ./reflex
+    volumes:
+      - ${ROOT_POPULATION_TYPES_API:-../../../../dp-population-types-api}:/dp-population-types-api
+    expose:
+      - "27300"
+    ports:
+      - 27300:27300
+    restart: unless-stopped
+    environment:
+      BIND_ADDR:                ":27300"
+      SERVICE_AUTH_TOKEN:       $SERVICE_AUTH_TOKEN
+      ENABLE_PRIVATE_ENDPOINTS: ${ENABLE_PRIVATE_ENDPOINTS:-false}
+      ENABLE_PERMISSIONS_AUTH:  ${ENABLE_PERMISSIONS_AUTH:-true}
+      ZEBEDEE_URL:              ${ZEBEDEE_URL:-http://zebedee:8082}
+      DATASET_API_URL:          ${DATASET_API_URL:-http://dp-dataset-api:22000}
+      MONGODB_BIND_ADDR:        ${MONGODB_BIND_ADDR:-mongodb:27017}
+      CANTABULAR_URL:           ${CANTABULAR_URL:-http://localhost:8491}
+      CANTABULAR_API_EXT_URL:   ${CANTABULAR_API_EXT_URL:-http://localhost:8492}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:27300/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 10

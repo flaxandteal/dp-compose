@@ -1,0 +1,30 @@
+version: "3.3"
+services:
+  dp-search-data-importer:
+    build:
+      context: ${ROOT_SEARCH_DATA_IMPORTER:-../../../../dp-search-data-importer}
+      dockerfile: Dockerfile.local
+    command:
+      - reflex
+      - -d
+      - none
+      - -c
+      - ./reflex
+    volumes:
+      - ${ROOT_SEARCH_DATA_IMPORTER:-../../../../dp-search-data-importer}:/dp-search-data-importer
+    expose:
+      - "25900"
+    ports:
+      - 25900:25900
+    restart: unless-stopped
+    environment:
+      BIND_ADDR:                   ":25900"
+      KAFKA_ADDR:                  ${KAFKA_ADDR:-kafka-1:19092,kafka-2:19092,kafka-3:19092}
+      KAFKA_VERSION:               ${KAFKA_VERSION:-3.1.0}
+      ELASTIC_SEARCH_URL:          ${ELASTIC_SEARCH_URL:-http://sitewideelasticsearch:9200}
+      SIGN_ELASTICSEARCH_REQUESTS: ${SIGN_ELASTICSEARCH_REQUESTS:-false}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:25900/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 10

@@ -1,5 +1,6 @@
 version: '3.3'
 services:
+
   elasticsearch:
     image: elasticsearch:2.4.2
     ports:
@@ -7,12 +8,14 @@ services:
       - 9200:9200
     environment:
       - "discovery.type=single-node"
+
   sitewideelasticsearch:
-    profiles: 
-      - "elasticsearch"
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+    expose:
+      - "9300" # exposed port to docker network so that the broker is reachable by other brokers, value needs to match PLAINTEXT port
+      - "9200"
     ports:
-      # Set alternative ports to prevent port clash.
+      # Set alternative localhost ports to prevent port clash.
       - 11300:9300
       - 11200:9200
     environment:

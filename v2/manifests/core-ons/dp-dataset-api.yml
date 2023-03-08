@@ -1,0 +1,36 @@
+version: "3.3"
+services:
+  dp-dataset-api:
+    build:
+      context: ${ROOT_DATASET_API:-../../../../dp-dataset-api}
+      dockerfile: Dockerfile.local
+    command:
+      - reflex
+      - -d
+      - none
+      - -c
+      - ./reflex
+    volumes:
+      - ${ROOT_DATASET_API:-../../../../dp-dataset-api}:/dp-dataset-api
+    expose:
+      - "22000"
+    ports:
+      - 22000:22000
+    restart: unless-stopped
+    environment:
+      BIND_ADDR:                   ":22000"
+      KAFKA_ADDR:                  ${KAFKA_ADDR:-kafka-1:19092,kafka-2:19092,kafka-3:19092}
+      CODE_LIST_API_URL:           ${CODE_LIST_API_URL:-http://localhost:22400}
+      DATASET_API_URL:             ${DATASET_API_URL:-http://dp-dataset-api:22000}
+      WEBSITE_URL:                 ${WEBSITE_URL:-http://localhost:20000}
+      ZEBEDEE_URL:                 ${ZEBEDEE_URL:-http://zebedee:8082}
+      ENABLE_PRIVATE_ENDPOINTS:    "true"
+      ENABLE_DETACH_DATASET:       "true"
+      SERVICE_AUTH_TOKEN:          $SERVICE_AUTH_TOKEN
+      DISABLE_GRAPH_DB_DEPENDENCY: "true"
+      MONGODB_BIND_ADDR:           ${MONGODB_BIND_ADDR:-mongodb:27017}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:22000/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 10
