@@ -1,3 +1,7 @@
+# -- Dependencies -- 
+
+# Contains all the search stack non-ons dependencies.
+
 version: "3.3"
 services:
   sitewideelasticsearch:

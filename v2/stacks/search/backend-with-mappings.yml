@@ -1,0 +1,27 @@
+# -- Backend With mappings -- 
+
+# To be used for re-indexing and extract-import pipelines with external data.
+# Contains the search stack backend services without zebedee or dataset api.
+# It assumes that these dependencies will be available in localhost.
+# `extra_hosts` blocks are used to do this mapping.
+
+version: "3.3"
+services:
+  dp-search-api:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-search-api.yml
+      service: dp-search-api
+  dp-search-data-extractor:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-search-data-extractor.yml
+      service: dp-search-data-extractor
+    extra_hosts:
+      - "host.docker.internal:host-gateway"          # localhost mapping for linux
+      - "docker.for.mac.host.internal:host-gateway"  # localhost mapping for mac (docker v17.12 to v18.02)
+  dp-search-data-importer:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-search-data-importer.yml
+      service: dp-search-data-importer
+    extra_hosts:
+      - "host.docker.internal:host-gateway"          # localhost mapping for linux
+      - "docker.for.mac.host.internal:host-gateway"  # localhost mapping for mac (docker v17.12 to v18.02)

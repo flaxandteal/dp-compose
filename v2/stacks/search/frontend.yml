@@ -1,0 +1,6 @@
+# -- Frontend -- 
+
+# Contains all the search stack frontend services.
+# TODO add the necessary services
+
+version: "3.3"

@@ -242,6 +242,29 @@ make clean
 ```
 
 
+## Search
+
+1) Start the docker stack:
+
+```sh
+make start-detached
+```
+
+2) Stop the docker stack, removing containers, without removing the data:
+
+```sh
+make down
+```
+
+3) You may stop all containers and clean the environment when you finish. WARNING: this will remove local data:
+
+```sh
+make clean
+```
+
+More information in [search stack readme](./search/README.md)
+
+
 ## Static files with auth
 
 1) Start the docker stack
