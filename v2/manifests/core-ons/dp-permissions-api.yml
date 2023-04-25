@@ -26,4 +26,3 @@ services:
       interval: ${HEALTHCHECK_INTERVAL:-30s}
       timeout: 10s
       retries: 10
-    entrypoint: make debug

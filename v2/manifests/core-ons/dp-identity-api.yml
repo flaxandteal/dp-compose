@@ -2,13 +2,22 @@ version: "3.3"
 services:
   dp-identity-api:
     build:
-      context: ../../provisioning/go
-      dockerfile: Dockerfile
+      context: ${ROOT_IDENTITY_API:-../../../../dp-identity-api}
+      dockerfile: Dockerfile.local
+    command:
+      - reflex
+      - -d
+      - none
+      - -c
+      - ./reflex
+    volumes:
+      - ${ROOT_IDENTITY_API:-../../../../dp-identity-api}:/dp-identity-api
+      - ~/.aws/:/root/.aws/
     expose:
       - "25600"
     ports:
       - "25600:25600"
-    restart: "no"
+    restart: unless-stopped
     environment:
       AWS_ACCESS_KEY_ID:            $AWS_ACCESS_KEY_ID
       AWS_SECRET_ACCESS_KEY:        $AWS_SECRET_ACCESS_KEY
@@ -25,12 +34,8 @@ services:
       AWS_COGNITO_CLIENT_ID:        $AWS_COGNITO_CLIENT_ID
       AWS_COGNITO_CLIENT_SECRET:    $AWS_COGNITO_CLIENT_SECRET
       AWS_AUTH_FLOW":               "USER_PASSWORD_AUTH"
-    volumes:
-      - ${ROOT_IDENTITY_API:-../../../../dp-identity-api}:/app
-      - ~/.aws/:$HOME/.aws/
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:25600/health" ]
       interval: ${HEALTHCHECK_INTERVAL:-30s}
       timeout: 10s
       retries: 10
-    entrypoint: make run
