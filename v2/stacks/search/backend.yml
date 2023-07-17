@@ -25,3 +25,7 @@ services:
     extends:
       file: ${PATH_MANIFESTS}/core-ons/dp-dataset-api.yml
       service: dp-dataset-api
+  dp-api-router:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-api-router.yml
+      service: dp-api-router

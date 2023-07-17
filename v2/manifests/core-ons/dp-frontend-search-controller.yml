@@ -19,7 +19,7 @@ services:
     restart: unless-stopped
     environment:
       BIND_ADDR:          ":25000"
-      API_ROUTER_URL:     ${API_ROUTER_URL:-http://dp-api-router:23200}
+      API_ROUTER_URL:     ${API_ROUTER_URL:-http://dp-api-router:23200}/v1
       IS_PUBLISHING:      ${IS_PUBLISHING:-true}
       SERVICE_AUTH_TOKEN: $SERVICE_AUTH_TOKEN
     healthcheck:

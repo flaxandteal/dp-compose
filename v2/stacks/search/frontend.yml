@@ -4,3 +4,16 @@
 # TODO add the necessary services
 
 version: "3.3"
+services:
+  dp-frontend-search-controller:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-frontend-search-controller.yml
+      service: dp-frontend-search-controller
+  dp-frontend-router:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-frontend-router.yml
+      service: dp-frontend-router
+  dp-design-system:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-design-system.yml
+      service: dp-design-system
