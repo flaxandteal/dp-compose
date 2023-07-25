@@ -90,13 +90,31 @@ $ collection-id
 
 If you want to run a stand-alone search stack, without external dependencies, you may use the basic stack, like so:
 
-3- Edit docker-compose config
+1- Edit docker-compose config
 
 Edit this stack's `.env` file and comment the necessary lines to prevent `ZEBEDEE_URL` and `DATASET_API_URL` being overwritten.
 
 Uncomment the `COMPOSE_FILE` that uses `backend.yml` and comment the other one.
 
-4- Run the stack
+2- Run the stack
+
+```sh
+make start-detached
+```
+
+### Run in Publishing mode
+
+To run in publishing mode (mostly used to view Search via Florence) do the following:
+
+1- Edit docker-compose config
+
+Edit this stack's `.env` file and comment the necessary lines to prevent `ZEBEDEE_URL` and `DATASET_API_URL` being overwritten.
+
+Uncomment the `COMPOSE_FILE` that uses `frontend-publishing.yml` and comment the other one.
+
+Uncomment the line that sets `IS_PUBLISHING` to `true`
+
+2- Run the stack
 
 ```sh
 make start-detached

@@ -1,0 +1,17 @@
+# -- Publishing -- 
+
+# Contains all the search stack publishing services.
+# This is a self-contained stack that doesn't rely on any external mapping or running service
+
+version: "3.3"
+services:
+  florence:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/florence.yml
+      service: florence
+  babbage:
+    extends: 
+      file: ${PATH_MANIFESTS}/core-ons/babbage.yml
+      service: babbage
+    environment:
+      IS_PUBLISHING: "Y"
