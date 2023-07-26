@@ -8,7 +8,6 @@ You may run the stack in stand-alone mode, assuming you already have the data yo
 
 Or you may run it with mappings to localhost, to obtain data from external sources (required if you need to re-index or run the extract-import pipeline with data available externally)
 
-
 ## Run with mappings
 
 If you want to use data from en external source (e.g. Sandbox environment), you may use the backend-with-mappings stack, like so:
@@ -41,9 +40,28 @@ Please, replace the publishing node, ip and port according to where the services
 
 4- Edit docker-compose config
 
-Edit this stack's `.env` file and uncomment the necessary lines to override `ZEBEDEE_URL` and `DATASET_API_URL` with the `host.docker.internal` values.
+Edit this stack's `.env` file and uncomment the following block:
 
-Uncomment the `COMPOSE_FILE` that uses `backend-with-mappings.yml` and comment the other one.
+```sh
+# -- BACKEND WITH MAPPINGS -- Uncomment the following lines to run backend with mappings
+#COMPOSE_FILE=deps.yml:backend-with-mappings.yml:frontend.yml
+#ZEBEDEE_URL="http://host.docker.internal:8082"       
+#DATASET_API_URL="http://host.docker.internal:22000" 
+```
+
+Ensure that the the blocks that begin
+
+```sh
+# -- FULL STACK (WEB) --
+```
+
+and
+
+```sh
+# -- FULL STACK (PUBLISHING) -- Uncomment the following lines to run full stack in publishing mode
+```
+
+are commented out.
 
 5- Run the stack
 
@@ -92,9 +110,26 @@ If you want to run a stand-alone search stack, without external dependencies, yo
 
 1- Edit docker-compose config
 
-Edit this stack's `.env` file and comment the necessary lines to prevent `ZEBEDEE_URL` and `DATASET_API_URL` being overwritten.
+Edit this stack's `.env` file and uncomment this block (by default this is uncommented):
 
-Uncomment the `COMPOSE_FILE` that uses `backend.yml` and comment the other one.
+```sh
+# -- FULL STACK (WEB) --
+COMPOSE_FILE=deps.yml:backend.yml:frontend.yml
+```
+
+Ensure that the the blocks that begin
+
+```sh
+# -- FULL STACK (PUBLISHING) -- Uncomment the following lines to run full stack in publishing mode
+```
+
+and
+
+```sh
+# -- BACKEND WITH MAPPINGS -- Uncomment the following lines to run backend with mappings
+```
+
+are commented out.
 
 2- Run the stack
 
@@ -108,13 +143,34 @@ To run in publishing mode (mostly used to view Search via Florence) do the follo
 
 1- Edit docker-compose config
 
-Edit this stack's `.env` file and comment the necessary lines to prevent `ZEBEDEE_URL` and `DATASET_API_URL` being overwritten.
+Edit this stack's `.env` file and uncomment this block:
 
-Uncomment the `COMPOSE_FILE` that uses `frontend-publishing.yml` and comment the other one.
+```sh
+# -- FULL STACK (PUBLISHING) -- Uncomment the following lines to run full stack in publishing mode
+#COMPOSE_FILE=deps.yml:backend.yml:frontend.yml:publishing.yml
+#IS_PUBLISHING=true
+#ENABLE_AUDIT=true
+```
 
-Uncomment the line that sets `IS_PUBLISHING` to `true`
+Ensure that the the blocks that begin
 
-2- Run the stack
+```sh
+# -- FULL STACK (WEB) --
+```
+
+and
+
+```sh
+# -- BACKEND WITH MAPPINGS -- Uncomment the following lines to run backend with mappings
+```
+
+are commented out.
+
+2- Ensure your service auth token is valid in your zebedee
+
+Check the /services directory to ensure there is a token there.
+
+3- Run the stack
 
 ```sh
 make start-detached
