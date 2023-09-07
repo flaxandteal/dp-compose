@@ -24,6 +24,8 @@ You may run containers for all required backing services by doing one of the fol
 
 You can run `make stop` to stop the containers, or `make clean` to stop and remove them as well.
 
+**If you're running for the first time** you will need to seed the Mongo database and create the collections for the first time. Run the [init-db.sh](https://github.com/ONSdigital/dp-compose/blob/main/cantabular-import/helpers/init-db.sh) script to create recipe and dataset related collections.
+
 ## CMD
 
 The ONS website and CMD both require Elastic search but (annoyingly) require different versions. The `docker-compose.yml` will start 2 instances. 
