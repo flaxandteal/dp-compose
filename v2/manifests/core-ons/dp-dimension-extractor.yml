@@ -1,0 +1,34 @@
+version: "3.3"
+services:
+  dp-dimension-extractor:
+    build:
+      context: ${ROOT_IMAGE_API:-../../../../dp-dimension-extractor}
+      dockerfile: Dockerfile.local
+    command:
+      - reflex
+      - -d
+      - none
+      - -c
+      - ./reflex
+    volumes:
+      - ${ROOT_IMAGE_API:-../../../../dp-dimension-extractor}:/dp-dimension-extractor
+    expose:
+      - "21400"
+    ports:
+      - 21400:21400
+    restart: unless-stopped
+    environment:
+      BIND_ADDR:                   ":21400"
+      DATASET_API_URL:             ${DATASET_API_URL:-http://dp-dataset-api:22000}
+      KAFKA_ADDR:                  ${KAFKA_ADDR:-kafka-1:19092,kafka-2:19092,kafka-3:19092}
+      KAFKA_MAX_BYTES:             ${KAFKA_MAX_BYTES:-2000000}
+      KAFKA_VERSION:               ${KAFKA_VERSION:-3.1.0}
+      LOCALSTACK_HOST:             ${LOCALSTACK_URL:-http://localstack:4566}
+      IS_PUBLISHING:               ${IS_PUBLISHING:-true}
+      VAULT_ADDR:                  ${VAULT_ADDR:-http://vault:8200}
+      ZEBEDEE_URL:                 ${ZEBEDEE_URL:-http://zebedee:8082}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:21400/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 10

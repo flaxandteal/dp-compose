@@ -1,0 +1,34 @@
+version: "3.3"
+services:
+  dp-frontend-dataset-controller:
+    build:
+      context: ${ROOT_HOMEPAGE_CONTROLLER:-../../../../dp-frontend-dataset-controller}
+      dockerfile: Dockerfile.local
+    command:
+      - reflex
+      - -d
+      - none
+      - -c
+      - ./reflex
+    volumes:
+      - ${ROOT_HOMEPAGE_CONTROLLER:-../../../../dp-frontend-dataset-controller}:/dp-frontend-dataset-controller
+    expose:
+      - "20200"
+    ports:
+      - 20200:20200
+    restart: unless-stopped
+    environment:
+      BIND_ADDR:                      ":20200"
+      API_ROUTER_URL:                 ${API_ROUTER_URL:-http://dp-api-router:23200}/v1
+      CENSUS_TOPIC_ID:                ${CENSUS_TOPIC_ID:-4445}
+      DEBUG:                          ${DEBUG:-false}
+      ENABLE_CENSUS_TOPIC_SUBSECTION: ${ENABLE_CENSUS_TOPIC_SUBSECTION:-false}
+      ENABLE_NEW_NAVBAR:              ${ENABLE_NEW_NAVBAR:-false}
+      IS_PUBLISHING_MODE:             ${IS_PUBLISHING:-false}
+      SERVICE_AUTH_TOKEN:             $SERVICE_AUTH_TOKEN
+      SITE_DOMAIN:                    ${SITE_DOMAIN:-localhost}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:20200/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 10

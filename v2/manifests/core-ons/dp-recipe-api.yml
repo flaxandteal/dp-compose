@@ -1,0 +1,32 @@
+version: "3.3"
+services:
+  dp-recipe-api:
+    build:
+      context: ${ROOT_IMAGE_API:-../../../../dp-recipe-api}
+      dockerfile: Dockerfile.local
+    command:
+      - reflex
+      - -d
+      - none
+      - -c
+      - ./reflex
+    volumes:
+      - ${ROOT_IMAGE_API:-../../../../dp-recipe-api}:/dp-recipe-api
+    expose:
+      - "22300"
+    ports:
+      - 22300:22300
+    restart: unless-stopped
+    environment:
+      BIND_ADDR:                   ":22300"
+      MONGODB_BIND_ADDR:           ${MONGODB_BIND_ADDR:-mongodb:27017}
+      KAFKA_ADDR:                  ${KAFKA_ADDR:-kafka-1:19092,kafka-2:19092,kafka-3:19092}
+      KAFKA_MAX_BYTES:             ${KAFKA_MAX_BYTES:-2000000}
+      KAFKA_VERSION:               ${KAFKA_VERSION:-3.1.0}
+      IS_PUBLISHING:               ${IS_PUBLISHING:-true}
+      ZEBEDEE_URL:                 ${ZEBEDEE_URL:-http://zebedee:8082}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:22300/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 10

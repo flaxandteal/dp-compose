@@ -1,0 +1,39 @@
+version: "3.3"
+services:
+  dp-import-tracker:
+    build:
+      context: ${ROOT_IMAGE_API:-../../../../dp-import-tracker}
+      dockerfile: Dockerfile.local
+    command:
+      - reflex
+      - -d
+      - none
+      - -c
+      - ./reflex
+    volumes:
+      - ${ROOT_IMAGE_API:-../../../../dp-import-tracker}:/dp-import-tracker
+    expose:
+      - "21300"
+    ports:
+      - 21300:21300
+    restart: unless-stopped
+    environment:
+      BIND_ADDR:                   ":21300"
+      DATASET_API_ADDR:            ${DATASET_API_ADDR:-http://dp-dataset-api:22000}
+      IMPORT_API_ADDR:             ${IMPORT_API_ADDR:-http://dp-import-api:21800}
+      MONGODB_BIND_ADDR:           ${MONGODB_BIND_ADDR:-mongodb:27017}
+      KAFKA_ADDR:                  ${KAFKA_ADDR:-kafka-1:19092,kafka-2:19092,kafka-3:19092}
+      KAFKA_MAX_BYTES:             ${KAFKA_MAX_BYTES:-2000000}
+      KAFKA_VERSION:               ${KAFKA_VERSION:-3.1.0}
+      IS_PUBLISHING:               ${IS_PUBLISHING:-true}
+      SERVICE_AUTH_TOKEN:          $SERVICE_AUTH_TOKEN
+      ZEBEDEE_URL:                 ${ZEBEDEE_URL:-http://zebedee:8082}
+      VAULT_ADDR:                  ${VAULT_ADDR:-http://vault:8200}
+      NEPTUNE_TLS_SKIP_VERIFY:     ${NEPTUNE_TLS_SKIP_VERIFY:-true}
+      GRAPH_ADDR:                  ${GRAPH_ADDR:-wss://host.docker.internal:8182/gremlin}
+      GRAPH_DRIVER_TYPE:           ${GRAPH_DRIVER_TYPE:-neptune}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:21300/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 10
