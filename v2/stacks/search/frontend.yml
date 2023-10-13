@@ -4,6 +4,14 @@
 
 version: "3.3"
 services:
+  babbage:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/babbage.yml
+      service: babbage
+  dp-frontend-release-calendar:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-frontend-release-calendar.yml
+      service: dp-frontend-release-calendar
   dp-frontend-search-controller:
     extends:
       file: ${PATH_MANIFESTS}/core-ons/dp-frontend-search-controller.yml
