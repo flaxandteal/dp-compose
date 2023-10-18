@@ -10,6 +10,7 @@ services:
       - 9000:9000
     volumes:
       - ${ROOT_SIXTEENS:-../../../../sixteens}:/sixteens
+      - /sixteens/node_modules/
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9000" ]
