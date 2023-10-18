@@ -4,7 +4,7 @@ This stack deploys the necessary services and dependencies for the search functi
 
 The search stack uses elasticsearch to store some indexed data that can be queried via the search api.
 
-You may run the stack in stand-alone mode, assuming you already have the data you need in elasticsearch. 
+You may run the stack in stand-alone mode, assuming you already have the data you need in elasticsearch.
 
 Or you may run it with mappings to localhost, to obtain data from external sources (required if you need to re-index or run the extract-import pipeline with data available externally)
 
@@ -175,3 +175,62 @@ Check the /services directory to ensure there is a token there.
 ```sh
 make start-detached
 ```
+
+### Gotchas
+
+Some errors seen while adding new services that you can overcome
+
+---
+
+`dp-frontend-release-calendar` error 500 on a page similar to <http://localhost:20000/releases/uktotalpublicservicesproductivityestimates2013>. With the logs displaying:
+
+```log
+json: cannot unmarshal string into Go value of type zebedee.HomepageContent
+```
+
+Make sure your Zebedee authentication token is set (old authentication)
+
+- Make a POST request to <http://localhost:8082/login>
+- The body should take the form as:
+
+```json
+{
+    "email": "florence@magicroundabout.ons.gov.uk",
+    "password": "Your local florence/zebedee password"
+}
+```
+
+- Add the response into your browser cookie as a key/value pair `access_token:{ResponseFromPOST}`
+
+---
+
+`dp-frontend-release-calendar` error 503, logs displaying that the app will not run and displaying similar to:
+
+```log
+no such module for github.com/kevinburke/go-bindata/go-bindata 
+run go get github.com/kevinburke/go-bindata/go-bindata
+```
+
+- Delete your local files under the `.go/` (not source controlled) directory for the service
+- Delete the offending image from the container
+- Try again i.e. `make start-detached`
+
+---
+
+GET request to <http://localhost:23200/v1/releases/legacy?url=/releases/uktotalpublicservicesproductivityestimates2013> returning a 500
+
+Solution: set your authentication token
+
+- Make a POST request to <http://localhost:8082/login>
+- The body should take the form as:
+
+```json
+{
+    "email": "florence@magicroundabout.ons.gov.uk",
+    "password": "Your local florence/zebedee password"
+}
+```
+
+- Add the response to the header of the GET request
+
+`X-Florence-Token:{TheResponseFromThePOSTRequest}`

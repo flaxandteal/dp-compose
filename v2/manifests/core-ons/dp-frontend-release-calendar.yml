@@ -1,0 +1,30 @@
+version: "3.3"
+services:
+  dp-frontend-release-calendar:
+    build:
+      context: ${ROOT_RELEASE_CALENDAR:-../../../../dp-frontend-release-calendar}
+      dockerfile: Dockerfile.local
+    command:
+      - reflex
+      - -d
+      - none
+      - -c
+      - ./reflex
+    volumes:
+      - ${ROOT_RELEASE_CALENDAR:-../../../../dp-frontend-release-calendar}:/dp-frontend-release-calendar
+    expose:
+      - "27700"
+    ports:
+      - 27700:27700
+    restart: unless-stopped
+    environment:
+      API_ROUTER_URL: ${API_ROUTER_URL:-http://dp-api-router:23200}/v1
+      BABBAGE_URL:    ${BABBAGE_URL:-http://babbage:8080}
+      BIND_ADDR:      ":27700"
+      DEBUG:          ${DEBUG:-false}
+      SITE_DOMAIN:    ${SITE_DOMAIN:-localhost}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:27700/health"]
+      interval:   ${HEALTHCHECK_INTERVAL:-30s}
+      timeout:    10s
+      retries:    10

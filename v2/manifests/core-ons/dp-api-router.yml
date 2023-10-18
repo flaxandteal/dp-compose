@@ -40,7 +40,7 @@ services:
       FILTER_API_URL:              ${FILTER_API_URL:-http://dp-filter-api:22100}
       TOPIC_API_URL:               ${TOPIC_API_URL:-http://http-echo:5678}
       UPLOAD_SERVICE_API_URL:      ${UPLOAD_API_URL:-http://dp-upload-service:25100}
-      RELEASE_CALENDAR_API_URL:    ${RELEASE_CALENDAR_API_URL:-http://http-echo:5678}
+      RELEASE_CALENDAR_API_URL:    ${RELEASE_CALENDAR_API_URL:-http://dp-release-calendar-api:27800}
       SEARCH_API_URL:              ${SEARCH_API_URL:-http://dp-search-api:23900}
       FILES_API_URL:               ${FILES_API_URL:-http://dp-files-api:26900}
       IDENTITY_API_URL:            ${IDENTITY_API_URL:-http://dp-identity-api:25600}
