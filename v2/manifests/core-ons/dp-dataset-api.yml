@@ -20,15 +20,18 @@ services:
     environment:
       BIND_ADDR:                   ":22000"
       KAFKA_ADDR:                  ${KAFKA_ADDR:-kafka-1:19092,kafka-2:19092,kafka-3:19092}
-      CODE_LIST_API_URL:           ${CODE_LIST_API_URL:-http://localhost:22400}
+      CODE_LIST_API_URL:           ${CODE_LIST_API_URL:-http://dp-code-list-api:22400}
       DATASET_API_URL:             ${DATASET_API_URL:-http://dp-dataset-api:22000}
       WEBSITE_URL:                 ${WEBSITE_URL:-http://localhost:20000}
       ZEBEDEE_URL:                 ${ZEBEDEE_URL:-http://zebedee:8082}
       ENABLE_PRIVATE_ENDPOINTS:    "true"
       ENABLE_DETACH_DATASET:       "true"
       SERVICE_AUTH_TOKEN:          $SERVICE_AUTH_TOKEN
+      GRAPH_ADDR:                  ${GRAPH_ADDR:-wss://host.docker.internal:8182/gremlin}
+      GRAPH_DRIVER_TYPE:           ${GRAPH_DRIVER_TYPE:-neptune}
       DISABLE_GRAPH_DB_DEPENDENCY: "true"
       MONGODB_BIND_ADDR:           ${MONGODB_BIND_ADDR:-mongodb:27017}
+      NEPTUNE_TLS_SKIP_VERIFY:     ${NEPTUNE_TLS_SKIP_VERIFY:-true}
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:22000/health" ]
       interval: ${HEALTHCHECK_INTERVAL:-30s}

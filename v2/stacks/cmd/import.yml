@@ -1,0 +1,80 @@
+version: "3.3"
+services:
+  dp-code-list-api:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-code-list-api.yml
+      service: dp-code-list-api
+  dp-dataset-api:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-dataset-api.yml
+      service: dp-dataset-api
+    environment:  
+      DISABLE_GRAPH_DB_DEPENDENCY: false
+    extra_hosts:
+      - "host.docker.internal:host-gateway"          # localhost mapping for linux
+      - "docker.for.mac.host.internal:host-gateway"  # localhost mapping for mac (docker v17.12 to v18.02)
+  dp-dimension-extractor:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-dimension-extractor.yml
+      service: dp-dimension-extractor
+  dp-dimension-importer:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-dimension-importer.yml
+      service: dp-dimension-importer
+    extra_hosts:
+      - "host.docker.internal:host-gateway"          # localhost mapping for linux
+      - "docker.for.mac.host.internal:host-gateway"  # localhost mapping for mac (docker v17.12 to v18.02)
+  dp-dimension-search-builder:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-dimension-search-builder.yml
+      service: dp-dimension-search-builder
+  dp-hierarchy-api:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-hierarchy-api.yml
+      service: dp-hierarchy-api
+    extra_hosts:
+      - "host.docker.internal:host-gateway"          # localhost mapping for linux
+      - "docker.for.mac.host.internal:host-gateway"  # localhost mapping for mac (docker v17.12 to v18.02)
+  dp-hierarchy-builder:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-hierarchy-builder.yml
+      service: dp-hierarchy-builder
+    extra_hosts:
+      - "host.docker.internal:host-gateway"          # localhost mapping for linux
+      - "docker.for.mac.host.internal:host-gateway"  # localhost mapping for mac (docker v17.12 to v18.02)
+  dp-import-api:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-import-api.yml
+      service: dp-import-api
+  dp-import-tracker:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-import-tracker.yml
+      service: dp-import-tracker
+    extra_hosts:
+      - "host.docker.internal:host-gateway"          # localhost mapping for linux
+      - "docker.for.mac.host.internal:host-gateway"  # localhost mapping for mac (docker v17.12 to v18.02)
+  dp-observation-extractor:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-observation-extractor.yml
+      service: dp-observation-extractor
+  dp-observation-importer:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-observation-importer.yml
+      service: dp-observation-importer
+    extra_hosts:
+      - "host.docker.internal:host-gateway"          # localhost mapping for linux
+      - "docker.for.mac.host.internal:host-gateway"  # localhost mapping for mac (docker v17.12 to v18.02)
+  dp-publishing-dataset-controller:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-publishing-dataset-controller.yml
+      service: dp-publishing-dataset-controller
+  dp-recipe-api:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-recipe-api.yml
+      service: dp-recipe-api
+  dp-upload-service:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-upload-service.yml
+      service: dp-upload-service
+
+

@@ -1,0 +1,30 @@
+version: "3.3"
+services:
+  dp-code-list-api:
+    build:
+      context: ${ROOT_IMAGE_API:-../../../../dp-code-list-api}
+      dockerfile: Dockerfile.local
+    command:
+      - reflex
+      - -d
+      - none
+      - -c
+      - ./reflex
+    volumes:
+      - ${ROOT_IMAGE_API:-../../../../dp-code-list-api}:/dp-code-list-api
+    expose:
+      - "22400"
+    ports:
+      - 22400:22400
+    restart: unless-stopped
+    environment:
+      BIND_ADDR:                   ":22400"
+      DATASET_API_URL:             ${DATASET_API_URL:-http://dp-dataset-api:22000}
+      NEPTUNE_TLS_SKIP_VERIFY:     ${NEPTUNE_TLS_SKIP_VERIFY:-true}
+      GRAPH_ADDR:                  ${GRAPH_ADDR:-wss://host.docker.internal:8182/gremlin}
+      GRAPH_DRIVER_TYPE:           ${GRAPH_DRIVER_TYPE:-neptune}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:22400/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 10

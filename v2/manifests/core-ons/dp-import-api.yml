@@ -1,0 +1,34 @@
+version: "3.3"
+services:
+  dp-import-api:
+    build:
+      context: ${ROOT_IMAGE_API:-../../../../dp-import-api}
+      dockerfile: Dockerfile.local
+    command:
+      - reflex
+      - -d
+      - none
+      - -c
+      - ./reflex
+    volumes:
+      - ${ROOT_IMAGE_API:-../../../../dp-import-api}:/dp-import-api
+    expose:
+      - "21800"
+    ports:
+      - 21800:21800
+    restart: unless-stopped
+    environment:
+      BIND_ADDR:                   ":21800"
+      DATASET_API_URL:             ${DATASET_API_URL:-http://dp-dataset-api:22000}
+      MONGODB_BIND_ADDR:           ${MONGODB_BIND_ADDR:-mongodb:27017}
+      KAFKA_ADDR:                  ${KAFKA_ADDR:-kafka-1:19092,kafka-2:19092,kafka-3:19092}
+      KAFKA_MAX_BYTES:             ${KAFKA_MAX_BYTES:-2000000}
+      KAFKA_VERSION:               ${KAFKA_VERSION:-3.1.0}
+      IS_PUBLISHING:               ${IS_PUBLISHING:-true}
+      RECIPE_API_URL:              ${RECIPE_API_URL:-http://dp-recipe-api:22300}
+      ZEBEDEE_URL:                 ${ZEBEDEE_URL:-http://zebedee:8082}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:21800/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 10

@@ -1,0 +1,26 @@
+version: "3.3"
+services:
+  sixteens:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/sixteens.yml
+      service: sixteens
+  dp-frontend-router:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-frontend-router.yml
+      service: dp-frontend-router
+  dp-api-router:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-api-router.yml
+      service: dp-api-router
+  zebedee:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/zebedee.yml
+      service: zebedee
+  florence:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/florence.yml
+      service: florence
+  dp-frontend-dataset-controller:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-frontend-dataset-controller.yml
+      service: dp-frontend-dataset-controller

@@ -28,7 +28,7 @@ var databases = [
 	},
 	{
 		name: "imports",
-		collections: [{"name":"imports"}]
+		collections: [{"name":"imports"}, {"name":"imports_locks"}]
 	},
 	{
 		name: "topics",

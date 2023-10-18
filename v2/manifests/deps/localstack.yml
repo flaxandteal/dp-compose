@@ -11,6 +11,6 @@ services:
       - EDGE_PORT=4566
     volumes:
       - ../../provisioning/localstack/index.html:/root/index.html
-      - ../../provisioning/localstack:/docker-entrypoint-initaws.d      
+      - ../../provisioning/localstack:/etc/localstack/init/ready.d/      
       - "${TMPDIR:-/tmp}/localstack:/tmp/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
