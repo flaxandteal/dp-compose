@@ -49,6 +49,10 @@ var databases = [
 	{
         name: "permissions",
         collections: [{"name":"roles"}, {"name":"policies"}]
+	},
+	{
+		name: "search",
+		collections: [{"name":"jobs"}, {"name":"jobs_locks"}, {"name":"tasks"}]
 	}
 ];
 

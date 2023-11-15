@@ -176,6 +176,25 @@ Check the /services directory to ensure there is a token there.
 make start-detached
 ```
 
+### Run with Reindex Pipeline
+
+If you want to run a search stack, without external dependencies, including the reindex pipeline:
+
+1- Edit docker-compose config
+
+Edit this stack's `.env` file and uncomment this block (by default this is commented):
+
+```sh
+# -- FULL STACK (WEB) + REINDEX --
+COMPOSE_FILE=deps.yml:backend.yml:frontend.yml:reindex.yml
+```
+
+2- Run the stack
+
+```sh
+make start-detached
+```
+
 ### Gotchas
 
 Some errors seen while adding new services that you can overcome

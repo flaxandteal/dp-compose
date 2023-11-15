@@ -1,0 +1,29 @@
+version: "3.3"
+services:
+  dp-search-reindex-tracker:
+    build:
+      context: ${ROOT_SEARCH_REINDEX_TRACKER:-../../../../dp-search-reindex-tracker}
+      dockerfile: Dockerfile.local
+    command:
+      - reflex
+      - -d
+      - none
+      - -c
+      - ./reflex
+    volumes:
+      - ${ROOT_SEARCH_REINDEX_TRACKER:-../../../../dp-search-reindex-racker}:/dp-search-reindex-tracker
+    expose:
+      - "28500"
+    ports:
+      - 28500:28500
+    restart: unless-stopped
+    environment:
+      BIND_ADDR:          ":28500"
+      ELASTIC_SEARCH_URL: ${ELASTIC_SEARCH_URL:-http://sitewideelasticsearch:9200}
+      SERVICE_AUTH_TOKEN:                 $SERVICE_AUTH_TOKEN
+      ZEBEDEE_URL:        ${ZEBEDEE_URL:-http://zebedee:8082}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:28500/health" ]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: 10s
+      retries: 10

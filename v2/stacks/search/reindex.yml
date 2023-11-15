@@ -1,0 +1,18 @@
+# -- Reindex pipeline -- 
+
+# Contains all the search stack reindex pipeline applications.
+
+version: "3.3"
+services:
+  dp-search-reindex-api:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-search-reindex-api.yml
+      service: dp-search-reindex-api
+  dp-search-data-finder:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-search-data-finder.yml
+      service: dp-search-data-finder
+  dp-search-reindex-tracker:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-search-reindex-tracker.yml
+      service: dp-search-reindex-tracker
