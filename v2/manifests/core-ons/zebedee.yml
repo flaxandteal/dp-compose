@@ -43,8 +43,6 @@ services:
       AWS_COGNITO_KEY_ID_TWO:         "GRBevIroJzPBvaGaL9xm4x/6rQGkbKxi3wLtcTiGymE="
       website_reindex_key:            "1hZiEDeZcVKZwO6WmTDTDhVSiRAKS0jM6Nzlvlszk0OW0vY5M2FCiGD7ncqcucxB"
       scheduled_publishing_enabled:   "false"
-      ENABLE_INTERACTIVES_PUBLISHING: "true"
-      INTERACTIVES_API_URL:           ${INTERACTIVES_API_URL:-http://dp-interactives-api:27500}
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8082/health" ]
       interval: ${HEALTHCHECK_INTERVAL:-30s}

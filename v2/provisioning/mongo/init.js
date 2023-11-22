@@ -1,19 +1,5 @@
 var databases = [
 	{
-		name: "interactives",
-		collections: [
-			{
-				"name": "metadata",
-				"index": [
-					{
-						"condition": '{"metadata.resource_id": 1}',
-						"options": '{"background":true, "unique": true}'
-					}
-				]
-		    }
-		]
-	},
-	{
 		name: "datasets",
 		collections: [
 			{"name": "datasets"}, {"name":"contacts"}, {"name":"editions"}, {"name":"instances"}, {"name":"dimension.options"}, {"name":"instances_locks"}]

@@ -28,11 +28,9 @@ services:
       SERVICE_AUTH_TOKEN:          $SERVICE_AUTH_TOKEN
       ENABLE_AUDIT:                ${ENABLE_AUDIT:-false}
       ENABLE_PRIVATE_ENDPOINTS:    ${ENABLE_PRIVATE_ENDPOINTS:-true}
-      ENABLE_INTERACTIVES_API:     ${ENABLE_INTERACTIVES_API:-true}
       ENABLE_TOPIC_API:            ${ENABLE_TOPIC_API:-true}
       ENABLE_FILES_API:            ${ENABLE_FILES_API:-true}
       ENABLE_RELEASE_CALENDAR_API: ${ENABLE_RELEASE_CALENDAR_API:-true}
-      INTERACTIVES_API_URL:        ${INTERACTIVES_API_URL:-http://dp-interactives-api:27500}
       ZEBEDEE_URL:                 ${ZEBEDEE_URL:-http://zebedee:8082}
       RECIPE_API_URL:              ${RECIPE_API_URL:-http://dp-recipe-api:22300}
       IMPORT_API_URL:              ${IMPORT_API_URL:-http://dp-import-api:21800}

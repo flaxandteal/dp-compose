@@ -19,8 +19,6 @@ services:
     restart: unless-stopped
     environment:
       HEALTHCHECK_INTERVAL:            ${HEALTHCHECK_INTERVAL:-30s}
-      INTERACTIVES_ROUTES_ENABLED:     ${INTERACTIVES_ROUTES_ENABLED:-false}
-      INTERACTIVES_CONTROLLER_URL:     ${INTERACTIVES_CONTROLLER_URL:-http://dp-interactives-controller:27300}
       RENDERER_URL:                    ${RENDERER_URL:-http://dp-renderer:20010}
       HOMEPAGE_CONTROLLER_URL:         ${HOMEPAGE_CONTROLLER_URL:-http://dp-frontend-homepage-controller:24400}
       BABBAGE_URL:                     ${BABBAGE_URL:-http://babbage:8080}

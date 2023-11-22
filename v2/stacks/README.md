@@ -71,16 +71,13 @@ AUTHORISATION_ENABLED
 IS_PUBLISHING
 ENABLE_PRIVATE_ENDPOINTS
 ENABLE_AUDIT
-ENABLE_INTERACTIVES_API
 ENABLE_TOPIC_API
 ENABLE_FILES_API
 ENABLE_RELEASE_CALENDAR_API
 DEBUG
 ENABLE_CENSUS_TOPIC_SUBSECTION
 ENABLE_NEW_NAVBAR
-INTERACTIVES_ROUTES_ENABLED
 FILTER_FLEX_ROUTES_ENABLED
-ENABLE_NEW_INTERACTIVES
 ENABLE_PERMISSION_API
 ENABLE_NEW_SIGN_IN
 ENABLE_DATASET_IMPORT
@@ -113,7 +110,6 @@ PERMISSIONS_API_URL
 IDENTITY_API_URL
 
 # Backend
-INTERACTIVES_API_URL
 FILES_API_URL
 UPLOAD_API_URL
 DOWNLOAD_SERVICE_URL
@@ -130,7 +126,6 @@ SEARCH_API_URL
 # frontend
 SIXTEENS_URL
 DATASET_CONTROLLER_URL
-INTERACTIVES_CONTROLLER_URL
 RENDERER_URL
 HOMEPAGE_CONTROLLER_URL
 DATASET_CONTROLLER_URL
@@ -202,37 +197,6 @@ make start-detached
 ```sh
 make clean
 ```
-
-
-## Interactives
-
-1) Start the docker stack
-
-```sh
-make start-detached
-```
-
-2) You may stop all containers and clean the environment when you finish:
-
-```sh
-make clean
-```
-
-
-## Interactives with auth
-
-1) Start the docker stack
-
-```sh
-make start-detached
-```
-
-2) You may stop all containers and clean the environment when you finish:
-
-```sh
-make clean
-```
-
 
 ## Static files
 
