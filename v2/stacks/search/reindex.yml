@@ -4,6 +4,10 @@
 
 version: "3.3"
 services:
+  dp-api-router:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-api-router.yml
+      service: dp-api-router
   dp-search-reindex-api:
     extends:
       file: ${PATH_MANIFESTS}/core-ons/dp-search-reindex-api.yml
@@ -11,7 +15,23 @@ services:
   dp-search-data-finder:
     extends:
       file: ${PATH_MANIFESTS}/core-ons/dp-search-data-finder.yml
+      service: dp-search-data-extractor
+  zebedee:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/zebedee.yml
+      service: zebedee
+  dp-dataset-api:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-data-api.yml
+      service: dp-dataset-api
+  dp-search-data-extractor:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-search-data-extractor.yml
       service: dp-search-data-finder
+  dp-search-data-importer:
+    extends:
+      file: ${PATH_MANIFESTS}/core-ons/dp-search-data-importer.yml
+      service: dp-search-data-importer
   dp-search-reindex-tracker:
     extends:
       file: ${PATH_MANIFESTS}/core-ons/dp-search-reindex-tracker.yml
